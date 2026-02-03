@@ -1,32 +1,40 @@
-/* Стартовый экран с фоном */
+@keyframes move-bg {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -626px 0; /* ширина твоего изображения */
+  }
+}
+
 .start-screen {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 
-  /* фон-картинка 626x351 */
-  background-image: url("/public/assets/Background_menu.avif"); /* подставь своё имя файла */
-  background-repeat: repeat-x;      /* зациклено по ширине */
-  background-size: auto 100vh;      /* высота = высоте окна, ширина по пропорциям */
-  background-position: center top;  /* фон выровнен по центру сверху */
+  background-image: url("/public/assets/Background_menu.avif"); /* подгони путь */
+  background-repeat: repeat-x;
+  background-size: auto 100vh;
+  background-position: 0 0;
+
+  animation: move-bg 20s linear infinite; /* скорость можно менять */
 }
 
-/* Кнопка "Играть" */
 .start-button {
   padding: 14px 40px;
   font-size: 18px;
   font-weight: 600;
   color: #ffffff; /* белый текст */
 
-  border-radius: 999px;                  /* закруглённые края */
-  border: 2px solid #001a4d;             /* тёмно-синяя рамка ~2 мм */
+  border-radius: 999px;            /* закруглённые края */
+  border: 2px solid #001a4d;       /* тёмно-синяя рамка ~2 мм */
 
   background: linear-gradient(
     to bottom,
     #7b2cff,
     #24c4ff
-  ); /* градиент фиолетовый -> голубой */
+  ); /* градиент сверху вниз: фиолетовый -> голубой */
 
   cursor: pointer;
   outline: none;
@@ -45,4 +53,96 @@
   transform: translateY(1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   opacity: 0.9;
+}
+
+/* экран выбора персонажа */
+.choose-screen {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #050818;
+  color: #fff;
+}
+
+.choose-card {
+  padding: 24px 32px;
+  border-radius: 16px;
+  background: rgba(5, 8, 24, 0.9);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.choose-title {
+  margin-bottom: 16px;
+}
+
+.choose-list {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.choose-list button {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid #4c6fff;
+  background: #20274a;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* основной экран игры */
+.game-screen {
+  min-height: 100vh;
+  padding: 16px;
+  background: #050818;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.game-score {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.game-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+}
+
+/* персонаж по центру */
+.game-character {
+  flex: 0 0 auto;
+}
+
+.character-placeholder {
+  width: 160px;
+  height: 220px;
+  border-radius: 16px;
+  border: 2px solid #4c6fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* колонка молекул справа */
+.game-molecules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.molecule-slot {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  border: 2px solid #24c4ff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(10, 20, 60, 0.9);
 }

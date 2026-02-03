@@ -1,15 +1,19 @@
-import { useEffect } from 'react';
-import { GameScreen } from './app/screens/GameScreen/GameScreen';
-import { useTelegramWebApp } from './hooks/useTelegramWebApp';
+import "./App.css";
 
-export const App = () => {
-  const tg = useTelegramWebApp();
+function App() {
+  const handleStart = () => {
+    // здесь потом покажешь основной экран игры
+    console.log("Игра запущена");
+  };
 
-  useEffect(() => {
-    if (!tg) return;
-    console.log('Telegram WebApp initData:', tg.initDataUnsafe);
-    tg.ready();
-  }, [tg]);
+  return (
+    <div className="start-screen">
+      {/* Если нужен только фон на весь экран, можно оставить только кнопку */}
+      <button className="start-button" onClick={handleStart}>
+        Играть
+      </button>
+    </div>
+  );
+}
 
-  return <GameScreen />;
-};
+export default App;

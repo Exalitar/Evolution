@@ -1,0 +1,48 @@
+/* Стартовый экран с фоном */
+.start-screen {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* фон-картинка 626x351 */
+  background-image: url("/public/assets/Background_menu.avif"); /* подставь своё имя файла */
+  background-repeat: repeat-x;      /* зациклено по ширине */
+  background-size: auto 100vh;      /* высота = высоте окна, ширина по пропорциям */
+  background-position: center top;  /* фон выровнен по центру сверху */
+}
+
+/* Кнопка "Играть" */
+.start-button {
+  padding: 14px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff; /* белый текст */
+
+  border-radius: 999px;                  /* закруглённые края */
+  border: 2px solid #001a4d;             /* тёмно-синяя рамка ~2 мм */
+
+  background: linear-gradient(
+    to bottom,
+    #7b2cff,
+    #24c4ff
+  ); /* градиент фиолетовый -> голубой */
+
+  cursor: pointer;
+  outline: none;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.start-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+  opacity: 0.95;
+}
+
+.start-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+}

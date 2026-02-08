@@ -1,44 +1,54 @@
+/* ===== анимация фона стартового экрана ===== */
+
 @keyframes move-bg {
   from {
     background-position: 0 0;
   }
   to {
-    background-position: -626px 0; /* ширина твоего изображения */
+    background-position: -626px 0;
   }
 }
+
+/* ===== анимация фона главного экрана туда-обратно ===== */
+
+@keyframes move-bg-loop {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: -2262px 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* ===== стартовый экран с фоном ===== */
 
 .start-screen {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  background-image: url("/public/assets/Background_menu.avif"); /* подгони путь */
+  background-image: url("/public/assets/Background_menu.avif");
   background-repeat: repeat-x;
   background-size: auto 100vh;
   background-position: 0 0;
-
-  animation: move-bg 20s linear infinite; /* скорость можно менять */
+  animation: move-bg 20s linear infinite;
 }
 
+/* ===== кнопка Играть ===== */
+
 .start-button {
-  padding: 14px 40px;
-  font-size: 18px;
+  padding: 18px 50px;
+  font-size: 22px;
   font-weight: 600;
-  color: #ffffff; /* белый текст */
-
-  border-radius: 999px;            /* закруглённые края */
-  border: 2px solid #001a4d;       /* тёмно-синяя рамка ~2 мм */
-
-  background: linear-gradient(
-    to bottom,
-    #7b2cff,
-    #24c4ff
-  ); /* градиент сверху вниз: фиолетовый -> голубой */
-
+  color: #ffffff;
+  border-radius: 999px;
+  border: 2px solid #001a4d;
+  background: linear-gradient(to bottom, #7b2cff, #24c4ff);
   cursor: pointer;
   outline: none;
-
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
@@ -55,94 +65,735 @@
   opacity: 0.9;
 }
 
-/* экран выбора персонажа */
-.choose-screen {
+/* ===== главный экран с кругами ===== */
+
+.main-screen {
   min-height: 100vh;
+  background-image: url("/assets/Background_main_window.png");
+  background-repeat: repeat-x;
+  background-size: auto 100vh;
+  background-position: 0 0;
+  animation: move-bg-loop 40s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 140px;
+}
+
+/* ===== центральный круг ===== */
+
+.central-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 50, 100, 0.4), rgba(0, 100, 200, 0.4));
+  border: 4px solid rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: #050818;
-  color: #fff;
-}
-
-.choose-card {
-  padding: 24px 32px;
-  border-radius: 16px;
-  background: rgba(5, 8, 24, 0.9);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-  text-align: center;
-}
-
-.choose-title {
-  margin-bottom: 16px;
-}
-
-.choose-list {
-  display: flex;
-  gap: 12px;
   justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
 }
 
-.choose-list button {
-  padding: 10px 18px;
-  border-radius: 999px;
-  border: 1px solid #4c6fff;
-  background: #20274a;
-  color: #fff;
+.central-circle.drag-over {
+  border-color: rgba(0, 255, 100, 0.9);
+  box-shadow: 0 0 60px rgba(0, 255, 100, 0.6);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.central-circle.drag-over-breed {
+  border-color: rgba(255, 200, 0, 0.9);
+  box-shadow: 0 0 60px rgba(255, 200, 0, 0.6);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.central-circle.has-character {
+  pointer-events: auto;
   cursor: pointer;
 }
 
-/* основной экран игры */
-.game-screen {
-  min-height: 100vh;
-  padding: 16px;
-  background: #050818;
-  color: #fff;
-  box-sizing: border-box;
+.central-circle:hover.has-character {
+  transform: translate(-50%, -50%) scale(1.02);
+  box-shadow: 0 0 50px rgba(0, 255, 255, 0.6);
 }
 
-.game-score {
+.central-placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
   text-align: center;
-  font-size: 20px;
+  padding: 20px;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.central-character-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ===== маленькие круги (материалы) ===== */
+
+.small-circle {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(20, 30, 60, 0.8), rgba(40, 50, 80, 0.8));
+  border: 3px solid rgba(0, 200, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: grab;
+  z-index: 5;
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.3);
+}
+
+.small-circle:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  border-color: rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 35px rgba(0, 255, 255, 0.5);
+}
+
+.small-circle.is-dragging {
+  opacity: 0.3;
+}
+
+.small-circle.is-used {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: rgba(100, 100, 100, 0.5);
+  box-shadow: 0 0 10px rgba(100, 100, 100, 0.2);
+}
+
+.small-circle-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 5px;
+}
+
+.small-circle-name {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+/* ===== призрак перетаскивания ===== */
+
+.dragging-ghost {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.8;
+}
+
+.dragging-ghost-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.8);
+  border: 3px solid rgba(0, 255, 255, 0.9);
+}
+
+/* ===== тултип материала ===== */
+
+.material-requirements-tooltip {
+  position: absolute;
+  bottom: calc(100% + 15px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  border: 2px solid rgba(0, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 180px;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+}
+
+.tooltip-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 255, 255, 0.9);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.tooltip-bonuses {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tooltip-bonuses span {
+  display: block;
+}
+
+/* ===== запрет выделения изображений ===== */
+
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
+.small-circle img,
+.central-circle img,
+.dragging-ghost img {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ===== информация игрока (верхний левый угол) ===== */
+
+.player-info {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(10, 15, 30, 0.9), rgba(20, 30, 50, 0.9));
+  padding: 10px 18px;
+  border-radius: 50px;
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.player-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 255, 0.6);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.player-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+}
+
+.player-level {
+  font-size: 14px;
+  color: rgba(0, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* ===== кнопка магазина (верхний правый угол) ===== */
+
+.market-button {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(255, 200, 0, 0.2), rgba(255, 150, 0, 0.2));
+  border: 2px solid rgba(255, 200, 0, 0.6);
+  border-radius: 50px;
+  padding: 10px 20px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  box-shadow: 0 0 25px rgba(255, 200, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.market-button:hover {
+  background: linear-gradient(135deg, rgba(255, 200, 0, 0.3), rgba(255, 150, 0, 0.3));
+  border-color: rgba(255, 200, 0, 0.9);
+  box-shadow: 0 0 35px rgba(255, 200, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.market-button:active {
+  transform: translateY(0);
+}
+
+.market-icon {
+  font-size: 24px;
+}
+
+/* ===== нижняя навигация ===== */
+
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  background: linear-gradient(180deg, rgba(10, 15, 30, 0.8) 0%, rgba(10, 15, 30, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 20px;
+  box-shadow: 0 -4px 20px rgba(0, 255, 255, 0.2);
+  z-index: 100;
+}
+
+.nav-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 6px;
+}
+
+.nav-button:hover {
+  transform: translateY(-5px);
+}
+
+.nav-button:active {
+  transform: translateY(-2px);
+}
+
+.nav-button-icon {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover .nav-button-icon {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.nav-button-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.4));
+}
+
+.nav-button:hover .nav-button-icon img {
+  filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.7));
+}
+
+.nav-button-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  text-align: center;
+  transition: color 0.3s ease;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+.nav-button:hover .nav-button-label {
+  color: rgba(0, 255, 255, 1);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+/* ===== вторичные экраны (Лаборатория, Премиум, Магазин) ===== */
+
+.secondary-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%);
+  z-index: 1000;
+  overflow-y: auto;
+  padding-bottom: 120px;
+}
+
+.secondary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px;
+  background: rgba(0, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.secondary-header h2 {
+  color: #00ffff;
+  font-size: 26px;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  margin: 0;
+}
+
+.secondary-content {
+  padding: 22px;
+  color: white;
+  font-size: 16px;
+}
+
+/* ===== общая кнопка закрытия ===== */
+
+.close-button {
+  background: rgba(255, 0, 0, 0.2);
+  border: 2px solid rgba(255, 0, 0, 0.5);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: rgba(255, 0, 0, 0.4);
+  border-color: rgba(255, 0, 0, 0.8);
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+/* ===== экран информации ===== */
+
+.info-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%);
+  z-index: 1000;
+  overflow-y: auto;
+  padding-bottom: 120px;
+}
+
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px;
+  background: rgba(0, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.info-header h2 {
+  color: #00ffff;
+  font-size: 26px;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  margin: 0;
+}
+
+.info-content {
+  padding: 22px;
+  color: white;
+}
+
+.info-character-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.info-character-image {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 35px rgba(0, 255, 255, 0.4);
   margin-bottom: 16px;
 }
 
-.game-layout {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
+.info-character-name {
+  font-size: 26px;
+  font-weight: 600;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-/* персонаж по центру */
-.game-character {
-  flex: 0 0 auto;
-}
-
-.character-placeholder {
-  width: 160px;
-  height: 220px;
-  border-radius: 16px;
-  border: 2px solid #4c6fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* колонка молекул справа */
-.game-molecules {
+.info-stats-list {
   display: flex;
   flex-direction: column;
+  gap: 22px;
+  margin-bottom: 30px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-icon {
+  font-size: 22px;
+}
+
+.stat-name {
+  flex: 1;
+  margin-left: 10px;
+  font-size: 17px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.stat-value {
+  font-size: 19px;
+  font-weight: 600;
+  color: #00ffff;
+}
+
+.stat-bar-container {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stat-bar {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.stat-bar.attack {
+  background: linear-gradient(90deg, #ff4444, #ff8888);
+}
+
+.stat-bar.health {
+  background: linear-gradient(90deg, #44ff44, #88ff88);
+}
+
+.stat-bar.defense {
+  background: linear-gradient(90deg, #4444ff, #8888ff);
+}
+
+.stat-bar.speed {
+  background: linear-gradient(90deg, #ffff44, #ffff88);
+}
+
+.info-description {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+
+.info-description h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #00ffff;
+  font-size: 19px;
+}
+
+.info-description p {
+  margin: 0;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+}
+
+.info-stage-display {
+  display: flex;
+  justify-content: center;
+}
+
+.stage-badge {
+  background: rgba(0, 255, 255, 0.2);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  border-radius: 14px;
+  padding: 18px 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stage-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+}
+
+.stage-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #00ffff;
+  text-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+}
+
+.info-no-character {
+  text-align: center;
+  padding: 45px 22px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 17px;
+}
+
+/* ===== модальное окно скрещивания ===== */
+
+.breed-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.breed-modal {
+  width: 360px;
+  max-width: 90vw;
+  padding: 26px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0b1028 0%, #1a1f3e 100%);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+.breed-modal-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.breed-modal-text {
+  font-size: 16px;
+  margin-bottom: 22px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.breed-modal-info {
+  margin-bottom: 22px;
+}
+
+.breed-modal-bonus {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.bonus-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #00ffff;
+  margin-bottom: 10px;
+}
+
+.bonus-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bonus-stats span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.breed-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
   gap: 12px;
 }
 
-.molecule-slot {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  border: 2px solid #24c4ff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(10, 20, 60, 0.9);
+.breed-modal-button {
+  padding: 11px 26px;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  background: rgba(0, 100, 150, 0.3);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.breed-modal-button.yes {
+  background: linear-gradient(135deg, rgba(0, 200, 100, 0.6), rgba(0, 150, 80, 0.6));
+  border-color: rgba(0, 255, 100, 0.6);
+}
+
+.breed-modal-button.yes:hover {
+  background: linear-gradient(135deg, rgba(0, 220, 110, 0.8), rgba(0, 170, 90, 0.8));
+  box-shadow: 0 0 25px rgba(0, 255, 100, 0.5);
+}
+
+.breed-modal-button.no {
+  background: rgba(100, 100, 100, 0.3);
+  border-color: rgba(150, 150, 150, 0.5);
+}
+
+.breed-modal-button.no:hover {
+  background: rgba(120, 120, 120, 0.5);
+  box-shadow: 0 0 20px rgba(150, 150, 150, 0.3);
+}
+
+/* ===== убираем старые стили ===== */
+
+.actions-toggle-wrapper,
+.actions-toggle-button,
+.actions-panel,
+.actions-panel-button,
+.global-score {
+  display: none !important;
 }

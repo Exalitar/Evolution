@@ -16,7 +16,7 @@
     background-position: 0 0;
   }
   50% {
-    background-position: -626px 0;
+    background-position: 100% 0;
   }
   100% {
     background-position: 0 0;
@@ -71,7 +71,7 @@
   height: 100vh;
   width: 100vw;
   background-image: url("/assets/Background_main_window.png");
-  background-repeat: repeat-x;
+  background-repeat: repeat;
   background-size: auto 100vh;
   background-position: 0 0;
   animation: move-bg-loop 40s ease-in-out infinite;

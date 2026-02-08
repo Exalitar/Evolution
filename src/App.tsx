@@ -528,13 +528,13 @@ function App() {
   };
 
 
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ - уменьшен радиус до 130px
+  // ФУНКЦИЯ ДЛЯ ПОЗИЦИОНИРОВАНИЯ КРУГОВ
   const getCirclePosition = (index: number, total: number) => {
     const angle = (2 * Math.PI / total) * index - Math.PI / 2;
-    const radius = 130; // УМЕНЬШЕН С 250 ДО 130
+    const radius = 130;
     
     const offsetX = Math.cos(angle) * radius;
-    const offsetY = Math.sin(angle) * radius;
+    const offsetY = Math.sin(angle) * radius - 50; // Поднято на 50px вверх
     
     return { 
       x: `calc(50% + ${offsetX}px)`, 

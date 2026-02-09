@@ -89,7 +89,7 @@
 
 .central-circle {
   position: absolute;
-  top: 35%;  /* Изменено с 50% на 35% - поднято выше */
+  top: 40%;  /* Изменено с 50% на 35% - поднято выше */
   left: 50%;
   transform: translate(-50%, -50%);
   width: 280px;
@@ -151,7 +151,7 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 10px;  /* Изменено с 15px на 10px */
+  gap: 15px;  /* Изменено с 15px на 10px */
   align-items: center;
   justify-content: center;
   z-index: 5;

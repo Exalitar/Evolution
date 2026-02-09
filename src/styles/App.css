@@ -85,17 +85,16 @@
   padding-top: 80px;
 }
 
-
-/* ===== центральный круг ===== */
+/* ===== центральный прямоугольник для персонажа ===== */
 
 .central-circle {
   position: absolute;
-  top: calc(50% - 50px);
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
+  width: 280px;
+  height: 350px;
+  border-radius: 20px;
   background: linear-gradient(135deg, rgba(0, 50, 100, 0.4), rgba(0, 100, 200, 0.4));
   border: 3px solid rgba(0, 255, 255, 0.6);
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
@@ -130,9 +129,9 @@
 
 .central-placeholder {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
-  padding: 15px;
+  padding: 20px;
   font-weight: 500;
   text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
@@ -140,14 +139,29 @@
 .central-character-image {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 20px;
   object-fit: cover;
+}
+
+/* ===== контейнер для материалов вверху ===== */
+
+.materials-container {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 0 10px;
 }
 
 /* ===== маленькие круги (материалы) ===== */
 
 .small-circle {
-  position: absolute;
+  position: relative;
   width: 70px;
   height: 70px;
   border-radius: 50%;
@@ -159,12 +173,12 @@
   justify-content: center;
   transition: all 0.3s ease;
   cursor: grab;
-  z-index: 5;
   box-shadow: 0 0 20px rgba(0, 200, 255, 0.3);
+  flex-shrink: 0;
 }
 
 .small-circle:hover {
-  transform: translate(-50%, -50%) scale(1.15);
+  transform: scale(1.15);
   border-color: rgba(0, 255, 255, 0.8);
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
 }

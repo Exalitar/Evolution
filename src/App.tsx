@@ -524,22 +524,15 @@ function App() {
   const getCharacterImage = () => {
     if (!selectedCharacter) return "";
     const speciesNum = selectedCharacter.split("_")[1];
-    return `/assets/Material/Bio${speciesNum}.jpg`;
-  };
-
-
-  // ФУНКЦИЯ ДЛЯ ПОЗИЦИОНИРОВАНИЯ КРУГОВ
-  const getCirclePosition = (index: number, total: number) => {
-    const angle = (2 * Math.PI / total) * index - Math.PI / 2;
-    const radius = 130;
     
-    const offsetX = Math.cos(angle) * radius;
-    const offsetY = Math.sin(angle) * radius - 50; // Поднято на 50px вверх
-    
-    return { 
-      x: `calc(50% + ${offsetX}px)`, 
-      y: `calc(50% + ${offsetY}px)` 
-    };
+    // Используем Mob1.jpg и mob2.gif.mp4 вместо Bio1 и Bio2
+    if (speciesNum === "1") {
+      return `/assets/Material/Mob1.jpg`;
+    } else if (speciesNum === "2") {
+      return `/assets/Material/Mob2.gif`;
+    } else {
+      return `/assets/Material/Bio${speciesNum}.jpg`;
+    }
   };
 
 
@@ -603,58 +596,55 @@ function App() {
           </div>
 
 
-          {currentBreedingMaterials.map((material, index) => {
-            const pos = getCirclePosition(index, currentBreedingMaterials.length);
-            const isDraggingThis = selectedCharacter 
-              ? draggedBreedMaterial?.id === material.id
-              : draggedInitialMaterial?.id === material.id;
-            const isUsed = usedMaterials.has(material.id);
-            
-            return (
-              <div
-                key={material.id}
-                className={`small-circle breeding-material ${isDraggingThis ? 'is-dragging' : ''} ${isUsed ? 'is-used' : ''}`}
-                style={{
-                  left: pos.x,
-                  top: pos.y,
-                  transform: 'translate(-50%, -50%)',
-                }}
-                draggable={!isUsed}
-                onDragStart={(e) => {
-                  if (isUsed) return;
-                  if (selectedCharacter) {
-                    handleDragStartBreed(material, e);
-                  } else {
-                    handleDragStartInitial(material, e);
-                  }
-                }}
-                onDrag={handleDrag}
-                onDragEnd={selectedCharacter ? handleDragEndBreed : handleDragEndInitial}
-                onMouseEnter={() => !isUsed && selectedCharacter && setHoveredMaterial(material.id)}
-                onMouseLeave={() => setHoveredMaterial(null)}
-              >
-                <img 
-                  src={material.image} 
-                  alt={material.name}
-                  className="small-circle-image"
-                  draggable={false}
-                />
-                <div className="small-circle-name">{material.name}</div>
-                
-                {hoveredMaterial === material.id && !isUsed && selectedCharacter && materialBonuses[material.id]?.[selectedCharacter] && (
-                  <div className="material-requirements-tooltip">
-                    <div className="tooltip-title">Бонусы:</div>
-                    <div className="tooltip-bonuses">
-                      <span>⚔️ +{materialBonuses[material.id][selectedCharacter].attack}</span>
-                      <span>❤️ +{materialBonuses[material.id][selectedCharacter].health}</span>
-                      <span>🛡️ +{materialBonuses[material.id][selectedCharacter].defense}</span>
-                      <span>⚡ +{materialBonuses[material.id][selectedCharacter].attackSpeed.toFixed(2)}</span>
+          {/* НОВЫЙ КОНТЕЙНЕР ДЛЯ МАТЕРИАЛОВ */}
+          <div className="materials-container">
+            {currentBreedingMaterials.map((material, index) => {
+              const isDraggingThis = selectedCharacter 
+                ? draggedBreedMaterial?.id === material.id
+                : draggedInitialMaterial?.id === material.id;
+              const isUsed = usedMaterials.has(material.id);
+              
+              return (
+                <div
+                  key={material.id}
+                  className={`small-circle breeding-material ${isDraggingThis ? 'is-dragging' : ''} ${isUsed ? 'is-used' : ''}`}
+                  draggable={!isUsed}
+                  onDragStart={(e) => {
+                    if (isUsed) return;
+                    if (selectedCharacter) {
+                      handleDragStartBreed(material, e);
+                    } else {
+                      handleDragStartInitial(material, e);
+                    }
+                  }}
+                  onDrag={handleDrag}
+                  onDragEnd={selectedCharacter ? handleDragEndBreed : handleDragEndInitial}
+                  onMouseEnter={() => !isUsed && selectedCharacter && setHoveredMaterial(material.id)}
+                  onMouseLeave={() => setHoveredMaterial(null)}
+                >
+                  <img 
+                    src={material.image} 
+                    alt={material.name}
+                    className="small-circle-image"
+                    draggable={false}
+                  />
+                  <div className="small-circle-name">{material.name}</div>
+                  
+                  {hoveredMaterial === material.id && !isUsed && selectedCharacter && materialBonuses[material.id]?.[selectedCharacter] && (
+                    <div className="material-requirements-tooltip">
+                      <div className="tooltip-title">Бонусы:</div>
+                      <div className="tooltip-bonuses">
+                        <span>⚔️ +{materialBonuses[material.id][selectedCharacter].attack}</span>
+                        <span>❤️ +{materialBonuses[material.id][selectedCharacter].health}</span>
+                        <span>🛡️ +{materialBonuses[material.id][selectedCharacter].defense}</span>
+                        <span>⚡ +{materialBonuses[material.id][selectedCharacter].attackSpeed.toFixed(2)}</span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
 
           {isDragging && dragPosition && (draggedBreedMaterial || draggedInitialMaterial) && (

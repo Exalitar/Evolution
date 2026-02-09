@@ -89,7 +89,7 @@
 
 .central-circle {
   position: absolute;
-  top: 40%;  /* Изменено с 50% на 35% - поднято выше */
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 280px;

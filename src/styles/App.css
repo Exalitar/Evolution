@@ -89,7 +89,7 @@
 
 .central-circle {
   position: absolute;
-  top: 50%;
+  top: 35%;  /* Изменено с 50% на 35% - поднято выше */
   left: 50%;
   transform: translate(-50%, -50%);
   width: 280px;
@@ -151,7 +151,7 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 15px;
+  gap: 10px;  /* Изменено с 15px на 10px */
   align-items: center;
   justify-content: center;
   z-index: 5;
@@ -162,8 +162,8 @@
 
 .small-circle {
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 55px;  /* Изменено с 70px на 55px */
+  height: 55px;  /* Изменено с 70px на 55px */
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(20, 30, 60, 0.8), rgba(40, 50, 80, 0.8));
   border: 2px solid rgba(0, 200, 255, 0.5);
@@ -195,15 +195,15 @@
 }
 
 .small-circle-image {
-  width: 45px;
-  height: 45px;
+  width: 35px;  /* Изменено с 45px на 35px */
+  height: 35px;  /* Изменено с 45px на 35px */
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 3px;
+  margin-bottom: 2px;  /* Изменено с 3px на 2px */
 }
 
 .small-circle-name {
-  font-size: 8px;
+  font-size: 7px;  /* Изменено с 8px на 7px */
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
   font-weight: 500;
@@ -214,8 +214,8 @@
 
 .dragging-ghost {
   position: fixed;
-  width: 70px;
-  height: 70px;
+  width: 55px;  /* Изменено с 70px на 55px */
+  height: 55px;  /* Изменено с 70px на 55px */
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 10000;

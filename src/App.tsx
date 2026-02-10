@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./styles/App.css";
-
+import { Laboratory } from './features/laboratory/Laboratory';
 
 type CharacterId =
   | "species_1"
@@ -8,7 +8,6 @@ type CharacterId =
   | "species_3"
   | "species_4"
   | "species_5";
-
 
 type Screen =
   | "start"
@@ -703,17 +702,7 @@ function App() {
       )}
 
 
-      {screen === "laboratory" && (
-        <div className="secondary-screen">
-          <div className="secondary-header">
-            <h2>Лаборатория</h2>
-            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
-          </div>
-          <div className="secondary-content">
-            <p>Содержимое лаборатории будет здесь</p>
-          </div>
-        </div>
-      )}
+      {screen === "laboratory" && <Laboratory />}
 
 
       {screen === "premium" && (

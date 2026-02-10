@@ -1,0 +1,177 @@
+/* ===== Экран лаборатории ===== */
+.laboratory-screen {
+  width: 100vw;
+  height: 100vh;
+  background-image: url('/assets/Laboratory/LabHallway.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+/* ===== Базовые стили для указателей ===== */
+.room-indicator {
+  position: absolute;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.room-indicator:hover {
+  transform: scale(1.1);
+}
+
+.room-indicator:hover .indicator-label {
+  background: rgba(0, 255, 255, 0.95);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+}
+
+.room-indicator:hover .indicator-arrow {
+  border-color: rgba(0, 255, 255, 0.95);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+}
+
+/* ===== Надпись указателя ===== */
+.indicator-label {
+  background: rgba(0, 200, 255, 0.85);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+/* ===== Стрелка указателя ===== */
+.indicator-arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+/* ===== Позиционирование для левой ближней двери (Room 1) ===== */
+.room-1 {
+  left: 8%;
+  top: 55%;
+  transform: translateX(0);
+}
+
+.room-1 .indicator-label {
+  margin-bottom: 12px;
+}
+
+.room-1 .indicator-arrow {
+  border-width: 18px 12px 0 12px;
+  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
+}
+
+/* ===== Позиционирование для левой дальней двери (Room 2) ===== */
+.room-2 {
+  left: 18%;
+  top: 35%;
+  transform: translateX(0);
+}
+
+.room-2 .indicator-label {
+  margin-bottom: 12px;
+}
+
+.room-2 .indicator-arrow {
+  border-width: 18px 12px 0 12px;
+  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
+}
+
+/* ===== Позиционирование для правой дальней двери (Room 3) ===== */
+.room-3 {
+  right: 18%;
+  top: 35%;
+  transform: translateX(0);
+}
+
+.room-3 .indicator-label {
+  margin-bottom: 12px;
+}
+
+.room-3 .indicator-arrow {
+  border-width: 18px 12px 0 12px;
+  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
+}
+
+/* ===== Позиционирование для правой ближней двери (Room 4) ===== */
+.room-4 {
+  right: 8%;
+  top: 55%;
+  transform: translateX(0);
+}
+
+.room-4 .indicator-label {
+  margin-bottom: 12px;
+}
+
+.room-4 .indicator-arrow {
+  border-width: 18px 12px 0 12px;
+  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
+}
+
+/* ===== Адаптивность для разных высот экрана ===== */
+@media (max-height: 667px) {
+  .indicator-label {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  .room-1, .room-4 {
+    top: 58%;
+  }
+  
+  .room-2, .room-3 {
+    top: 38%;
+  }
+}
+
+@media (min-height: 844px) {
+  .indicator-label {
+    font-size: 18px;
+    padding: 12px 24px;
+  }
+  
+  .indicator-arrow {
+    border-width: 20px 14px 0 14px;
+  }
+}
+
+/* ===== Оптимизация для очень высоких экранов ===== */
+@media (min-height: 1200px) {
+  .room-1, .room-4 {
+    top: 60%;
+  }
+  
+  .room-2, .room-3 {
+    top: 32%;
+  }
+}

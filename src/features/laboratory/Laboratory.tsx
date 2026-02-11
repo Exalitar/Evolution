@@ -1,49 +1,146 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './Laboratory.css';
 
+type LabSection = 'center' | 'left' | 'right';
+
 export const Laboratory = () => {
-  const handleRoomClick = (roomNumber: number) => {
-    console.log(`Переход в комнату ${roomNumber}`);
-    // Здесь будет логика перехода в конкретную комнату
+  const [currentSection, setCurrentSection] = useState<LabSection>('center');
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const backgrounds = {
+  center: '/assets/Laboratory/Center_lab.png',
+  left: '/assets/Laboratory/Left_lab.png',
+  right: '/assets/Laboratory/Right_lab.png'
+};
+
+  // Сброс позиции при смене секции
+  useEffect(() => {
+    setPosition({ x: 0, y: 0 });
+  }, [currentSection]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
+    
+    // Ограничения перемещения
+    const maxX = 200;
+    const maxY = 200;
+    
+    setPosition({
+      x: Math.max(-maxX, Math.min(maxX, newX)),
+      y: Math.max(-maxY, Math.min(maxY, newY))
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({
+      x: touch.clientX - position.x,
+      y: touch.clientY - position.y
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    const touch = e.touches[0];
+    const newX = touch.clientX - dragStart.x;
+    const newY = touch.clientY - dragStart.y;
+    
+    const maxX = 200;
+    const maxY = 200;
+    
+    setPosition({
+      x: Math.max(-maxX, Math.min(maxX, newX)),
+      y: Math.max(-maxY, Math.min(maxY, newY))
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
   };
 
   return (
-    <div className="laboratory-screen">
-      {/* Указатель на левую ближнюю дверь */}
-      <div 
-        className="room-indicator room-1"
-        onClick={() => handleRoomClick(1)}
+    <div className="laboratory-page">
+      <div
+        ref={containerRef}
+        className="laboratory-background-container"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
-        <div className="indicator-arrow"></div>
-        <div className="indicator-label">Комната 1</div>
+        <div
+          className="laboratory-background"
+          style={{
+            backgroundImage: `url(${backgrounds[currentSection]})`,
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            cursor: isDragging ? 'grabbing' : 'grab'
+          }}
+        />
       </div>
 
-      {/* Указатель на левую дальнюю дверь */}
-      <div 
-        className="room-indicator room-2"
-        onClick={() => handleRoomClick(2)}
-      >
-        <div className="indicator-arrow"></div>
-        <div className="indicator-label">Комната 2</div>
-      </div>
+      {/* Навигационные кнопки */}
+      {currentSection === 'center' && (
+        <>
+          <button
+            className="lab-nav-button left"
+            onClick={() => setCurrentSection('left')}
+          >
+            <div className="nav-arrow left-arrow">←</div>
+            <span className="nav-label">Левый блок</span>
+          </button>
 
-      {/* Указатель на правую дальнюю дверь */}
-      <div 
-        className="room-indicator room-3"
-        onClick={() => handleRoomClick(3)}
-      >
-        <div className="indicator-arrow"></div>
-        <div className="indicator-label">Комната 3</div>
-      </div>
+          <button
+            className="lab-nav-button right"
+            onClick={() => setCurrentSection('right')}
+          >
+            <div className="nav-arrow right-arrow">→</div>
+            <span className="nav-label">Правый блок</span>
+          </button>
+        </>
+      )}
 
-      {/* Указатель на правую ближнюю дверь */}
-      <div 
-        className="room-indicator room-4"
-        onClick={() => handleRoomClick(4)}
-      >
-        <div className="indicator-arrow"></div>
-        <div className="indicator-label">Комната 4</div>
-      </div>
+      {currentSection === 'left' && (
+        <button
+          className="lab-nav-button right"
+          onClick={() => setCurrentSection('center')}
+        >
+          <div className="nav-arrow right-arrow">→</div>
+          <span className="nav-label">Центр</span>
+        </button>
+      )}
+
+      {currentSection === 'right' && (
+        <button
+          className="lab-nav-button left"
+          onClick={() => setCurrentSection('center')}
+        >
+          <div className="nav-arrow left-arrow">←</div>
+          <span className="nav-label">Центр</span>
+        </button>
+      )}
     </div>
   );
 };

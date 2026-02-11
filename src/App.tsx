@@ -18,14 +18,12 @@ type Screen =
   | "info"
   | "market";
 
-
 interface Material {
   id: string;
   name: string;
   image: string;
   description: string;
 }
-
 
 interface CharacterStats {
   attack: number;
@@ -34,7 +32,6 @@ interface CharacterStats {
   attackSpeed: number;
 }
 
-
 interface MaterialBonus {
   attack: number;
   health: number;
@@ -42,16 +39,13 @@ interface MaterialBonus {
   attackSpeed: number;
 }
 
-
 type MaterialBonusMap = Record<CharacterId, MaterialBonus>;
-
 
 interface StartMaterial {
   id: CharacterId;
   name: string;
   image: string;
 }
-
 
 const startMaterials: StartMaterial[] = [
   { id: "species_1", name: "Хищник", image: "/assets/Material/Malecula1.jpg" },
@@ -61,7 +55,6 @@ const startMaterials: StartMaterial[] = [
   { id: "species_5", name: "Страж", image: "/assets/Material/Malecula5.jpg" },
 ];
 
-
 const breedingMaterialsStage1: Material[] = [
   { id: "m1_1", name: "Материал 1‑1", image: "/assets/Material/Malecula1.jpg", description: "Материал 1‑1 для 1 пробуждения" },
   { id: "m1_2", name: "Материал 1‑2", image: "/assets/Material/Malecula2.jpg", description: "Материал 1‑2 для 1 пробуждения" },
@@ -69,7 +62,6 @@ const breedingMaterialsStage1: Material[] = [
   { id: "m1_4", name: "Материал 1‑4", image: "/assets/Material/Malecula4.jpg", description: "Материал 1‑4 для 1 пробуждения" },
   { id: "m1_5", name: "Материал 1‑5", image: "/assets/Material/Malecula5.jpg", description: "Материал 1‑5 для 1 пробуждения" },
 ];
-
 
 const breedingMaterialsStage2: Material[] = [
   { id: "m2_1", name: "Материал 2‑1", image: "/assets/Material/Malecula6.jpg", description: "Материал 2‑1 для 2 пробуждения" },
@@ -79,7 +71,6 @@ const breedingMaterialsStage2: Material[] = [
   { id: "m2_5", name: "Материал 2‑5", image: "/assets/Material/Malecula10.jpg", description: "Материал 2‑5 для 2 пробуждения" },
 ];
 
-
 const breedingMaterialsStage3: Material[] = [
   { id: "m3_1", name: "Материал 3‑1", image: "/assets/Material/Malecula11.jpg", description: "Материал 3‑1 для 3 пробуждения" },
   { id: "m3_2", name: "Материал 3‑2", image: "/assets/Material/Malecula12.jpg", description: "Материал 3‑2 для 3 пробуждения" },
@@ -87,7 +78,6 @@ const breedingMaterialsStage3: Material[] = [
   { id: "m3_4", name: "Материал 3‑4", image: "/assets/Material/Malecula14.jpg", description: "Материал 3‑4 для 3 пробуждения" },
   { id: "m3_5", name: "Материал 3‑5", image: "/assets/Material/Malecula15.jpg", description: "Материал 3‑5 для 3 пробуждения" },
 ];
-
 
 const breedingMaterialsStage4: Material[] = [
   { id: "m4_1", name: "Материал 4‑1", image: "/assets/Material/Malecula16.jpg", description: "Материал 4‑1 для 4 пробуждения" },
@@ -97,7 +87,6 @@ const breedingMaterialsStage4: Material[] = [
   { id: "m4_5", name: "Материал 4‑5", image: "/assets/Material/Malecula20.jpg", description: "Материал 4‑5 для 4 пробуждения" },
 ];
 
-
 const breedingMaterialsStage5: Material[] = [
   { id: "m5_1", name: "Материал 5‑1", image: "/assets/Material/Malecula21.jpg", description: "Материал 5‑1 для 5 пробуждения" },
   { id: "m5_2", name: "Материал 5‑2", image: "/assets/Material/Malecula22.jpg", description: "Материал 5‑2 для 5 пробуждения" },
@@ -106,7 +95,6 @@ const breedingMaterialsStage5: Material[] = [
   { id: "m5_5", name: "Материал 5‑5", image: "/assets/Material/Malecula25.jpg", description: "Материал 5‑5 для 5 пробуждения" },
 ];
 
-
 const initialCharacterStats: Record<CharacterId, CharacterStats> = {
   species_1: { attack: 120, health: 80, defense: 60, attackSpeed: 1.5 },
   species_2: { attack: 70, health: 150, defense: 100, attackSpeed: 0.8 },
@@ -114,7 +102,6 @@ const initialCharacterStats: Record<CharacterId, CharacterStats> = {
   species_4: { attack: 85, health: 100, defense: 80, attackSpeed: 1.2 },
   species_5: { attack: 75, health: 110, defense: 110, attackSpeed: 1.0 }
 };
-
 
 const materialBonuses: Record<string, MaterialBonusMap> = {
   "m1_1": {
@@ -189,7 +176,6 @@ const materialBonuses: Record<string, MaterialBonusMap> = {
     species_5: { attack: 16, health: 22, defense: 22, attackSpeed: 0.15 }
   },
 
-
   "m3_1": {
     species_1: { attack: 30, health: 15, defense: 13, attackSpeed: 0.19 },
     species_2: { attack: 15, health: 35, defense: 22, attackSpeed: 0.14 },
@@ -226,7 +212,6 @@ const materialBonuses: Record<string, MaterialBonusMap> = {
     species_5: { attack: 22, health: 28, defense: 28, attackSpeed: 0.2 }
   },
 
-
   "m4_1": {
     species_1: { attack: 40, health: 20, defense: 18, attackSpeed: 0.24 },
     species_2: { attack: 20, health: 45, defense: 28, attackSpeed: 0.19 },
@@ -262,7 +247,6 @@ const materialBonuses: Record<string, MaterialBonusMap> = {
     species_4: { attack: 30, health: 32, defense: 28, attackSpeed: 0.27 },
     species_5: { attack: 28, health: 34, defense: 34, attackSpeed: 0.25 }
   },
-
 
   "m5_1": {
     species_1: { attack: 50, health: 25, defense: 23, attackSpeed: 0.29 },
@@ -301,13 +285,11 @@ const materialBonuses: Record<string, MaterialBonusMap> = {
   }
 };
 
-
 function App() {
   const [screen, setScreen] = useState<Screen>("start");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterId | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");
   const [playerLevel, setPlayerLevel] = useState(1);
-
 
   const [awakeningStage, setAwakeningStage] = useState<number>(1);
   const [evolutionStage, setEvolutionStage] = useState<number>(1);
@@ -315,24 +297,19 @@ function App() {
   const [characterForm, setCharacterForm] = useState<number>(1);
   const [hoveredMaterial, setHoveredMaterial] = useState<string | null>(null);
 
-
   const [draggedInitialMaterial, setDraggedInitialMaterial] = useState<Material | null>(null);
   const [isOverCenterInitial, setIsOverCenterInitial] = useState(false);
-
 
   const [draggedBreedMaterial, setDraggedBreedMaterial] = useState<Material | null>(null);
   const [isOverCenterForBreed, setIsOverCenterForBreed] = useState(false);
   const [pendingBreedSelection, setPendingBreedSelection] = useState<Material | null>(null);
   const [isBreedConfirmOpen, setIsBreedConfirmOpen] = useState(false);
 
-
   const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
-
 
   const [characterStats, setCharacterStats] = useState<CharacterStats>({
     attack: 0,
@@ -341,9 +318,7 @@ function App() {
     attackSpeed: 0
   });
 
-
   const handleStart = () => setScreen("main");
-
 
   const getMaterialCharacterId = (materialId: string): CharacterId => {
     const mapping: Record<string, CharacterId> = {
@@ -356,7 +331,6 @@ function App() {
     return mapping[materialId] || "species_1";
   };
 
-
   const handleDragStartInitial = (material: Material, e: React.DragEvent) => {
     setDraggedInitialMaterial(material);
     setIsDragging(true);
@@ -366,7 +340,6 @@ function App() {
     e.dataTransfer.setDragImage(img, 0, 0);
   };
 
-
   const handleDragEndInitial = () => {
     setDraggedInitialMaterial(null);
     setIsOverCenterInitial(false);
@@ -374,17 +347,14 @@ function App() {
     setDragPosition(null);
   };
 
-
   const handleDragOverCenterInitial = (e: React.DragEvent) => {
     e.preventDefault();
     setIsOverCenterInitial(true);
   };
 
-
   const handleDragLeaveCenterInitial = () => {
     setIsOverCenterInitial(false);
   };
-
 
   const handleDropOnCenterInitial = (e: React.DragEvent) => {
     e.preventDefault();
@@ -410,7 +380,6 @@ function App() {
     }
   };
 
-
   const handleDragStartBreed = (material: Material, e: React.DragEvent) => {
     setDraggedBreedMaterial(material);
     setIsDragging(true);
@@ -420,7 +389,6 @@ function App() {
     e.dataTransfer.setDragImage(img, 0, 0);
   };
 
-
   const handleDragEndBreed = () => {
     setDraggedBreedMaterial(null);
     setIsOverCenterForBreed(false);
@@ -428,23 +396,19 @@ function App() {
     setDragPosition(null);
   };
 
-
   const handleDrag = (e: React.DragEvent) => {
     if (e.clientX === 0 && e.clientY === 0) return;
     setDragPosition({ x: e.clientX, y: e.clientY });
   };
-
 
   const handleDragOverCenterForBreed = (e: React.DragEvent) => {
     e.preventDefault();
     setIsOverCenterForBreed(true);
   };
 
-
   const handleDragLeaveCenterForBreed = () => {
     setIsOverCenterForBreed(false);
   };
-
 
   const handleDropOnCenterForBreed = (e: React.DragEvent) => {
     e.preventDefault();
@@ -456,13 +420,11 @@ function App() {
     }
   };
 
-
   const handleConfirmBreeding = () => {
     if (!pendingBreedSelection || !selectedCharacter) {
       setIsBreedConfirmOpen(false);
       return;
     }
-
 
     const bonus = materialBonuses[pendingBreedSelection.id]?.[selectedCharacter];
     if (bonus) {
@@ -474,12 +436,10 @@ function App() {
       }));
     }
 
-
     setUsedMaterials(prev => new Set([...prev, pendingBreedSelection.id]));
     
     const newTotalCount = totalUsedCount + 1;
     setTotalUsedCount(newTotalCount);
-
 
     setCharacterForm((prev) => Math.min(prev + 1, 5));
     
@@ -508,23 +468,19 @@ function App() {
     setPendingBreedSelection(null);
   };
 
-
   const handleCancelBreeding = () => {
     setIsBreedConfirmOpen(false);
     setPendingBreedSelection(null);
   };
 
-
   const handleCentralCircleClick = () => {
-    // Клик по центральному кругу (можно оставить пустым)
+    // Клик по центральному кругу
   };
-
 
   const getCharacterImage = () => {
     if (!selectedCharacter) return "";
     const speciesNum = selectedCharacter.split("_")[1];
     
-    // Используем Mob1.jpg и mob2.gif.mp4 вместо Bio1 и Bio2
     if (speciesNum === "1") {
       return `/assets/Material/Mob1.jpg`;
     } else if (speciesNum === "2") {
@@ -533,7 +489,6 @@ function App() {
       return `/assets/Material/Bio${speciesNum}.jpg`;
     }
   };
-
 
   return (
     <>
@@ -544,7 +499,6 @@ function App() {
           </button>
         </div>
       )}
-
 
       {screen === "main" && (
         <div className="main-screen">
@@ -560,14 +514,12 @@ function App() {
                 </div>
               </div>
 
-
               <button className="market-button" onClick={() => setScreen("market")}>
                 <div className="market-icon">🛒</div>
                 <span>Магазин</span>
               </button>
             </>
           )}
-
 
           <div 
             className={`central-circle ${
@@ -594,10 +546,8 @@ function App() {
             )}
           </div>
 
-
-          {/* НОВЫЙ КОНТЕЙНЕР ДЛЯ МАТЕРИАЛОВ */}
           <div className="materials-container">
-            {currentBreedingMaterials.map((material, index) => {
+            {currentBreedingMaterials.map((material) => {
               const isDraggingThis = selectedCharacter 
                 ? draggedBreedMaterial?.id === material.id
                 : draggedInitialMaterial?.id === material.id;
@@ -645,7 +595,6 @@ function App() {
             })}
           </div>
 
-
           {isDragging && dragPosition && (draggedBreedMaterial || draggedInitialMaterial) && (
             <div 
               className="dragging-ghost"
@@ -663,7 +612,6 @@ function App() {
             </div>
           )}
 
-
           {selectedCharacter && (
             <div className="bottom-navigation">
               <button className="nav-button" onClick={() => setScreen("laboratory")}>
@@ -673,7 +621,6 @@ function App() {
                 <span className="nav-button-label">Лаборатория</span>
               </button>
 
-
               <button className="nav-button" onClick={() => setScreen("premium")}>
                 <div className="nav-button-icon">
                   <img src="/assets/Icon_button/Premium_button.png" alt="Премиум" draggable={false} />
@@ -681,14 +628,12 @@ function App() {
                 <span className="nav-button-label">Премиум</span>
               </button>
 
-
               <button className="nav-button" onClick={() => setScreen("shop")}>
                 <div className="nav-button-icon">
                   <img src="/assets/Icon_button/Shop_button.png" alt="Магазин" draggable={false} />
                 </div>
                 <span className="nav-button-label">Магазин</span>
               </button>
-
 
               <button className="nav-button" onClick={() => setScreen("info")}>
                 <div className="nav-button-icon">
@@ -701,9 +646,7 @@ function App() {
         </div>
       )}
 
-
       {screen === "laboratory" && <Laboratory />}
-
 
       {screen === "premium" && (
         <div className="secondary-screen">
@@ -717,7 +660,6 @@ function App() {
         </div>
       )}
 
-
       {screen === "shop" && (
         <div className="secondary-screen">
           <div className="secondary-header">
@@ -730,7 +672,6 @@ function App() {
         </div>
       )}
 
-
       {screen === "market" && (
         <div className="secondary-screen">
           <div className="secondary-header">
@@ -742,7 +683,6 @@ function App() {
           </div>
         </div>
       )}
-
 
       {screen === "info" && (
         <div className="info-screen">
@@ -838,7 +778,6 @@ function App() {
         </div>
       )}
 
-
       {isBreedConfirmOpen && pendingBreedSelection && selectedCharacter && (
         <div className="breed-modal-backdrop">
           <div className="breed-modal">
@@ -867,6 +806,5 @@ function App() {
     </>
   );
 }
-
 
 export default App;

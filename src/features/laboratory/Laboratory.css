@@ -1,177 +1,159 @@
-/* ===== Экран лаборатории ===== */
-.laboratory-screen {
+/* ===== Страница лаборатории ===== */
+.laboratory-page {
   width: 100vw;
   height: 100vh;
-  background-image: url('/assets/Laboratory/LabHallway.png');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
   position: fixed;
   top: 0;
   left: 0;
   overflow: hidden;
+  background: #000;
+  z-index: 2000;
 }
 
-/* ===== Базовые стили для указателей ===== */
-.room-indicator {
+/* ===== Контейнер фона ===== */
+.laboratory-background-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  touch-action: none;
+}
+
+/* ===== Перемещаемый фон ===== */
+.laboratory-background {
+  width: 120%;
+  height: 120%;
   position: absolute;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 10;
+  top: -10%;
+  left: -10%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.1s ease-out;
+  will-change: transform;
 }
 
-.room-indicator:hover {
-  transform: scale(1.1);
-}
-
-.room-indicator:hover .indicator-label {
-  background: rgba(0, 255, 255, 0.95);
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
-}
-
-.room-indicator:hover .indicator-arrow {
-  border-color: rgba(0, 255, 255, 0.95);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-}
-
-/* ===== Надпись указателя ===== */
-.indicator-label {
-  background: rgba(0, 200, 255, 0.85);
+/* ===== Навигационные кнопки ===== */
+.lab-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 15px;
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.8), rgba(0, 100, 200, 0.8));
+  border: 3px solid rgba(0, 255, 255, 0.7);
+  border-radius: 15px;
   color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  text-align: center;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
+  cursor: pointer;
+  z-index: 100;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 200, 255, 0.4);
+  backdrop-filter: blur(5px);
+}
+
+.lab-nav-button:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.9), rgba(0, 150, 255, 0.9));
+  box-shadow: 0 6px 30px rgba(0, 255, 255, 0.6);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.lab-nav-button:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.lab-nav-button.left {
+  left: 20px;
+}
+
+.lab-nav-button.right {
+  right: 20px;
+}
+
+/* ===== Стрелки навигации ===== */
+.nav-arrow {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.nav-label {
+  font-size: 12px;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
   white-space: nowrap;
 }
 
-/* ===== Стрелка указателя ===== */
-.indicator-arrow {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  position: absolute;
-  transition: all 0.3s ease;
+/* ===== Адаптивность ===== */
+@media (max-width: 768px) {
+  .lab-nav-button {
+    padding: 15px 12px;
+    gap: 6px;
+  }
+
+  .nav-arrow {
+    font-size: 24px;
+  }
+
+  .nav-label {
+    font-size: 11px;
+  }
+
+  .lab-nav-button.left {
+    left: 15px;
+  }
+
+  .lab-nav-button.right {
+    right: 15px;
+  }
 }
 
-/* ===== Позиционирование для левой ближней двери (Room 1) ===== */
-.room-1 {
-  left: 8%;
-  top: 55%;
-  transform: translateX(0);
+@media (max-width: 480px) {
+  .lab-nav-button {
+    padding: 12px 10px;
+    gap: 4px;
+  }
+
+  .nav-arrow {
+    font-size: 20px;
+  }
+
+  .nav-label {
+    font-size: 10px;
+  }
+
+  .lab-nav-button.left {
+    left: 10px;
+  }
+
+  .lab-nav-button.right {
+    right: 10px;
+  }
 }
 
-.room-1 .indicator-label {
-  margin-bottom: 12px;
-}
-
-.room-1 .indicator-arrow {
-  border-width: 18px 12px 0 12px;
-  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 100%;
-  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
-}
-
-/* ===== Позиционирование для левой дальней двери (Room 2) ===== */
-.room-2 {
-  left: 18%;
-  top: 35%;
-  transform: translateX(0);
-}
-
-.room-2 .indicator-label {
-  margin-bottom: 12px;
-}
-
-.room-2 .indicator-arrow {
-  border-width: 18px 12px 0 12px;
-  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 100%;
-  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
-}
-
-/* ===== Позиционирование для правой дальней двери (Room 3) ===== */
-.room-3 {
-  right: 18%;
-  top: 35%;
-  transform: translateX(0);
-}
-
-.room-3 .indicator-label {
-  margin-bottom: 12px;
-}
-
-.room-3 .indicator-arrow {
-  border-width: 18px 12px 0 12px;
-  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 100%;
-  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
-}
-
-/* ===== Позиционирование для правой ближней двери (Room 4) ===== */
-.room-4 {
-  right: 8%;
-  top: 55%;
-  transform: translateX(0);
-}
-
-.room-4 .indicator-label {
-  margin-bottom: 12px;
-}
-
-.room-4 .indicator-arrow {
-  border-width: 18px 12px 0 12px;
-  border-color: rgba(0, 200, 255, 0.85) transparent transparent transparent;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 100%;
-  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));
-}
-
-/* ===== Адаптивность для разных высот экрана ===== */
 @media (max-height: 667px) {
-  .indicator-label {
-    font-size: 14px;
-    padding: 8px 16px;
+  .lab-nav-button {
+    padding: 10px 8px;
   }
-  
-  .room-1, .room-4 {
-    top: 58%;
-  }
-  
-  .room-2, .room-3 {
-    top: 38%;
-  }
-}
 
-@media (min-height: 844px) {
-  .indicator-label {
+  .nav-arrow {
     font-size: 18px;
-    padding: 12px 24px;
-  }
-  
-  .indicator-arrow {
-    border-width: 20px 14px 0 14px;
   }
 }
 
-/* ===== Оптимизация для очень высоких экранов ===== */
-@media (min-height: 1200px) {
-  .room-1, .room-4 {
-    top: 60%;
-  }
-  
-  .room-2, .room-3 {
-    top: 32%;
+/* ===== Оптимизация для touch устройств ===== */
+@media (hover: none) and (pointer: coarse) {
+  .lab-nav-button:active {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 1), rgba(0, 180, 255, 1));
+    box-shadow: 0 8px 35px rgba(0, 255, 255, 0.7);
   }
 }

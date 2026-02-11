@@ -818,3 +818,177 @@ img {
 .global-score {
   display: none !important;
 }
+
+/* ===== Модальное окно лаборатории ===== */
+.laboratory-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.laboratory-modal {
+  width: 90%;
+  max-width: 500px;
+  padding: 25px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #0b1028 0%, #1a1f3e 100%);
+  border: 3px solid rgba(0, 255, 255, 0.6);
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.9);
+  color: #fff;
+}
+
+.laboratory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.laboratory-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #00ffff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+}
+
+.close-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 0, 0, 0.3);
+  border-color: rgba(255, 0, 0, 0.6);
+  transform: rotate(90deg);
+}
+
+/* ===== Сетка кнопок лаборатории ===== */
+.laboratory-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.lab-room-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(20, 30, 60, 0.8), rgba(40, 50, 80, 0.8));
+  border: 2px solid rgba(0, 200, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 12px;
+}
+
+.lab-room-button:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0, 255, 255, 0.9);
+  box-shadow: 0 8px 30px rgba(0, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(30, 40, 70, 0.9), rgba(50, 60, 90, 0.9));
+}
+
+.lab-room-button:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+}
+
+/* ===== Иконка комнаты ===== */
+.lab-room-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.2), rgba(0, 100, 200, 0.2));
+  border: 3px solid rgba(0, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.lab-room-button:hover .lab-room-icon {
+  border-color: rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.lab-room-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== Название комнаты ===== */
+.lab-room-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+  transition: all 0.3s ease;
+}
+
+.lab-room-button:hover .lab-room-name {
+  color: #00ffff;
+  text-shadow: 0 0 12px rgba(0, 255, 255, 0.7);
+}
+
+/* ===== Адаптивность ===== */
+@media (max-width: 480px) {
+  .laboratory-buttons-grid {
+    gap: 15px;
+  }
+  
+  .lab-room-button {
+    padding: 15px;
+  }
+  
+  .lab-room-icon {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .lab-room-name {
+    font-size: 13px;
+  }
+  
+  .laboratory-header h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-height: 667px) {
+  .laboratory-modal {
+    padding: 20px;
+  }
+  
+  .lab-room-icon {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .lab-room-button {
+    padding: 12px;
+    gap: 8px;
+  }
+}

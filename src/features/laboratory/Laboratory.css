@@ -19,20 +19,21 @@
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  touch-action: none;
+  touch-action: pan-y pinch-zoom;
 }
 
 /* ===== Перемещаемый фон ===== */
 .laboratory-background {
-  width: 120%;
-  height: 120%;
+  width: 1536px;
+  height: 100%;
   position: absolute;
-  top: -10%;
-  left: -10%;
-  background-size: cover;
-  background-position: center;
+  top: 0;
+  left: 50%;
+  margin-left: -768px; /* Центрируем изображение (половина ширины 1536px) */
+  background-size: 1536px auto;
+  background-position: center top;
   background-repeat: no-repeat;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.05s ease-out;
   will-change: transform;
 }
 

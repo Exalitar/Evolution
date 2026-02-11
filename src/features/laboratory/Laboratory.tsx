@@ -5,27 +5,34 @@ type LabSection = 'center' | 'left' | 'right';
 
 export const Laboratory = () => {
   const [currentSection, setCurrentSection] = useState<LabSection>('center');
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const backgrounds = {
-  center: '/assets/Laboratory/Center_lab.png',
-  left: '/assets/Laboratory/Left_lab.png',
-  right: '/assets/Laboratory/Right_lab.png'
-};
+    center: '/assets/Laboratory/Center_lab.png',
+    left: '/assets/Laboratory/Left_lab.png',
+    right: '/assets/Laboratory/Right_lab.png'
+  };
 
   // Сброс позиции при смене секции
   useEffect(() => {
-    setPosition({ x: 0, y: 0 });
+    setPosition({ x: 0 });
   }, [currentSection]);
+
+  // Вычисление максимального сдвига (половина разницы между шириной изображения и экрана)
+  const getMaxOffset = () => {
+    if (!containerRef.current) return 0;
+    const screenWidth = containerRef.current.offsetWidth;
+    const imageWidth = 1536; // Ширина вашего изображения
+    return Math.max(0, (imageWidth - screenWidth) / 2);
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
+      x: e.clientX - position.x
     });
   };
 
@@ -33,15 +40,10 @@ export const Laboratory = () => {
     if (!isDragging) return;
     
     const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-    
-    // Ограничения перемещения
-    const maxX = 200;
-    const maxY = 200;
+    const maxOffset = getMaxOffset();
     
     setPosition({
-      x: Math.max(-maxX, Math.min(maxX, newX)),
-      y: Math.max(-maxY, Math.min(maxY, newY))
+      x: Math.max(-maxOffset, Math.min(maxOffset, newX))
     });
   };
 
@@ -53,8 +55,7 @@ export const Laboratory = () => {
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({
-      x: touch.clientX - position.x,
-      y: touch.clientY - position.y
+      x: touch.clientX - position.x
     });
   };
 
@@ -63,14 +64,10 @@ export const Laboratory = () => {
     
     const touch = e.touches[0];
     const newX = touch.clientX - dragStart.x;
-    const newY = touch.clientY - dragStart.y;
-    
-    const maxX = 200;
-    const maxY = 200;
+    const maxOffset = getMaxOffset();
     
     setPosition({
-      x: Math.max(-maxX, Math.min(maxX, newX)),
-      y: Math.max(-maxY, Math.min(maxY, newY))
+      x: Math.max(-maxOffset, Math.min(maxOffset, newX))
     });
   };
 
@@ -95,7 +92,7 @@ export const Laboratory = () => {
           className="laboratory-background"
           style={{
             backgroundImage: `url(${backgrounds[currentSection]})`,
-            transform: `translate(${position.x}px, ${position.y}px)`,
+            transform: `translateX(${position.x}px)`,
             cursor: isDragging ? 'grabbing' : 'grab'
           }}
         />

@@ -35,27 +35,21 @@ export const Laboratory = () => {
 
   // Функция для установки начальной позиции при смене секции
   const setInitialPosition = (from: LabSection, to: LabSection) => {
-    // Ждем рендера, чтобы получить правильные размеры
     setTimeout(() => {
       const { min, max } = getMaxOffset();
       
       if (to === 'center') {
         if (from === 'left') {
-          // Из левого блока в центр - показываем левую часть центра
-          setPosition({ x: max }); // Крайняя правая позиция (0)
+          setPosition({ x: max });
         } else if (from === 'right') {
-          // Из правого блока в центр - показываем правую часть центра
-          setPosition({ x: min }); // Крайняя левая позиция
+          setPosition({ x: min });
         } else {
-          // Через кнопку или начальная загрузка - центр изображения
           setPosition({ x: (max + min) / 2 });
         }
       } else if (to === 'left') {
-        // Переход в левый блок из центра - показываем правую часть левого блока
-        setPosition({ x: min }); // Крайняя левая позиция
+        setPosition({ x: min });
       } else if (to === 'right') {
-        // Переход в правый блок из центра - показываем левую часть правого блока
-        setPosition({ x: max }); // Крайняя правая позиция (0)
+        setPosition({ x: max });
       }
     }, 50);
   };
@@ -150,7 +144,7 @@ export const Laboratory = () => {
             onClick={() => handleSectionChange('left')}
           >
             <div className="nav-arrow left-arrow">←</div>
-            <span className="nav-label">Левый блок</span>
+            <span className="nav-label">Block B</span>
           </button>
 
           <button
@@ -158,7 +152,7 @@ export const Laboratory = () => {
             onClick={() => handleSectionChange('right')}
           >
             <div className="nav-arrow right-arrow">→</div>
-            <span className="nav-label">Правый блок</span>
+            <span className="nav-label">Block C</span>
           </button>
         </>
       )}
@@ -169,7 +163,7 @@ export const Laboratory = () => {
           onClick={() => handleSectionChange('center')}
         >
           <div className="nav-arrow right-arrow">→</div>
-          <span className="nav-label">Центр</span>
+          <span className="nav-label">Block A</span>
         </button>
       )}
 
@@ -179,7 +173,7 @@ export const Laboratory = () => {
           onClick={() => handleSectionChange('center')}
         >
           <div className="nav-arrow left-arrow">←</div>
-          <span className="nav-label">Центр</span>
+          <span className="nav-label">Block A</span>
         </button>
       )}
     </div>

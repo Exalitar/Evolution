@@ -20,20 +20,23 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   touch-action: pan-y pinch-zoom;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* ===== Перемещаемый фон ===== */
 .laboratory-background {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-size: auto 100%;
-  background-position: center center;
+  height: 100vh;
+  width: 150vw; /* Ширина больше экрана, чтобы было что двигать */
+  min-width: calc(100vh * 1.5); /* 1536/1024 = 1.5 */
+  position: relative;
+  background-size: contain;
+  background-position: left center;
   background-repeat: no-repeat;
   transition: transform 0.05s ease-out;
   will-change: transform;
+  flex-shrink: 0;
 }
 
 /* ===== Навигационные кнопки ===== */

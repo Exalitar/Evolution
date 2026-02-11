@@ -21,11 +21,17 @@ export const Laboratory = () => {
     setPosition({ x: 0 });
   }, [currentSection]);
 
-  // Вычисление максимального сдвига (половина разницы между шириной изображения и экрана)
+  // Вычисление максимального сдвига
   const getMaxOffset = () => {
     if (!containerRef.current) return 0;
     const screenWidth = containerRef.current.offsetWidth;
-    const imageWidth = 1536; // Ширина вашего изображения
+    const screenHeight = containerRef.current.offsetHeight;
+    
+    // Вычисляем ширину изображения при высоте 100vh
+    // Пропорция: 1536 / 1024 (ширина / высота оригинала)
+    const imageWidth = screenHeight * (1536 / 1024);
+    
+    // Если изображение шире экрана, можем двигать
     return Math.max(0, (imageWidth - screenWidth) / 2);
   };
 

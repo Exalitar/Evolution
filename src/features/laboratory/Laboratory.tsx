@@ -9,6 +9,7 @@ export const Laboratory = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
 
   const backgrounds = {
     center: '/assets/Laboratory/Center_lab.png',
@@ -23,16 +24,19 @@ export const Laboratory = () => {
 
   // Вычисление максимального сдвига
   const getMaxOffset = () => {
-    if (!containerRef.current) return 0;
+    if (!containerRef.current || !imageRef.current) return { min: 0, max: 0 };
+    
     const screenWidth = containerRef.current.offsetWidth;
-    const screenHeight = containerRef.current.offsetHeight;
+    const imageWidth = imageRef.current.offsetWidth;
     
-    // Вычисляем ширину изображения при высоте 100vh
-    // Пропорция: 1536 / 1024 (ширина / высота оригинала)
-    const imageWidth = screenHeight * (1536 / 1024);
+    // Если изображение шире экрана
+    if (imageWidth > screenWidth) {
+      const maxRight = 0; // Правый край - это начальная позиция
+      const maxLeft = -(imageWidth - screenWidth); // Левый край
+      return { min: maxLeft, max: maxRight };
+    }
     
-    // Если изображение шире экрана, можем двигать
-    return Math.max(0, (imageWidth - screenWidth) / 2);
+    return { min: 0, max: 0 };
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -46,10 +50,10 @@ export const Laboratory = () => {
     if (!isDragging) return;
     
     const newX = e.clientX - dragStart.x;
-    const maxOffset = getMaxOffset();
+    const { min, max } = getMaxOffset();
     
     setPosition({
-      x: Math.max(-maxOffset, Math.min(maxOffset, newX))
+      x: Math.max(min, Math.min(max, newX))
     });
   };
 
@@ -70,10 +74,10 @@ export const Laboratory = () => {
     
     const touch = e.touches[0];
     const newX = touch.clientX - dragStart.x;
-    const maxOffset = getMaxOffset();
+    const { min, max } = getMaxOffset();
     
     setPosition({
-      x: Math.max(-maxOffset, Math.min(maxOffset, newX))
+      x: Math.max(min, Math.min(max, newX))
     });
   };
 
@@ -95,6 +99,7 @@ export const Laboratory = () => {
         onTouchEnd={handleTouchEnd}
       >
         <div
+          ref={imageRef}
           className="laboratory-background"
           style={{
             backgroundImage: `url(${backgrounds[currentSection]})`,

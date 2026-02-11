@@ -17,11 +17,6 @@ export const Laboratory = () => {
     right: '/assets/Laboratory/Right_lab.png'
   };
 
-  // Сброс позиции при смене секции
-  useEffect(() => {
-    setPosition({ x: 0 });
-  }, [currentSection]);
-
   // Вычисление максимального сдвига
   const getMaxOffset = () => {
     if (!containerRef.current || !imageRef.current) return { min: 0, max: 0 };
@@ -29,15 +24,53 @@ export const Laboratory = () => {
     const screenWidth = containerRef.current.offsetWidth;
     const imageWidth = imageRef.current.offsetWidth;
     
-    // Если изображение шире экрана
     if (imageWidth > screenWidth) {
-      const maxRight = 0; // Правый край - это начальная позиция
-      const maxLeft = -(imageWidth - screenWidth); // Левый край
+      const maxRight = 0;
+      const maxLeft = -(imageWidth - screenWidth);
       return { min: maxLeft, max: maxRight };
     }
     
     return { min: 0, max: 0 };
   };
+
+  // Функция для установки начальной позиции при смене секции
+  const setInitialPosition = (from: LabSection, to: LabSection) => {
+    // Ждем рендера, чтобы получить правильные размеры
+    setTimeout(() => {
+      const { min, max } = getMaxOffset();
+      
+      if (to === 'center') {
+        if (from === 'left') {
+          // Из левого блока в центр - показываем левую часть центра
+          setPosition({ x: max }); // Крайняя правая позиция (0)
+        } else if (from === 'right') {
+          // Из правого блока в центр - показываем правую часть центра
+          setPosition({ x: min }); // Крайняя левая позиция
+        } else {
+          // Через кнопку или начальная загрузка - центр изображения
+          setPosition({ x: (max + min) / 2 });
+        }
+      } else if (to === 'left') {
+        // Переход в левый блок из центра - показываем правую часть левого блока
+        setPosition({ x: min }); // Крайняя левая позиция
+      } else if (to === 'right') {
+        // Переход в правый блок из центра - показываем левую часть правого блока
+        setPosition({ x: max }); // Крайняя правая позиция (0)
+      }
+    }, 50);
+  };
+
+  // Обработка переходов между секциями
+  const handleSectionChange = (newSection: LabSection) => {
+    const prevSection = currentSection;
+    setCurrentSection(newSection);
+    setInitialPosition(prevSection, newSection);
+  };
+
+  // Начальная установка центра при первой загрузке
+  useEffect(() => {
+    setInitialPosition('center', 'center');
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -114,7 +147,7 @@ export const Laboratory = () => {
         <>
           <button
             className="lab-nav-button left"
-            onClick={() => setCurrentSection('left')}
+            onClick={() => handleSectionChange('left')}
           >
             <div className="nav-arrow left-arrow">←</div>
             <span className="nav-label">Левый блок</span>
@@ -122,7 +155,7 @@ export const Laboratory = () => {
 
           <button
             className="lab-nav-button right"
-            onClick={() => setCurrentSection('right')}
+            onClick={() => handleSectionChange('right')}
           >
             <div className="nav-arrow right-arrow">→</div>
             <span className="nav-label">Правый блок</span>
@@ -133,7 +166,7 @@ export const Laboratory = () => {
       {currentSection === 'left' && (
         <button
           className="lab-nav-button right"
-          onClick={() => setCurrentSection('center')}
+          onClick={() => handleSectionChange('center')}
         >
           <div className="nav-arrow right-arrow">→</div>
           <span className="nav-label">Центр</span>
@@ -143,7 +176,7 @@ export const Laboratory = () => {
       {currentSection === 'right' && (
         <button
           className="lab-nav-button left"
-          onClick={() => setCurrentSection('center')}
+          onClick={() => handleSectionChange('center')}
         >
           <div className="nav-arrow left-arrow">←</div>
           <span className="nav-label">Центр</span>

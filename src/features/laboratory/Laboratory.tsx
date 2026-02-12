@@ -181,30 +181,33 @@ export const Laboratory = () => {
           }}
         >
           {/* Интерактивные зоны только для центральной секции */}
-          {currentSection === 'center' && (
-            <>
-              {/* Левая зона - Микроскоп */}
-              <div
-                className="equipment-hotspot microscope-hotspot"
-                onClick={() => handleEquipmentClick('microscope')}
-                title="Микроскоп"
-              />
+            {currentSection === 'center' && (
+              <>
+                {/* Левая зона - Микроскоп */}
+                <div
+                  className="equipment-hotspot microscope-hotspot"
+                  onClick={() => handleEquipmentClick('microscope')}
+                >
+                  <div className="equipment-label">Микроскоп</div>
+                </div>
 
-              {/* Центральная зона - Панель управления */}
-              <div
-                className="equipment-hotspot control-panel-hotspot"
-                onClick={() => handleEquipmentClick('control_panel')}
-                title="Панель управления"
-              />
+                {/* Центральная зона - Панель управления */}
+                <div
+                  className="equipment-hotspot control-panel-hotspot"
+                  onClick={() => handleEquipmentClick('control_panel')}
+                >
+                  <div className="equipment-label">Панель управления</div>
+                </div>
 
-              {/* Правая зона - Анализатор */}
-              <div
-                className="equipment-hotspot analyzer-hotspot"
-                onClick={() => handleEquipmentClick('analyzer')}
-                title="Анализатор"
-              />
-            </>
-          )}
+                {/* Правая зона - Анализатор */}
+                <div
+                  className="equipment-hotspot analyzer-hotspot"
+                  onClick={() => handleEquipmentClick('analyzer')}
+                >
+                  <div className="equipment-label">Анализатор</div>
+                </div>
+              </>
+            )}
         </div>
       </div>
 

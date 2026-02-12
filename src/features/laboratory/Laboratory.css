@@ -172,6 +172,7 @@
   border: 2px solid transparent;
   transition: all 0.3s ease;
   z-index: 10;
+  border-radius: 8px;
 }
 
 .equipment-hotspot:hover {
@@ -188,25 +189,25 @@
 /* Микроскоп - левая зона */
 .microscope-hotspot {
   left: 5%;
-  top: 40%;
-  width: 18%;
-  height: 35%;
+  top: 50%;
+  width: 15%;
+  height: 25%;
 }
 
 /* Панель управления - центральная зона */
 .control-panel-hotspot {
   left: 32%;
-  top: 55%;
+  top: 62%;
   width: 36%;
-  height: 30%;
+  height: 22%;
 }
 
 /* Анализатор - правая зона */
 .analyzer-hotspot {
   right: 5%;
-  top: 40%;
-  width: 18%;
-  height: 35%;
+  top: 50%;
+  width: 15%;
+  height: 25%;
 }
 
 /* ===== Модальное окно оборудования ===== */

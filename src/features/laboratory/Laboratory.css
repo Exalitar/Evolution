@@ -459,16 +459,16 @@
 .control-panel-left-hotspot {
   left: 39%;
   top: 30%;
-  width: 17%;
+  width: 14%;
   height: 35%;
 }
 
 /* Анализирующий модуль - правый */
 .analyzing-module-hotspot {
   right: 30%;
-  top: 62%;
+  top: 65%;
   width: 19%;
-  height: 24%;
+  height: 21%;
 }
 
 /* ===== Позиции для Block C (Right) - 4 объекта ===== */

@@ -457,7 +457,7 @@
 
 /* Панель управления - центр нижний */
 .control-panel-left-hotspot {
-  left: 34%;
+  left: 39%;
   top: 30%;
   width: 17%;
   height: 35%;
@@ -465,10 +465,10 @@
 
 /* Анализирующий модуль - правый */
 .analyzing-module-hotspot {
-  right: 27%;
-  top: 60%;
-  width: 22%;
-  height: 26%;
+  right: 30%;
+  top: 62%;
+  width: 19%;
+  height: 24%;
 }
 
 /* ===== Позиции для Block C (Right) - 4 объекта ===== */

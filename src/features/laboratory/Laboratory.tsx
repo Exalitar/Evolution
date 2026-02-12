@@ -2,12 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import './Laboratory.css';
 
 type LabSection = 'center' | 'left' | 'right';
+type EquipmentType = 'microscope' | 'control_panel' | 'analyzer' | null;
+
+interface Equipment {
+  id: EquipmentType;
+  name: string;
+  level: number;
+  description: string;
+}
 
 export const Laboratory = () => {
   const [currentSection, setCurrentSection] = useState<LabSection>('center');
   const [position, setPosition] = useState({ x: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0 });
+  const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
 
@@ -17,7 +26,27 @@ export const Laboratory = () => {
     right: '/assets/Laboratory/Right_lab.png'
   };
 
-  // Вычисление максимального сдвига
+  const [equipment, setEquipment] = useState<Record<string, Equipment>>({
+    microscope: {
+      id: 'microscope',
+      name: 'Микроскоп',
+      level: 1,
+      description: 'Улучшите для более детального анализа ДНК'
+    },
+    control_panel: {
+      id: 'control_panel',
+      name: 'Панель управления',
+      level: 1,
+      description: 'Улучшите для ускорения процессов синтеза'
+    },
+    analyzer: {
+      id: 'analyzer',
+      name: 'Анализатор',
+      level: 1,
+      description: 'Улучшите для повышения точности экспериментов'
+    }
+  });
+
   const getMaxOffset = () => {
     if (!containerRef.current || !imageRef.current) return { min: 0, max: 0 };
     
@@ -33,7 +62,6 @@ export const Laboratory = () => {
     return { min: 0, max: 0 };
   };
 
-  // Функция для установки начальной позиции при смене секции
   const setInitialPosition = (from: LabSection, to: LabSection) => {
     setTimeout(() => {
       const { min, max } = getMaxOffset();
@@ -54,19 +82,18 @@ export const Laboratory = () => {
     }, 50);
   };
 
-  // Обработка переходов между секциями
   const handleSectionChange = (newSection: LabSection) => {
     const prevSection = currentSection;
     setCurrentSection(newSection);
     setInitialPosition(prevSection, newSection);
   };
 
-  // Начальная установка центра при первой загрузке
   useEffect(() => {
     setInitialPosition('center', 'center');
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.equipment-hotspot')) return;
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x
@@ -89,6 +116,7 @@ export const Laboratory = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('.equipment-hotspot')) return;
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({
@@ -112,6 +140,24 @@ export const Laboratory = () => {
     setIsDragging(false);
   };
 
+  const handleEquipmentClick = (equipmentId: EquipmentType) => {
+    setSelectedEquipment(equipmentId);
+  };
+
+  const handleUpgrade = (equipmentId: string) => {
+    setEquipment(prev => ({
+      ...prev,
+      [equipmentId]: {
+        ...prev[equipmentId],
+        level: prev[equipmentId].level + 1
+      }
+    }));
+  };
+
+  const closeModal = () => {
+    setSelectedEquipment(null);
+  };
+
   return (
     <div className="laboratory-page">
       <div
@@ -133,7 +179,33 @@ export const Laboratory = () => {
             transform: `translateX(${position.x}px)`,
             cursor: isDragging ? 'grabbing' : 'grab'
           }}
-        />
+        >
+          {/* Интерактивные зоны только для центральной секции */}
+          {currentSection === 'center' && (
+            <>
+              {/* Левая зона - Микроскоп */}
+              <div
+                className="equipment-hotspot microscope-hotspot"
+                onClick={() => handleEquipmentClick('microscope')}
+                title="Микроскоп"
+              />
+
+              {/* Центральная зона - Панель управления */}
+              <div
+                className="equipment-hotspot control-panel-hotspot"
+                onClick={() => handleEquipmentClick('control_panel')}
+                title="Панель управления"
+              />
+
+              {/* Правая зона - Анализатор */}
+              <div
+                className="equipment-hotspot analyzer-hotspot"
+                onClick={() => handleEquipmentClick('analyzer')}
+                title="Анализатор"
+              />
+            </>
+          )}
+        </div>
       </div>
 
       {/* Навигационные кнопки */}
@@ -175,6 +247,55 @@ export const Laboratory = () => {
           <div className="nav-arrow left-arrow">←</div>
           <span className="nav-label">Block A</span>
         </button>
+      )}
+
+      {/* Модальное окно улучшения */}
+      {selectedEquipment && (
+        <div className="equipment-modal-backdrop" onClick={closeModal}>
+          <div className="equipment-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="equipment-modal-close" onClick={closeModal}>✕</button>
+            
+            <div className="equipment-modal-content">
+              <h2 className="equipment-modal-title">
+                {equipment[selectedEquipment].name}
+              </h2>
+              
+              <div className="equipment-level-display">
+                <span className="level-label">Уровень</span>
+                <span className="level-number">{equipment[selectedEquipment].level}</span>
+              </div>
+              
+              <p className="equipment-description">
+                {equipment[selectedEquipment].description}
+              </p>
+              
+              <div className="equipment-stats">
+                <div className="stat-row">
+                  <span className="stat-label">Производительность:</span>
+                  <span className="stat-value">+{equipment[selectedEquipment].level * 10}%</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Эффективность:</span>
+                  <span className="stat-value">+{equipment[selectedEquipment].level * 5}%</span>
+                </div>
+              </div>
+              
+              <div className="equipment-upgrade-section">
+                <div className="upgrade-cost">
+                  <span className="cost-label">Стоимость улучшения:</span>
+                  <span className="cost-value">{equipment[selectedEquipment].level * 1000} 💎</span>
+                </div>
+                
+                <button 
+                  className="upgrade-button"
+                  onClick={() => handleUpgrade(selectedEquipment)}
+                >
+                  Улучшить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -474,32 +474,32 @@
 /* ===== Позиции для Block C (Right) - 4 объекта ===== */
 /* Синтезатор - левый верхний */
 .synthesizer-hotspot {
-  left: 3%;
-  top: 12%;
+  left: 23%;
+  top: 26%;
   width: 32%;
-  height: 35%;
+  height: 29%;
 }
 
 /* Секвенатор - правый верхний */
 .sequencer-hotspot {
-  right: 8%;
-  top: 35%;
+  right: 38%;
+  top: 24%;
   width: 20%;
-  height: 25%;
+  height: 31%;
 }
 
 /* Термостат - центр нижний */
 .thermostat-hotspot {
-  left: 35%;
-  top: 58%;
-  width: 20%;
-  height: 22%;
+  left: 38%;
+  top: 59%;
+  width: 17%;
+  height: 18%;
 }
 
 /* Культиватор - правый нижний */
 .cultivator-hotspot {
-  right: 3%;
-  top: 62%;
-  width: 18%;
-  height: 20%;
+  right: 2%;
+  top: 54%;
+  width: 23%;
+  height: 28%;
 }

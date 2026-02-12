@@ -2,7 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import './Laboratory.css';
 
 type LabSection = 'center' | 'left' | 'right';
-type EquipmentType = 'microscope' | 'control_panel' | 'analyzer' | null;
+type EquipmentType = 
+  | 'microscope' | 'control_panel' | 'analyzer' 
+  | 'robot_manipulator' | 'control_panel_left' | 'analyzing_module'
+  | 'synthesizer' | 'sequencer' | 'thermostat' | 'cultivator' 
+  | null;
 
 interface Equipment {
   id: EquipmentType;
@@ -27,6 +31,7 @@ export const Laboratory = () => {
   };
 
   const [equipment, setEquipment] = useState<Record<string, Equipment>>({
+    // Block A (Center)
     microscope: {
       id: 'microscope',
       name: 'Микроскоп',
@@ -44,6 +49,52 @@ export const Laboratory = () => {
       name: 'Анализатор',
       level: 1,
       description: 'Улучшите для повышения точности экспериментов'
+    },
+    
+    // Block B (Left) - 3 объекта
+    robot_manipulator: {
+      id: 'robot_manipulator',
+      name: 'Робот-манипулятор',
+      level: 1,
+      description: 'Автоматизация процессов сборки ДНК'
+    },
+    control_panel_left: {
+      id: 'control_panel_left',
+      name: 'Панель управления',
+      level: 1,
+      description: 'Контроль всех систем лаборатории'
+    },
+    analyzing_module: {
+      id: 'analyzing_module',
+      name: 'Анализирующий модуль',
+      level: 1,
+      description: 'Глубокий анализ генетических структур'
+    },
+    
+    // Block C (Right) - 4 объекта
+    synthesizer: {
+      id: 'synthesizer',
+      name: 'Синтезатор',
+      level: 1,
+      description: 'Синтез новых генетических последовательностей'
+    },
+    sequencer: {
+      id: 'sequencer',
+      name: 'Секвенатор',
+      level: 1,
+      description: 'Расшифровка ДНК последовательностей'
+    },
+    thermostat: {
+      id: 'thermostat',
+      name: 'Термостат',
+      level: 1,
+      description: 'Инкубация и культивирование образцов'
+    },
+    cultivator: {
+      id: 'cultivator',
+      name: 'Культиватор',
+      level: 1,
+      description: 'Выращивание клеточных культур'
     }
   });
 
@@ -180,34 +231,90 @@ export const Laboratory = () => {
             cursor: isDragging ? 'grabbing' : 'grab'
           }}
         >
-          {/* Интерактивные зоны только для центральной секции */}
-            {currentSection === 'center' && (
-              <>
-                {/* Левая зона - Микроскоп */}
-                <div
-                  className="equipment-hotspot microscope-hotspot"
-                  onClick={() => handleEquipmentClick('microscope')}
-                >
-                  <div className="equipment-label">Микроскоп</div>
-                </div>
+          {/* Интерактивные зоны Block A (Center) */}
+          {currentSection === 'center' && (
+            <>
+              <div
+                className="equipment-hotspot microscope-hotspot"
+                onClick={() => handleEquipmentClick('microscope')}
+              >
+                <div className="equipment-label">Микроскоп</div>
+              </div>
 
-                {/* Центральная зона - Панель управления */}
-                <div
-                  className="equipment-hotspot control-panel-hotspot"
-                  onClick={() => handleEquipmentClick('control_panel')}
-                >
-                  <div className="equipment-label">Панель управления</div>
-                </div>
+              <div
+                className="equipment-hotspot control-panel-hotspot"
+                onClick={() => handleEquipmentClick('control_panel')}
+              >
+                <div className="equipment-label">Панель управления</div>
+              </div>
 
-                {/* Правая зона - Анализатор */}
-                <div
-                  className="equipment-hotspot analyzer-hotspot"
-                  onClick={() => handleEquipmentClick('analyzer')}
-                >
-                  <div className="equipment-label">Анализатор</div>
-                </div>
-              </>
-            )}
+              <div
+                className="equipment-hotspot analyzer-hotspot"
+                onClick={() => handleEquipmentClick('analyzer')}
+              >
+                <div className="equipment-label">Анализатор</div>
+              </div>
+            </>
+          )}
+
+          {/* Интерактивные зоны Block B (Left) - 3 объекта */}
+          {currentSection === 'left' && (
+            <>
+              <div
+                className="equipment-hotspot robot-manipulator-hotspot"
+                onClick={() => handleEquipmentClick('robot_manipulator')}
+              >
+                <div className="equipment-label">Робот-манипулятор</div>
+              </div>
+
+              <div
+                className="equipment-hotspot control-panel-left-hotspot"
+                onClick={() => handleEquipmentClick('control_panel_left')}
+              >
+                <div className="equipment-label">Панель управления</div>
+              </div>
+
+              <div
+                className="equipment-hotspot analyzing-module-hotspot"
+                onClick={() => handleEquipmentClick('analyzing_module')}
+              >
+                <div className="equipment-label">Анализирующий модуль</div>
+              </div>
+            </>
+          )}
+
+          {/* Интерактивные зоны Block C (Right) - 4 объекта */}
+          {currentSection === 'right' && (
+            <>
+              <div
+                className="equipment-hotspot synthesizer-hotspot"
+                onClick={() => handleEquipmentClick('synthesizer')}
+              >
+                <div className="equipment-label">Синтезатор</div>
+              </div>
+
+              <div
+                className="equipment-hotspot sequencer-hotspot"
+                onClick={() => handleEquipmentClick('sequencer')}
+              >
+                <div className="equipment-label">Секвенатор</div>
+              </div>
+
+              <div
+                className="equipment-hotspot thermostat-hotspot"
+                onClick={() => handleEquipmentClick('thermostat')}
+              >
+                <div className="equipment-label">Термостат</div>
+              </div>
+
+              <div
+                className="equipment-hotspot cultivator-hotspot"
+                onClick={() => handleEquipmentClick('cultivator')}
+              >
+                <div className="equipment-label">Культиватор</div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

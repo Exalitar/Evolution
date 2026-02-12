@@ -451,24 +451,24 @@
 .robot-manipulator-hotspot {
   left: 0%;
   top: 34%;
-  width: 23%;
+  width: 19%;
   height: 35%;
 }
 
 /* Панель управления - центр нижний */
 .control-panel-left-hotspot {
-  left: 13%;
-  top: 40%;
-  width: 32%;
-  height: 25%;
+  left: 20%;
+  top: 30%;
+  width: 20%;
+  height: 35%;
 }
 
 /* Анализирующий модуль - правый */
 .analyzing-module-hotspot {
-  right: 15%;
-  top: 57%;
+  right: 22%;
+  top: 60%;
   width: 22%;
-  height: 29%;
+  height: 26%;
 }
 
 /* ===== Позиции для Block C (Right) - 4 объекта ===== */

@@ -475,17 +475,17 @@
 /* Синтезатор - левый верхний */
 .synthesizer-hotspot {
   left: 23%;
-  top: 26%;
-  width: 32%;
+  top: 27%;
+  width: 24%;
   height: 29%;
 }
 
 /* Секвенатор - правый верхний */
 .sequencer-hotspot {
-  right: 38%;
-  top: 24%;
+  right: 30%;
+  top: 26%;
   width: 20%;
-  height: 31%;
+  height: 28%;
 }
 
 /* Термостат - центр нижний */
@@ -499,7 +499,7 @@
 /* Культиватор - правый нижний */
 .cultivator-hotspot {
   right: 2%;
-  top: 54%;
-  width: 23%;
-  height: 28%;
+  top: 52%;
+  width: 21%;
+  height: 30%;
 }

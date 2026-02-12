@@ -449,26 +449,26 @@
 /* ===== Позиции для Block B (Left) - 3 объекта ===== */
 /* Робот-манипулятор - левый верхний */
 .robot-manipulator-hotspot {
-  left: 3%;
-  top: 15%;
-  width: 28%;
+  left: 0%;
+  top: 34%;
+  width: 23%;
   height: 35%;
 }
 
 /* Панель управления - центр нижний */
 .control-panel-left-hotspot {
-  left: 20%;
-  top: 55%;
+  left: 13%;
+  top: 40%;
   width: 32%;
   height: 25%;
 }
 
 /* Анализирующий модуль - правый */
 .analyzing-module-hotspot {
-  right: 5%;
-  top: 35%;
+  right: 15%;
+  top: 57%;
   width: 22%;
-  height: 35%;
+  height: 29%;
 }
 
 /* ===== Позиции для Block C (Right) - 4 объекта ===== */

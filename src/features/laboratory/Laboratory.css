@@ -503,3 +503,528 @@
   width: 21%;
   height: 30%;
 }
+
+/* ===== UI элементы привязанные к экрану ===== */
+.lab-ui-elements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: transform 0.05s ease-out;
+  will-change: transform;
+}
+
+.lab-ui-element {
+  pointer-events: auto;
+}
+
+/* ===== Панель игрока (используем стили из App.css) ===== */
+.lab-player-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(0, 20, 60, 0.9), rgba(0, 40, 100, 0.9));
+  border: 2px solid rgba(0, 200, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+}
+
+.lab-player-panel .player-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 200, 255, 0.8);
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(0, 100, 200, 0.4), rgba(0, 50, 150, 0.6));
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+}
+
+.lab-player-panel .player-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lab-player-panel .player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lab-player-panel .player-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.lab-player-panel .player-level {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* ===== Кнопка магазина (используем стили из App.css) ===== */
+.lab-shop-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 70px;
+  height: 70px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 200;
+  padding: 0;
+}
+
+.lab-shop-button .nav-button-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lab-shop-button .nav-button-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 15px rgba(0, 200, 255, 0.4));
+}
+
+.lab-shop-button:hover {
+  transform: scale(1.1);
+}
+
+.lab-shop-button:hover .nav-button-icon img {
+  filter: drop-shadow(0 6px 25px rgba(0, 200, 255, 0.7));
+}
+
+.lab-shop-button:active {
+  transform: scale(0.95);
+}
+
+/* ===== Навигационная панель внизу (используем стили из App.css) ===== */
+.lab-nav-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(to top, rgba(0, 20, 60, 0.95), rgba(0, 30, 80, 0.9));
+  border-top: 2px solid rgba(0, 200, 255, 0.5);
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+  z-index: 200;
+}
+
+.lab-nav-bar .nav-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 10px 15px;
+  border-radius: 15px;
+  flex: 1;
+  max-width: 120px;
+}
+
+.lab-nav-bar .nav-button:hover {
+  background: rgba(0, 200, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.lab-nav-bar .nav-button.active {
+  background: rgba(0, 200, 255, 0.2);
+  border: 1px solid rgba(0, 200, 255, 0.5);
+}
+
+.lab-nav-bar .nav-button-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lab-nav-bar .nav-button-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 200, 255, 0.3));
+}
+
+.lab-nav-bar .nav-button:hover .nav-button-icon img,
+.lab-nav-bar .nav-button.active .nav-button-icon img {
+  filter: drop-shadow(0 4px 15px rgba(0, 200, 255, 0.6));
+}
+
+.lab-nav-bar .nav-button-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+
+.lab-nav-bar .nav-button:hover .nav-button-label,
+.lab-nav-bar .nav-button.active .nav-button-label {
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+/* ===== Модальное окно оборудования ===== */
+.equipment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.equipment-modal {
+  width: 90%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #0b1028 0%, #1a1f3e 100%);
+  border: 3px solid rgba(0, 255, 255, 0.6);
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.9);
+  color: #fff;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.equipment-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.equipment-modal-close:hover {
+  background: rgba(255, 0, 0, 0.3);
+  border-color: rgba(255, 0, 0, 0.6);
+  transform: rotate(90deg);
+}
+
+.equipment-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.equipment-modal-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #00ffff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+  text-align: center;
+}
+
+.equipment-level-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(0, 200, 255, 0.15);
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  border-radius: 12px;
+}
+
+.level-label {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.level-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.equipment-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.equipment-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(0, 100, 200, 0.1);
+  border-radius: 10px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-value {
+  color: #00ff00;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+.equipment-upgrade-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.upgrade-cost {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+}
+
+.cost-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.cost-value {
+  color: #ffff00;
+  font-weight: 700;
+  font-size: 18px;
+  text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+.upgrade-button {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #00cc00, #00ff00);
+  border: 2px solid #00ff00;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+  text-transform: uppercase;
+}
+
+.upgrade-button:hover {
+  background: linear-gradient(135deg, #00ff00, #00cc00);
+  box-shadow: 0 6px 25px rgba(0, 255, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.upgrade-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);
+}
+
+/* ===== Адаптивность ===== */
+@media (max-width: 768px) {
+  .equipment-label {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .lab-nav-button {
+    padding: 12px 15px;
+    gap: 6px;
+  }
+
+  .lab-nav-button.left {
+    left: 15px;
+  }
+
+  .lab-nav-button.right {
+    right: 15px;
+  }
+
+  .nav-arrow {
+    font-size: 20px;
+  }
+
+  .nav-label {
+    font-size: 11px;
+  }
+
+  .lab-player-panel {
+    padding: 8px 15px;
+    gap: 12px;
+    top: 15px;
+    left: 15px;
+  }
+
+  .lab-player-panel .player-avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .lab-player-panel .player-name {
+    font-size: 16px;
+  }
+
+  .lab-player-panel .player-level {
+    font-size: 12px;
+  }
+
+  .lab-shop-button {
+    width: 60px;
+    height: 60px;
+    top: 15px;
+    right: 15px;
+  }
+
+  .lab-nav-bar {
+    padding: 12px 15px;
+  }
+
+  .lab-nav-bar .nav-button {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .lab-nav-bar .nav-button-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .lab-nav-bar .nav-button-label {
+    font-size: 11px;
+  }
+
+  .equipment-modal {
+    padding: 20px;
+  }
+
+  .equipment-modal-title {
+    font-size: 22px;
+  }
+
+  .level-number {
+    font-size: 20px;
+  }
+
+  .equipment-description {
+    font-size: 13px;
+  }
+
+  .upgrade-button {
+    padding: 12px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .equipment-label {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .lab-nav-button {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+
+  .lab-nav-button.left {
+    left: 10px;
+  }
+
+  .lab-nav-button.right {
+    right: 10px;
+  }
+
+  .nav-arrow {
+    font-size: 18px;
+  }
+
+  .nav-label {
+    font-size: 10px;
+  }
+
+  .lab-player-panel {
+    padding: 6px 12px;
+    gap: 10px;
+    top: 10px;
+    left: 10px;
+  }
+
+  .lab-player-panel .player-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lab-player-panel .player-name {
+    font-size: 14px;
+  }
+
+  .lab-player-panel .player-level {
+    font-size: 11px;
+  }
+
+  .lab-shop-button {
+    width: 50px;
+    height: 50px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .lab-nav-bar {
+    padding: 10px 10px;
+  }
+
+  .lab-nav-bar .nav-button {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+
+  .lab-nav-bar .nav-button-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lab-nav-bar .nav-button-label {
+    font-size: 10px;
+  }
+}

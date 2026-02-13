@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Laboratory.css';
 
+type Screen = "main" | "game" | "laboratory" | "premium" | "shop" | "info" | "cabinet" | "market";
 type LabSection = 'center' | 'left' | 'right';
-type EquipmentType = 
-  | 'microscope' | 'control_panel' | 'analyzer' 
+
+type EquipmentType =
+  | 'microscope' | 'control_panel' | 'analyzer'
   | 'robot_manipulator' | 'control_panel_left' | 'analyzing_module'
-  | 'synthesizer' | 'sequencer' | 'thermostat' | 'cultivator' 
+  | 'synthesizer' | 'sequencer' | 'thermostat' | 'cultivator'
   | null;
 
 interface Equipment {
@@ -15,7 +17,19 @@ interface Equipment {
   description: string;
 }
 
-export const Laboratory = () => {
+interface LaboratoryProps {
+  playerName: string;
+  playerLevel: number;
+  playerAvatar: string;
+  onNavigate: (screen: Screen) => void;
+}
+
+export const Laboratory: React.FC<LaboratoryProps> = ({
+  playerName,
+  playerLevel,
+  playerAvatar,
+  onNavigate
+}) => {
   const [currentSection, setCurrentSection] = useState<LabSection>('center');
   const [position, setPosition] = useState({ x: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -50,7 +64,6 @@ export const Laboratory = () => {
       level: 1,
       description: 'Улучшите для повышения точности экспериментов'
     },
-    
     // Block B (Left) - 3 объекта
     robot_manipulator: {
       id: 'robot_manipulator',
@@ -70,7 +83,6 @@ export const Laboratory = () => {
       level: 1,
       description: 'Глубокий анализ генетических структур'
     },
-    
     // Block C (Right) - 4 объекта
     synthesizer: {
       id: 'synthesizer',
@@ -100,23 +112,19 @@ export const Laboratory = () => {
 
   const getMaxOffset = () => {
     if (!containerRef.current || !imageRef.current) return { min: 0, max: 0 };
-    
     const screenWidth = containerRef.current.offsetWidth;
     const imageWidth = imageRef.current.offsetWidth;
-    
     if (imageWidth > screenWidth) {
       const maxRight = 0;
       const maxLeft = -(imageWidth - screenWidth);
       return { min: maxLeft, max: maxRight };
     }
-    
     return { min: 0, max: 0 };
   };
 
   const setInitialPosition = (from: LabSection, to: LabSection) => {
     setTimeout(() => {
       const { min, max } = getMaxOffset();
-      
       if (to === 'center') {
         if (from === 'left') {
           setPosition({ x: max });
@@ -144,7 +152,8 @@ export const Laboratory = () => {
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.equipment-hotspot')) return;
+    if ((e.target as HTMLElement).closest('.equipment-hotspot') ||
+        (e.target as HTMLElement).closest('.lab-ui-element')) return;
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x
@@ -153,10 +162,8 @@ export const Laboratory = () => {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    
     const newX = e.clientX - dragStart.x;
     const { min, max } = getMaxOffset();
-    
     setPosition({
       x: Math.max(min, Math.min(max, newX))
     });
@@ -167,7 +174,8 @@ export const Laboratory = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.equipment-hotspot')) return;
+    if ((e.target as HTMLElement).closest('.equipment-hotspot') ||
+        (e.target as HTMLElement).closest('.lab-ui-element')) return;
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({
@@ -177,11 +185,9 @@ export const Laboratory = () => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
-    
     const touch = e.touches[0];
     const newX = touch.clientX - dragStart.x;
     const { min, max } = getMaxOffset();
-    
     setPosition({
       x: Math.max(min, Math.min(max, newX))
     });
@@ -211,7 +217,7 @@ export const Laboratory = () => {
 
   return (
     <div className="laboratory-page">
-      <div
+      <div 
         ref={containerRef}
         className="laboratory-background-container"
         onMouseDown={handleMouseDown}
@@ -222,7 +228,7 @@ export const Laboratory = () => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
+        <div 
           ref={imageRef}
           className="laboratory-background"
           style={{
@@ -234,21 +240,19 @@ export const Laboratory = () => {
           {/* Интерактивные зоны Block A (Center) */}
           {currentSection === 'center' && (
             <>
-              <div
+              <div 
                 className="equipment-hotspot microscope-hotspot"
                 onClick={() => handleEquipmentClick('microscope')}
               >
                 <div className="equipment-label">Микроскоп</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot control-panel-hotspot"
                 onClick={() => handleEquipmentClick('control_panel')}
               >
                 <div className="equipment-label">Панель управления</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot analyzer-hotspot"
                 onClick={() => handleEquipmentClick('analyzer')}
               >
@@ -260,21 +264,19 @@ export const Laboratory = () => {
           {/* Интерактивные зоны Block B (Left) - 3 объекта */}
           {currentSection === 'left' && (
             <>
-              <div
+              <div 
                 className="equipment-hotspot robot-manipulator-hotspot"
                 onClick={() => handleEquipmentClick('robot_manipulator')}
               >
                 <div className="equipment-label">Робот-манипулятор</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot control-panel-left-hotspot"
                 onClick={() => handleEquipmentClick('control_panel_left')}
               >
                 <div className="equipment-label">Панель управления</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot analyzing-module-hotspot"
                 onClick={() => handleEquipmentClick('analyzing_module')}
               >
@@ -286,28 +288,25 @@ export const Laboratory = () => {
           {/* Интерактивные зоны Block C (Right) - 4 объекта */}
           {currentSection === 'right' && (
             <>
-              <div
+              <div 
                 className="equipment-hotspot synthesizer-hotspot"
                 onClick={() => handleEquipmentClick('synthesizer')}
               >
                 <div className="equipment-label">Синтезатор</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot sequencer-hotspot"
                 onClick={() => handleEquipmentClick('sequencer')}
               >
                 <div className="equipment-label">Секвенатор</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot thermostat-hotspot"
                 onClick={() => handleEquipmentClick('thermostat')}
               >
                 <div className="equipment-label">Термостат</div>
               </div>
-
-              <div
+              <div 
                 className="equipment-hotspot cultivator-hotspot"
                 onClick={() => handleEquipmentClick('cultivator')}
               >
@@ -315,55 +314,109 @@ export const Laboratory = () => {
               </div>
             </>
           )}
+
+          {/* UI элементы привязанные к экрану */}
+          <div className="lab-ui-elements" style={{ transform: `translateX(-${position.x}px)` }}>
+            {/* Панель игрока вверху слева */}
+            <div className="lab-player-panel lab-ui-element">
+              <div className="player-avatar">
+                <img src={playerAvatar} alt={playerName} draggable={false} />
+              </div>
+              <div className="player-info">
+                <div className="player-name">{playerName}</div>
+                <div className="player-level">Уровень {playerLevel}</div>
+              </div>
+            </div>
+
+            {/* Кнопка магазина вверху справа */}
+            <button 
+              className="lab-shop-button lab-ui-element"
+              onClick={() => onNavigate('shop')}
+            >
+              <div className="nav-button-icon">
+                <img src="/assets/Icon_button/Shop_button.png" alt="" draggable={false} />
+              </div>
+            </button>
+
+            {/* Навигационная панель внизу - ПРАВИЛЬНЫЙ ПОРЯДОК */}
+            <div className="lab-nav-bar lab-ui-element">
+              <button className="nav-button" onClick={() => onNavigate('cabinet')}>
+                <div className="nav-button-icon">
+                  <img src="/assets/Icon_button/Person_button.png" alt="" draggable={false} />
+                </div>
+                <span className="nav-button-label">Кабинет</span>
+              </button>
+              
+              <button className="nav-button" onClick={() => onNavigate('premium')}>
+                <div className="nav-button-icon">
+                  <img src="/assets/Icon_button/Premium_button.png" alt="" draggable={false} />
+                </div>
+                <span className="nav-button-label">Премиум</span>
+              </button>
+              
+              <button className="nav-button" onClick={() => onNavigate('shop')}>
+                <div className="nav-button-icon">
+                  <img src="/assets/Icon_button/Shop_button.png" alt="" draggable={false} />
+                </div>
+                <span className="nav-button-label">Магазин</span>
+              </button>
+              
+              <button className="nav-button" onClick={() => onNavigate('info')}>
+                <div className="nav-button-icon">
+                  <img src="/assets/Icon_button/Setting_button.png" alt="" draggable={false} />
+                </div>
+                <span className="nav-button-label">Информация</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Навигационные кнопки между блоками */}
+          {currentSection === 'center' && (
+            <>
+              <button 
+                className="lab-nav-button left"
+                onClick={() => handleSectionChange('left')}
+              >
+                <div className="nav-arrow left-arrow">◀</div>
+                <span className="nav-label">Block B</span>
+              </button>
+              <button 
+                className="lab-nav-button right"
+                onClick={() => handleSectionChange('right')}
+              >
+                <div className="nav-arrow right-arrow">▶</div>
+                <span className="nav-label">Block C</span>
+              </button>
+            </>
+          )}
+
+          {currentSection === 'left' && (
+            <button 
+              className="lab-nav-button right"
+              onClick={() => handleSectionChange('center')}
+            >
+              <div className="nav-arrow right-arrow">▶</div>
+              <span className="nav-label">Block A</span>
+            </button>
+          )}
+
+          {currentSection === 'right' && (
+            <button 
+              className="lab-nav-button left"
+              onClick={() => handleSectionChange('center')}
+            >
+              <div className="nav-arrow left-arrow">◀</div>
+              <span className="nav-label">Block A</span>
+            </button>
+          )}
         </div>
       </div>
-
-      {/* Навигационные кнопки */}
-      {currentSection === 'center' && (
-        <>
-          <button
-            className="lab-nav-button left"
-            onClick={() => handleSectionChange('left')}
-          >
-            <div className="nav-arrow left-arrow">←</div>
-            <span className="nav-label">Block B</span>
-          </button>
-
-          <button
-            className="lab-nav-button right"
-            onClick={() => handleSectionChange('right')}
-          >
-            <div className="nav-arrow right-arrow">→</div>
-            <span className="nav-label">Block C</span>
-          </button>
-        </>
-      )}
-
-      {currentSection === 'left' && (
-        <button
-          className="lab-nav-button right"
-          onClick={() => handleSectionChange('center')}
-        >
-          <div className="nav-arrow right-arrow">→</div>
-          <span className="nav-label">Block A</span>
-        </button>
-      )}
-
-      {currentSection === 'right' && (
-        <button
-          className="lab-nav-button left"
-          onClick={() => handleSectionChange('center')}
-        >
-          <div className="nav-arrow left-arrow">←</div>
-          <span className="nav-label">Block A</span>
-        </button>
-      )}
 
       {/* Модальное окно улучшения */}
       {selectedEquipment && (
         <div className="equipment-modal-backdrop" onClick={closeModal}>
           <div className="equipment-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="equipment-modal-close" onClick={closeModal}>✕</button>
+            <button className="equipment-modal-close" onClick={closeModal}>×</button>
             
             <div className="equipment-modal-content">
               <h2 className="equipment-modal-title">

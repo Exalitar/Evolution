@@ -646,7 +646,14 @@ function App() {
         </div>
       )}
 
-      {screen === "laboratory" && <Laboratory />}
+      {screen === "laboratory" && (
+        <Laboratory 
+          playerName={playerName}
+          playerLevel={playerLevel}
+          playerAvatar="/assets/avatar.png"
+          onNavigate={(newScreen) => setScreen(newScreen as Screen)}
+        />
+      )}
 
       {screen === "premium" && (
         <div className="secondary-screen">

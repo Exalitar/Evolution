@@ -45,7 +45,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   };
 
   const [equipment, setEquipment] = useState<Record<string, Equipment>>({
-    // Block A (Center)
     microscope: {
       id: 'microscope',
       name: 'Микроскоп',
@@ -64,7 +63,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
       level: 1,
       description: 'Улучшите для повышения точности экспериментов'
     },
-    // Block B (Left) - 3 объекта
     robot_manipulator: {
       id: 'robot_manipulator',
       name: 'Робот-манипулятор',
@@ -83,7 +81,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
       level: 1,
       description: 'Глубокий анализ генетических структур'
     },
-    // Block C (Right) - 4 объекта
     synthesizer: {
       id: 'synthesizer',
       name: 'Синтезатор',
@@ -261,7 +258,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
             </>
           )}
 
-          {/* Интерактивные зоны Block B (Left) - 3 объекта */}
+          {/* Интерактивные зоны Block B (Left) */}
           {currentSection === 'left' && (
             <>
               <div 
@@ -285,7 +282,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
             </>
           )}
 
-          {/* Интерактивные зоны Block C (Right) - 4 объекта */}
+          {/* Интерактивные зоны Block C (Right) */}
           {currentSection === 'right' && (
             <>
               <div 
@@ -314,61 +311,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
               </div>
             </>
           )}
-
-          {/* UI элементы привязанные к экрану */}
-          <div className="lab-ui-elements" style={{ transform: `translateX(-${position.x}px)` }}>
-            {/* Панель игрока вверху слева */}
-            <div className="lab-player-panel lab-ui-element">
-              <div className="player-avatar">
-                <img src={playerAvatar} alt={playerName} draggable={false} />
-              </div>
-              <div className="player-info">
-                <div className="player-name">{playerName}</div>
-                <div className="player-level">Уровень {playerLevel}</div>
-              </div>
-            </div>
-
-            {/* Кнопка магазина вверху справа */}
-            <button 
-              className="lab-shop-button lab-ui-element"
-              onClick={() => onNavigate('shop')}
-            >
-              <div className="nav-button-icon">
-                <img src="/assets/Icon_button/Shop_button.png" alt="" draggable={false} />
-              </div>
-            </button>
-
-            {/* Навигационная панель внизу - ПРАВИЛЬНЫЙ ПОРЯДОК */}
-            <div className="lab-nav-bar lab-ui-element">
-              <button className="nav-button" onClick={() => onNavigate('cabinet')}>
-                <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Person_button.png" alt="" draggable={false} />
-                </div>
-                <span className="nav-button-label">Кабинет</span>
-              </button>
-              
-              <button className="nav-button" onClick={() => onNavigate('premium')}>
-                <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Premium_button.png" alt="" draggable={false} />
-                </div>
-                <span className="nav-button-label">Премиум</span>
-              </button>
-              
-              <button className="nav-button" onClick={() => onNavigate('shop')}>
-                <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Shop_button.png" alt="" draggable={false} />
-                </div>
-                <span className="nav-button-label">Магазин</span>
-              </button>
-              
-              <button className="nav-button" onClick={() => onNavigate('info')}>
-                <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Setting_button.png" alt="" draggable={false} />
-                </div>
-                <span className="nav-button-label">Информация</span>
-              </button>
-            </div>
-          </div>
 
           {/* Навигационные кнопки между блоками */}
           {currentSection === 'center' && (
@@ -410,6 +352,58 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
             </button>
           )}
         </div>
+      </div>
+
+      {/* UI элементы ФИКСИРОВАННЫЕ к экрану (НЕ двигаются с фоном) */}
+      {/* Панель игрока вверху слева - КАК НА ГЛАВНОМ ЭКРАНЕ */}
+      <div className="player-info">
+        <div className="player-avatar">
+          <img src={playerAvatar} alt={playerName} draggable={false} />
+        </div>
+        <div className="player-details">
+          <div className="player-name">{playerName}</div>
+          <div className="player-level">Уровень {playerLevel}</div>
+        </div>
+      </div>
+
+      {/* Кнопка магазина вверху справа - MARKET (другой магазин) */}
+      <button 
+        className="market-button"
+        onClick={() => onNavigate('market')}
+      >
+        <span className="market-icon">🛒</span>
+        Магазин
+      </button>
+
+      {/* Навигационная панель внизу - ФИКСИРОВАННАЯ */}
+      <div className="bottom-navigation">
+        <button className="nav-button" onClick={() => onNavigate('main')}>
+          <div className="nav-button-icon">
+            <img src="/assets/Icon_button/Person_button.png" alt="" draggable={false} />
+          </div>
+          <span className="nav-button-label">Кабинет</span>
+        </button>
+        
+        <button className="nav-button" onClick={() => onNavigate('premium')}>
+          <div className="nav-button-icon">
+            <img src="/assets/Icon_button/Premium_button.png" alt="" draggable={false} />
+          </div>
+          <span className="nav-button-label">Премиум</span>
+        </button>
+        
+        <button className="nav-button" onClick={() => onNavigate('shop')}>
+          <div className="nav-button-icon">
+            <img src="/assets/Icon_button/Shop_button.png" alt="" draggable={false} />
+          </div>
+          <span className="nav-button-label">Магазин</span>
+        </button>
+        
+        <button className="nav-button" onClick={() => onNavigate('info')}>
+          <div className="nav-button-icon">
+            <img src="/assets/Icon_button/Setting_button.png" alt="" draggable={false} />
+          </div>
+          <span className="nav-button-label">Информация</span>
+        </button>
       </div>
 
       {/* Модальное окно улучшения */}

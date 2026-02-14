@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from 'react';
 import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
 
@@ -45,6 +45,23 @@ interface StartMaterial {
   id: CharacterId;
   name: string;
   image: string;
+}
+
+type EquipmentType =
+  | 'microscope' | 'control_panel' | 'analyzer'
+  | 'robot_manipulator' | 'control_panel_left' | 'analyzing_module'
+  | 'synthesizer' | 'sequencer' | 'thermostat' | 'cultivator'
+  | null;
+
+interface Equipment {
+  id: EquipmentType;
+  name: string;
+  level: number;
+  description: string;
+  isUpgrading: boolean;
+  upgradeProgress: number;
+  upgradeStartTime: number | null; // Добавьте это!
+  upgradeDuration: number; // И это!
 }
 
 const startMaterials: StartMaterial[] = [
@@ -295,7 +312,6 @@ function App() {
   const [evolutionStage, setEvolutionStage] = useState<number>(1);
   const [currentBreedingMaterials, setCurrentBreedingMaterials] = useState<Material[]>(breedingMaterialsStage1);
   const [characterForm, setCharacterForm] = useState<number>(1);
-  const [hoveredMaterial, setHoveredMaterial] = useState<string | null>(null);
 
   const [draggedInitialMaterial, setDraggedInitialMaterial] = useState<Material | null>(null);
   const [isOverCenterInitial, setIsOverCenterInitial] = useState(false);
@@ -310,6 +326,116 @@ function App() {
 
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
+
+  const [isBreeding, setIsBreeding] = useState(false);
+  const [breedingProgress, setBreedingProgress] = useState(0);
+  const breedingTimerRef = useRef<number | null>(null);
+
+  const [isAnyUpgrading, setIsAnyUpgrading] = useState(false);
+
+  const [equipment, setEquipment] = useState<Record<string, Equipment>>({
+    microscope: {
+      id: 'microscope',
+      name: 'Микроскоп',
+      level: 1,
+      description: 'Улучшите для более детального анализа ДНК',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    control_panel: {
+      id: 'control_panel',
+      name: 'Панель управления',
+      level: 1,
+      description: 'Улучшите для ускорения процессов синтеза',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    analyzer: {
+      id: 'analyzer',
+      name: 'Анализатор',
+      level: 1,
+      description: 'Улучшите для повышения точности экспериментов',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    // ... остальные объекты с теми же полями
+    robot_manipulator: {
+      id: 'robot_manipulator',
+      name: 'Робот-манипулятор',
+      level: 1,
+      description: 'Автоматизация процессов сборки ДНК',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    control_panel_left: {
+      id: 'control_panel_left',
+      name: 'Панель управления',
+      level: 1,
+      description: 'Контроль всех систем лаборатории',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    analyzing_module: {
+      id: 'analyzing_module',
+      name: 'Анализирующий модуль',
+      level: 1,
+      description: 'Глубокий анализ генетических структур',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    synthesizer: {
+      id: 'synthesizer',
+      name: 'Синтезатор',
+      level: 1,
+      description: 'Синтез новых генетических последовательностей',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    sequencer: {
+      id: 'sequencer',
+      name: 'Секвенатор',
+      level: 1,
+      description: 'Расшифровка ДНК последовательностей',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    thermostat: {
+      id: 'thermostat',
+      name: 'Термостат',
+      level: 1,
+      description: 'Инкубация и культивирование образцов',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    },
+    cultivator: {
+      id: 'cultivator',
+      name: 'Культиватор',
+      level: 1,
+      description: 'Выращивание клеточных культур',
+      isUpgrading: false,
+      upgradeProgress: 0,
+      upgradeStartTime: null,
+      upgradeDuration: 10000
+    }
+  });
 
   const [characterStats, setCharacterStats] = useState<CharacterStats>({
     attack: 0,
@@ -329,6 +455,41 @@ function App() {
       "m1_5": "species_5"
     };
     return mapping[materialId] || "species_1";
+  };
+
+  const handleEquipmentUpgrade = (equipmentId: string) => {
+    if (isAnyUpgrading) return;
+
+    setIsAnyUpgrading(true);
+    
+    setEquipment(prev => ({
+      ...prev,
+      [equipmentId]: {
+        ...prev[equipmentId],
+        isUpgrading: true,
+        upgradeStartTime: Date.now()
+      }
+    }));
+  };
+
+  const canBreedToLevel5 = (): { canBreed: boolean; missingRequirements: string[] } => {
+    if (playerLevel !== 4) {
+      return { canBreed: true, missingRequirements: [] };
+    }
+
+    const missing: string[] = [];
+
+    if (equipment.control_panel.level < 3) {
+      missing.push(`Панель управления: уровень ${equipment.control_panel.level}/3`);
+    }
+    if (equipment.analyzer.level < 2) {
+      missing.push(`Анализатор: уровень ${equipment.analyzer.level}/2`);
+    }
+    if (equipment.thermostat.level < 3) {
+      missing.push(`Термостат: уровень ${equipment.thermostat.level}/3`);
+    }
+
+    return { canBreed: missing.length === 0, missingRequirements: missing };
   };
 
   const handleDragStartInitial = (material: Material, e: React.DragEvent) => {
@@ -413,8 +574,8 @@ function App() {
   const handleDropOnCenterForBreed = (e: React.DragEvent) => {
     e.preventDefault();
     setIsOverCenterForBreed(false);
-    
-    if (draggedBreedMaterial && selectedCharacter) {
+
+    if (draggedBreedMaterial && selectedCharacter && !isBreeding) {
       setPendingBreedSelection(draggedBreedMaterial);
       setIsBreedConfirmOpen(true);
     }
@@ -426,46 +587,83 @@ function App() {
       return;
     }
 
-    const bonus = materialBonuses[pendingBreedSelection.id]?.[selectedCharacter];
-    if (bonus) {
-      setCharacterStats((prev) => ({
-        attack: prev.attack + bonus.attack,
-        health: prev.health + bonus.health,
-        defense: prev.defense + bonus.defense,
-        attackSpeed: Math.round((prev.attackSpeed + bonus.attackSpeed) * 100) / 100
-      }));
-    }
-
-    setUsedMaterials(prev => new Set([...prev, pendingBreedSelection.id]));
-    
-    const newTotalCount = totalUsedCount + 1;
-    setTotalUsedCount(newTotalCount);
-
-    setCharacterForm((prev) => Math.min(prev + 1, 5));
-    
-    if (newTotalCount > 0 && newTotalCount % 5 === 0) {
-      const nextStage = Math.floor(newTotalCount / 5) + 1;
-      
-      if (nextStage === 2) {
-        setAwakeningStage(2);
-        setCurrentBreedingMaterials(breedingMaterialsStage2);
-      } else if (nextStage === 3) {
-        setAwakeningStage(3);
-        setCurrentBreedingMaterials(breedingMaterialsStage3);
-      } else if (nextStage === 4) {
-        setAwakeningStage(4);
-        setCurrentBreedingMaterials(breedingMaterialsStage4);
-      } else if (nextStage === 5) {
-        setAwakeningStage(5);
-        setCurrentBreedingMaterials(breedingMaterialsStage5);
+    // Проверка требований для 4→5
+    if (playerLevel === 4) {
+      const { canBreed } = canBreedToLevel5();
+      if (!canBreed) {
+        return; // Блокируем если требования не выполнены
       }
-      
-      const newEvolutionStage = Math.min(evolutionStage + 1, 5);
-      setEvolutionStage(newEvolutionStage);
     }
-    
+
     setIsBreedConfirmOpen(false);
-    setPendingBreedSelection(null);
+    
+    setIsBreeding(true);
+    setBreedingProgress(0);
+    
+    const breedDuration = 5000;
+    const updateInterval = 100;
+    
+    let progress = 0;
+    const timer = window.setInterval(() => {
+      progress += (updateInterval / breedDuration) * 100;
+      
+      if (progress >= 100) {
+        clearInterval(timer);
+        
+        const bonus = materialBonuses[pendingBreedSelection.id]?.[selectedCharacter];
+        if (bonus) {
+          setCharacterStats((prev) => ({
+            attack: prev.attack + bonus.attack,
+            health: prev.health + bonus.health,
+            defense: prev.defense + bonus.defense,
+            attackSpeed: Math.round((prev.attackSpeed + bonus.attackSpeed) * 100) / 100,
+          }));
+        }
+        
+        setUsedMaterials((prev) => new Set([...prev, pendingBreedSelection.id]));
+        
+        const newTotalCount = totalUsedCount + 1;
+        setTotalUsedCount(newTotalCount);
+        setCharacterForm((prev) => Math.min(prev + 1, 5));
+        
+        const newPlayerLevel = playerLevel + 1;
+        setPlayerLevel(newPlayerLevel);
+        
+        // При достижении 5 уровня обновляем материалы
+        if (newPlayerLevel === 5) {
+          setCurrentBreedingMaterials(breedingMaterialsStage2);
+          setUsedMaterials(new Set()); // Сбрасываем использованные материалы
+        }
+        
+        if (newTotalCount > 0 && newTotalCount % 5 === 0) {
+          const nextStage = Math.floor(newTotalCount / 5) + 1;
+          if (nextStage === 2) {
+            setAwakeningStage(2);
+            setCurrentBreedingMaterials(breedingMaterialsStage2);
+          } else if (nextStage === 3) {
+            setAwakeningStage(3);
+            setCurrentBreedingMaterials(breedingMaterialsStage3);
+          } else if (nextStage === 4) {
+            setAwakeningStage(4);
+            setCurrentBreedingMaterials(breedingMaterialsStage4);
+          } else if (nextStage === 5) {
+            setAwakeningStage(5);
+            setCurrentBreedingMaterials(breedingMaterialsStage5);
+          }
+          
+          const newEvolutionStage = Math.min(evolutionStage + 1, 5);
+          setEvolutionStage(newEvolutionStage);
+        }
+        
+        setIsBreeding(false);
+        setBreedingProgress(0);
+        setPendingBreedSelection(null);
+      } else {
+        setBreedingProgress(progress);
+      }
+    }, updateInterval);
+    
+    breedingTimerRef.current = timer;
   };
 
   const handleCancelBreeding = () => {
@@ -481,14 +679,59 @@ function App() {
     if (!selectedCharacter) return "";
     const speciesNum = selectedCharacter.split("_")[1];
     
-    if (speciesNum === "1") {
-      return `/assets/Material/Mob1.jpg`;
-    } else if (speciesNum === "2") {
-      return `/assets/Material/Mob2.gif`;
-    } else {
-      return `/assets/Material/Bio${speciesNum}.jpg`;
-    }
+    return `/assets/Material/Bio${speciesNum}.jpg`;
   };
+
+  // ========== ДОБАВЬТЕ useEffect ЗДЕСЬ (ПЕРЕД return) ==========
+  useEffect(() => {
+    const saved = localStorage.getItem('equipment');
+    if (saved) {
+      setEquipment(JSON.parse(saved));
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setEquipment(prev => {
+        const updated = { ...prev };
+        let hasUpgrading = false;
+
+        Object.keys(updated).forEach(key => {
+          const item = updated[key];
+          
+          if (item.isUpgrading && item.upgradeStartTime) {
+            const elapsed = Date.now() - item.upgradeStartTime;
+            const progress = Math.min((elapsed / item.upgradeDuration) * 100, 100);
+
+            if (progress >= 100) {
+              updated[key] = {
+                ...item,
+                level: item.level + 1,
+                isUpgrading: false,
+                upgradeProgress: 0,
+                upgradeStartTime: null
+              };
+            } else {
+              updated[key] = {
+                ...item,
+                upgradeProgress: progress
+              };
+              hasUpgrading = true;
+            }
+          }
+        });
+
+        setIsAnyUpgrading(hasUpgrading);
+        return updated;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('equipment', JSON.stringify(equipment));
+  }, [equipment]); // Выполнится каждый раз когда equipment изменится
 
   return (
     <>
@@ -521,28 +764,65 @@ function App() {
             </>
           )}
 
-          <div 
+          <div
             className={`central-circle ${
-              !selectedCharacter 
-                ? (isOverCenterInitial ? 'drag-over' : '') 
-                : (isOverCenterForBreed ? 'drag-over-breed' : 'has-character')
+              !selectedCharacter
+                ? isOverCenterInitial
+                  ? "drag-over"
+                  : ""
+                : isOverCenterForBreed && !isBreeding
+                ? "drag-over-breed"
+                : "has-character"
             }`}
-            onDragOver={!selectedCharacter ? handleDragOverCenterInitial : handleDragOverCenterForBreed}
-            onDragLeave={!selectedCharacter ? handleDragLeaveCenterInitial : handleDragLeaveCenterForBreed}
-            onDrop={!selectedCharacter ? handleDropOnCenterInitial : handleDropOnCenterForBreed}
+            onDragOver={
+              isBreeding
+                ? undefined
+                : !selectedCharacter
+                ? handleDragOverCenterInitial
+                : handleDragOverCenterForBreed
+            }
+            onDragLeave={
+              isBreeding
+                ? undefined
+                : !selectedCharacter
+                ? handleDragLeaveCenterInitial
+                : handleDragLeaveCenterForBreed
+            }
+            onDrop={
+              isBreeding
+                ? undefined
+                : !selectedCharacter
+                ? handleDropOnCenterInitial
+                : handleDropOnCenterForBreed
+            }
             onClick={selectedCharacter ? handleCentralCircleClick : undefined}
           >
             {!selectedCharacter ? (
               <div className="central-placeholder">
-                Перетащите материал сюда
+                Перетащите материал сюда, чтобы начать
               </div>
             ) : (
-              <img 
-                src={getCharacterImage()} 
-                alt="Selected Character" 
-                className="central-character-image"
-                draggable={false}
-              />
+              <>
+                <img
+                  src={getCharacterImage()}
+                  alt="Selected Character"
+                  className="central-character-image"
+                  draggable={false}
+                />
+                
+                {/* Таймер скрещивания */}
+                {isBreeding && (
+                  <div className="breeding-timer-overlay">
+                    <div 
+                      className="breeding-progress-bar"
+                      style={{ width: `${breedingProgress}%` }}
+                    />
+                    <span className="breeding-timer-text">
+                      {Math.ceil((5000 * (100 - breedingProgress)) / 100 / 1000)}s
+                    </span>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -556,10 +836,12 @@ function App() {
               return (
                 <div
                   key={material.id}
-                  className={`small-circle breeding-material ${isDraggingThis ? 'is-dragging' : ''} ${isUsed ? 'is-used' : ''}`}
-                  draggable={!isUsed}
+                  className={`small-circle breeding-material ${
+                    isDraggingThis ? "is-dragging" : ""
+                  } ${isUsed || isBreeding ? "is-used" : ""}`}
+                  draggable={!isUsed && !isBreeding}
                   onDragStart={(e) => {
-                    if (isUsed) return;
+                    if (isUsed || isBreeding) return;
                     if (selectedCharacter) {
                       handleDragStartBreed(material, e);
                     } else {
@@ -568,28 +850,14 @@ function App() {
                   }}
                   onDrag={handleDrag}
                   onDragEnd={selectedCharacter ? handleDragEndBreed : handleDragEndInitial}
-                  onMouseEnter={() => !isUsed && selectedCharacter && setHoveredMaterial(material.id)}
-                  onMouseLeave={() => setHoveredMaterial(null)}
                 >
-                  <img 
-                    src={material.image} 
+                  <img
+                    src={material.image}
                     alt={material.name}
                     className="small-circle-image"
                     draggable={false}
                   />
                   <div className="small-circle-name">{material.name}</div>
-                  
-                  {hoveredMaterial === material.id && !isUsed && selectedCharacter && materialBonuses[material.id]?.[selectedCharacter] && (
-                    <div className="material-requirements-tooltip">
-                      <div className="tooltip-title">Бонусы:</div>
-                      <div className="tooltip-bonuses">
-                        <span>⚔️ +{materialBonuses[material.id][selectedCharacter].attack}</span>
-                        <span>❤️ +{materialBonuses[material.id][selectedCharacter].health}</span>
-                        <span>🛡️ +{materialBonuses[material.id][selectedCharacter].defense}</span>
-                        <span>⚡ +{materialBonuses[material.id][selectedCharacter].attackSpeed.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -646,12 +914,15 @@ function App() {
         </div>
       )}
 
-      {screen === "laboratory" && (
-        <Laboratory 
+      {screen === 'laboratory' && (
+        <Laboratory
           playerName={playerName}
           playerLevel={playerLevel}
           playerAvatar="/assets/avatar.png"
           onNavigate={(newScreen) => setScreen(newScreen as Screen)}
+          equipment={equipment}
+          onUpgrade={handleEquipmentUpgrade}
+          isAnyUpgrading={isAnyUpgrading}
         />
       )}
 
@@ -788,24 +1059,59 @@ function App() {
       {isBreedConfirmOpen && pendingBreedSelection && selectedCharacter && (
         <div className="breed-modal-backdrop">
           <div className="breed-modal">
-            <div className="breed-modal-title">Подтвердить скрещивание?</div>
-            <div className="breed-modal-text">Использовать {pendingBreedSelection.name}?</div>
+            <div className="breed-modal-title">Вы точно хотите выполнить это скрещивание?</div>
+            <div className="breed-modal-text">
+              Скрестить {pendingBreedSelection.name}?
+            </div>
+
             {materialBonuses[pendingBreedSelection.id]?.[selectedCharacter] && (
               <div className="breed-modal-info">
                 <div className="breed-modal-bonus">
-                  <div className="bonus-title">Получите бонусы:</div>
+                  <div className="bonus-title">Бонусы:</div>
                   <div className="bonus-stats">
-                    <span>⚔️ +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attack}</span>
-                    <span>❤️ +{materialBonuses[pendingBreedSelection.id][selectedCharacter].health}</span>
-                    <span>🛡️ +{materialBonuses[pendingBreedSelection.id][selectedCharacter].defense}</span>
-                    <span>⚡ +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attackSpeed.toFixed(2)}</span>
+                    <span>⚔️ Атака: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attack}</span>
+                    <span>❤️ Здоровье: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].health}</span>
+                    <span>🛡️ Защита: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].defense}</span>
+                    <span>⚡ Скорость: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attackSpeed.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
             )}
+
+            {/* Требования для скрещивания 4→5 */}
+            {playerLevel === 4 && (() => {
+              const { canBreed, missingRequirements } = canBreedToLevel5();
+              if (!canBreed) {
+                return (
+                  <div className="breed-requirements">
+                    <div className="requirements-title">⚠️ Требования не выполнены:</div>
+                    <div className="requirements-list">
+                      {missingRequirements.map((req, index) => (
+                        <div key={index} className="requirement-item">❌ {req}</div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              } else {
+                return (
+                  <div className="breed-requirements">
+                    <div className="requirements-title-success">✅ Все требования выполнены!</div>
+                  </div>
+                );
+              }
+            })()}
+
             <div className="breed-modal-buttons">
-              <button className="breed-modal-button yes" onClick={handleConfirmBreeding}>Да</button>
-              <button className="breed-modal-button no" onClick={handleCancelBreeding}>Нет</button>
+              <button
+                className={`breed-modal-button yes ${playerLevel === 4 && !canBreedToLevel5().canBreed ? 'disabled' : ''}`}
+                onClick={handleConfirmBreeding}
+                disabled={playerLevel === 4 && !canBreedToLevel5().canBreed}
+              >
+                Да
+              </button>
+              <button className="breed-modal-button no" onClick={handleCancelBreeding}>
+                Нет
+              </button>
             </div>
           </div>
         </div>

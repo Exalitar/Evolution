@@ -24,21 +24,25 @@ interface LaboratoryProps {
   playerLevel: number;
   playerAvatar: string;
   onNavigate: (screen: Screen) => void;
+  equipment: Record<string, Equipment>;
+  onUpgrade: (equipmentId: string) => void;
+  isAnyUpgrading: boolean;
 }
 
 export const Laboratory: React.FC<LaboratoryProps> = ({
   playerName,
   playerLevel,
   playerAvatar,
-  onNavigate
+  onNavigate,
+  equipment,
+  onUpgrade,
+  isAnyUpgrading
 }) => {
   const [currentSection, setCurrentSection] = useState<LabSection>('center');
   const [position, setPosition] = useState({ x: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0 });
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType>(null);
-  const [isAnyUpgrading, setIsAnyUpgrading] = useState(false);
-  const [isZooming, setIsZooming] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const upgradeTimerRef = useRef<number | null>(null);
@@ -48,89 +52,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
     left: '/assets/Laboratory/Left_lab.png',
     right: '/assets/Laboratory/Right_lab.png'
   };
-
-  const [equipment, setEquipment] = useState<Record<string, Equipment>>({
-    microscope: {
-      id: 'microscope',
-      name: 'Микроскоп',
-      level: 1,
-      description: 'Улучшите для более детального анализа ДНК',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    control_panel: {
-      id: 'control_panel',
-      name: 'Панель управления',
-      level: 1,
-      description: 'Улучшите для ускорения процессов синтеза',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    analyzer: {
-      id: 'analyzer',
-      name: 'Анализатор',
-      level: 1,
-      description: 'Улучшите для повышения точности экспериментов',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    robot_manipulator: {
-      id: 'robot_manipulator',
-      name: 'Робот-манипулятор',
-      level: 1,
-      description: 'Автоматизация процессов сборки ДНК',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    control_panel_left: {
-      id: 'control_panel_left',
-      name: 'Панель управления',
-      level: 1,
-      description: 'Контроль всех систем лаборатории',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    analyzing_module: {
-      id: 'analyzing_module',
-      name: 'Анализирующий модуль',
-      level: 1,
-      description: 'Глубокий анализ генетических структур',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    synthesizer: {
-      id: 'synthesizer',
-      name: 'Синтезатор',
-      level: 1,
-      description: 'Синтез новых генетических последовательностей',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    sequencer: {
-      id: 'sequencer',
-      name: 'Секвенатор',
-      level: 1,
-      description: 'Расшифровка ДНК последовательностей',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    thermostat: {
-      id: 'thermostat',
-      name: 'Термостат',
-      level: 1,
-      description: 'Инкубация и культивирование образцов',
-      isUpgrading: false,
-      upgradeProgress: 0
-    },
-    cultivator: {
-      id: 'cultivator',
-      name: 'Культиватор',
-      level: 1,
-      description: 'Выращивание клеточных культур',
-      isUpgrading: false,
-      upgradeProgress: 0
-    }
-  });
 
   const getMaxOffset = () => {
     if (!containerRef.current || !imageRef.current) return { min: 0, max: 0 };
@@ -225,62 +146,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
     setSelectedEquipment(equipmentId);
   };
 
-  const handleUpgrade = (equipmentId: string) => {
-    if (isAnyUpgrading) return;
-
-    const upgradeDuration = 10000;
-    const updateInterval = 100;
-
-    setIsAnyUpgrading(true);
-    
-    setEquipment(prev => ({
-      ...prev,
-      [equipmentId]: {
-        ...prev[equipmentId],
-        isUpgrading: true,
-        upgradeProgress: 0
-      }
-    }));
-
-    let progress = 0;
-    const timer = window.setInterval(() => {
-      progress += (updateInterval / upgradeDuration) * 100;
-      
-      if (progress >= 100) {
-        clearInterval(timer);
-        setEquipment(prev => ({
-          ...prev,
-          [equipmentId]: {
-            ...prev[equipmentId],
-            level: prev[equipmentId].level + 1,
-            isUpgrading: false,
-            upgradeProgress: 0
-          }
-        }));
-        setIsAnyUpgrading(false);
-      } else {
-        setEquipment(prev => ({
-          ...prev,
-          [equipmentId]: {
-            ...prev[equipmentId],
-            upgradeProgress: progress
-          }
-        }));
-      }
-    }, updateInterval);
-
-    upgradeTimerRef.current = timer;
-  };
-
-  const handleZoomToMain = () => {
-    setIsZooming(true);
-    
-    setTimeout(() => {
-      onNavigate('main');
-      setIsZooming(false);
-    }, 1000);
-  };
-
   const closeModal = () => {
     setSelectedEquipment(null);
   };
@@ -294,7 +159,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   }, []);
 
   return (
-    <div className={`laboratory-page ${isZooming ? 'zooming' : ''}`}>
+    <div className="laboratory-page">
       <div 
         ref={containerRef}
         className="laboratory-background-container"
@@ -321,7 +186,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
               {/* Кнопка возврата на главную на ДНК */}
               <button 
                 className="dna-zoom-button"
-                onClick={handleZoomToMain}
+                onClick={() => onNavigate('main')}
               >
                 <div className="zoom-arrow">↑</div>
                 <span className="zoom-label">Вернуться</span>
@@ -513,9 +378,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
         </button>
       </div>
 
-      {/* Оверлей затемнения при зуме */}
-      {isZooming && <div className="zoom-overlay" />}
-
       {/* Модальное окно улучшения */}
       {selectedEquipment && (
         <div className="equipment-modal-backdrop" onClick={closeModal}>
@@ -566,7 +428,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                 ) : (
                   <button 
                     className={`upgrade-button ${isAnyUpgrading ? 'disabled' : ''}`}
-                    onClick={() => handleUpgrade(selectedEquipment)}
+                    onClick={() => onUpgrade(selectedEquipment)}
                     disabled={isAnyUpgrading}
                   >
                     {isAnyUpgrading ? 'Идет улучшение...' : 'Улучшить'}

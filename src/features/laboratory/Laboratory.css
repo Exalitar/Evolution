@@ -1029,8 +1029,6 @@
   }
 }
 
-/* Добавьте это в App.css или Laboratory.css */
-
 .nav-button.active {
   background: rgba(0, 200, 255, 0.2);
   border: 1px solid rgba(0, 200, 255, 0.5);
@@ -1045,4 +1043,252 @@
   color: #00ffff;
   text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
   font-weight: 600;
+}
+
+/* Прогресс-бар улучшения */
+.upgrade-progress-container {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  background: rgba(0, 50, 100, 0.3);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.upgrade-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #00cc00, #00ff00);
+  transition: width 0.1s linear;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+}
+
+.upgrade-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+.upgrade-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #666666, #888888);
+  border-color: #666666;
+}
+
+.upgrade-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Активная кнопка навигации */
+.nav-button.active {
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 100, 200, 0.3));
+  border: 2px solid rgba(0, 255, 255, 0.7);
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  transform: translateY(-3px);
+}
+
+.nav-button.active .nav-button-icon img {
+  filter: drop-shadow(0 0 25px rgba(0, 255, 255, 1)) brightness(1.3);
+}
+
+.nav-button.active .nav-button-label {
+  color: #00ffff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 1);
+  font-weight: 700;
+}
+
+/* Прогресс-бар улучшения */
+.upgrade-progress-container {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  background: rgba(0, 50, 100, 0.3);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.upgrade-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #00cc00, #00ff00);
+  transition: width 0.1s linear;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+}
+
+.upgrade-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+.upgrade-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #666666, #888888);
+  border-color: #666666;
+}
+
+.upgrade-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Кнопка возврата на ДНК */
+.dna-zoom-button {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 150, 255, 0.3));
+  border: 3px solid rgba(0, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 50;
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.dna-zoom-button:hover {
+  transform: translateX(-50%) scale(1.15);
+  box-shadow: 0 0 60px rgba(0, 255, 255, 0.9);
+  border-color: rgba(0, 255, 255, 1);
+}
+
+.dna-zoom-button:active {
+  transform: translateX(-50%) scale(1.05);
+}
+
+.zoom-arrow {
+  font-size: 36px;
+  color: #00ffff;
+  text-shadow: 0 0 20px rgba(0, 255, 255, 1);
+  font-weight: bold;
+  animation: pulse-arrow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-arrow {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-5px);
+    opacity: 0.7;
+  }
+}
+
+.zoom-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  text-align: center;
+}
+
+/* Оверлей затемнения с анимацией */
+.zoom-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  z-index: 9999;
+  animation: zoom-fade 1s ease-in-out forwards;
+  pointer-events: none;
+}
+
+@keyframes zoom-fade {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(3);
+  }
+}
+
+/* Анимация приближения фона */
+.laboratory-page.zooming .laboratory-background {
+  animation: zoom-in-background 1s ease-in-out forwards;
+}
+
+@keyframes zoom-in-background {
+  0% {
+    transform: scale(1) translateX(var(--translate-x, 0));
+  }
+  100% {
+    transform: scale(3) translateX(var(--translate-x, 0));
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .equipment-label {
+    font-size: 20px;
+    padding: 6px 16px;
+  }
+  
+  .dna-zoom-button {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .zoom-arrow {
+    font-size: 28px;
+  }
+  
+  .zoom-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .equipment-label {
+    font-size: 18px;
+    padding: 4px 12px;
+  }
+  
+  .dna-zoom-button {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .zoom-arrow {
+    font-size: 24px;
+  }
+  
+  .zoom-label {
+    font-size: 9px;
+  }
 }

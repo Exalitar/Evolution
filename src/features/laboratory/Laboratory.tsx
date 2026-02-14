@@ -377,11 +377,11 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
 
       {/* Навигационная панель внизу - ФИКСИРОВАННАЯ */}
       <div className="bottom-navigation">
-        <button className="nav-button" onClick={() => onNavigate('main')}>
+        <button className="nav-button active">
           <div className="nav-button-icon">
-            <img src="/assets/Icon_button/Person_button.png" alt="" draggable={false} />
+            <img src="/assets/Icon_button/Lab_button.png" alt="" draggable={false} />
           </div>
-          <span className="nav-button-label">Кабинет</span>
+          <span className="nav-button-label">Лаборатория</span>
         </button>
         
         <button className="nav-button" onClick={() => onNavigate('premium')}>

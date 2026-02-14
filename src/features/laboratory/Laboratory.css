@@ -194,11 +194,11 @@
 
 /* Названия оборудования */
 .equipment-label {
-  font-size: 12px;
+  font-size: 24px; /* Было 12px, увеличено в 2 раза */
   font-weight: 600;
   color: #00ffff;
   background: rgba(0, 0, 0, 0.7);
-  padding: 4px 10px;
+  padding: 8px 20px; /* Увеличен padding для большего текста */
   border-radius: 6px;
   border: 1px solid rgba(0, 255, 255, 0.6);
   text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
@@ -232,18 +232,18 @@
   height: 19%;
 }
 
-/* Адаптивность для названий */
+/* Адаптивные размеры для мобильных устройств */
 @media (max-width: 768px) {
   .equipment-label {
-    font-size: 10px;
-    padding: 3px 8px;
+    font-size: 20px; /* Было 10px, увеличено в 2 раза */
+    padding: 6px 16px;
   }
 }
 
 @media (max-width: 480px) {
   .equipment-label {
-    font-size: 9px;
-    padding: 2px 6px;
+    font-size: 18px; /* Было 9px, увеличено в 2 раза */
+    padding: 4px 12px;
   }
 }
 
@@ -1027,4 +1027,22 @@
   .lab-nav-bar .nav-button-label {
     font-size: 10px;
   }
+}
+
+/* Добавьте это в App.css или Laboratory.css */
+
+.nav-button.active {
+  background: rgba(0, 200, 255, 0.2);
+  border: 1px solid rgba(0, 200, 255, 0.5);
+  border-radius: 15px;
+}
+
+.nav-button.active .nav-button-icon img {
+  filter: drop-shadow(0 0 20px rgba(0, 255, 255, 1));
+}
+
+.nav-button.active .nav-button-label {
+  color: #00ffff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+  font-weight: 600;
 }

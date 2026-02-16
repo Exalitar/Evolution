@@ -103,6 +103,7 @@
   justify-content: center;
   transition: all 0.3s ease;
   z-index: 10;
+  overflow: hidden;
 }
 
 .central-circle.drag-over {
@@ -140,7 +141,7 @@
   width: 100%;
   height: 100%;
   border-radius: 20px;
-  object-fit: cover;
+  object-fit: fill;
 }
 
 /* ===== контейнер для материалов вверху ===== */

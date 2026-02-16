@@ -305,6 +305,7 @@ const materialBonuses: Record<string, MaterialBonusMap> = {
 function App() {
   const [screen, setScreen] = useState<Screen>("start");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterId | null>(null);
+  const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");
   const [playerLevel, setPlayerLevel] = useState(1);
 
@@ -591,7 +592,7 @@ function App() {
     if (playerLevel === 4) {
       const { canBreed } = canBreedToLevel5();
       if (!canBreed) {
-        return; // Блокируем если требования не выполнены
+        return;
       }
     }
 
@@ -629,10 +630,15 @@ function App() {
         const newPlayerLevel = playerLevel + 1;
         setPlayerLevel(newPlayerLevel);
         
-        // При достижении 5 уровня обновляем материалы
+        // ========== ДОБАВЬТЕ ЭТУ ПРОВЕРКУ ==========
+        // При достижении 5 уровня сохраняем изображение последнего материала
         if (newPlayerLevel === 5) {
+          // Извлекаем номер материала из id (например "m1_1" -> "Bio1-1")
+          const materialNumber = pendingBreedSelection.id.replace('m', '').replace('_', '-');
+          setFinalBioImage(`/assets/Material/Bio${materialNumber}.jpg`);
+          
           setCurrentBreedingMaterials(breedingMaterialsStage2);
-          setUsedMaterials(new Set()); // Сбрасываем использованные материалы
+          setUsedMaterials(new Set());
         }
         
         if (newTotalCount > 0 && newTotalCount % 5 === 0) {
@@ -677,9 +683,14 @@ function App() {
 
   const getCharacterImage = () => {
     if (!selectedCharacter) return "";
-    const speciesNum = selectedCharacter.split("_")[1];
     
-    return `/assets/Material/Bio${speciesNum}.jpg`;
+    // Если уровень 5 и есть финальное изображение
+    if (playerLevel === 5 && finalBioImage) {
+      return finalBioImage;
+    }
+    
+    // Для уровней 1-4 используем базовое изображение Bio
+    return "/assets/Material/Bio.png";
   };
 
   // ========== ДОБАВЬТЕ useEffect ЗДЕСЬ (ПЕРЕД return) ==========
@@ -918,7 +929,7 @@ function App() {
         <Laboratory
           playerName={playerName}
           playerLevel={playerLevel}
-          playerAvatar="/assets/avatar.png"
+          playerAvatar={getCharacterImage()} // ← Используйте функцию getCharacterImage
           onNavigate={(newScreen) => setScreen(newScreen as Screen)}
           equipment={equipment}
           onUpgrade={handleEquipmentUpgrade}

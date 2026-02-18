@@ -133,11 +133,11 @@
 /* СЕТКА ТОВАРОВ */
 .shop-items-grid {
   flex: 1;
-  padding: 16px 18px 20px 18px;
+  padding: 16px 10px 20px 10px;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* минимум 3 колонки */
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr); /* всегда 3 колонки */
+  gap: 10px;
 }
 
 @media (max-width: 600px) {
@@ -161,8 +161,8 @@
     rgba(40, 50, 80, 0.95)
   );
   border: 2px solid rgba(0, 200, 255, 0.5);
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: 14px;
+  padding: 8px;                 /* меньше отступы */
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -183,18 +183,18 @@
 /* Изображение товара */
 .shop-item-image {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 10px;
   background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .shop-item-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -208,7 +208,7 @@
 
 .shop-item-name {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   text-align: center;
 }
@@ -221,7 +221,7 @@
 
 .shop-item-current-price {
   color: #00ff88;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
 }

@@ -158,14 +158,14 @@ export const Shop: React.FC<ShopProps> = ({
     const el = tabsRef.current;
     if (!el) return;
 
-    const speed = 0.3; // px за тик
+    const speed = 0.4; // px за тик (чуть быстрее)
     const interval = 16; // ~60 FPS
 
     const id = window.setInterval(() => {
       if (isUserScrollingTabs) return;
 
       const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
+      if (maxScroll <= 0) return; // не из чего скроллить
 
       const dir = autoScrollDirectionRef.current;
       let next = el.scrollLeft + dir * speed;
@@ -193,7 +193,7 @@ export const Shop: React.FC<ShopProps> = ({
     };
   }, []);
 
-  const handleTabsScroll = () => {
+  const startTabsPause = () => {
     setIsUserScrollingTabs(true);
 
     if (userScrollTimeoutRef.current) {
@@ -202,7 +202,11 @@ export const Shop: React.FC<ShopProps> = ({
 
     userScrollTimeoutRef.current = window.setTimeout(() => {
       setIsUserScrollingTabs(false);
-    }, 3000); // 3 секунды паузы после ручного скролла
+    }, 3000);
+  };
+
+  const handleTabsScroll = () => {
+    startTabsPause();
   };
 
   // Скролл вкладок колесом мыши на ПК
@@ -210,8 +214,8 @@ export const Shop: React.FC<ShopProps> = ({
     const el = tabsRef.current;
     if (!el) return;
 
-    el.scrollLeft += e.deltaY; // вертикальное колесо -> горизонтальный скролл
-    handleTabsScroll();
+    el.scrollLeft += e.deltaY;
+    startTabsPause();
   };
 
   const handlePurchaseClick = () => {

@@ -1,15 +1,14 @@
+/* Общий экран магазина */
 .shop-screen {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%);
   z-index: 1000;
   display: flex;
   flex-direction: column;
 }
 
+/* Шапка магазина */
 .shop-header {
   display: flex;
   justify-content: space-between;
@@ -26,6 +25,7 @@
   margin: 0;
 }
 
+/* Валюта игрока */
 .shop-currency {
   display: flex;
   align-items: center;
@@ -47,6 +47,7 @@
   text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
 }
 
+/* Кнопка закрытия */
 .shop-close-button {
   background: rgba(255, 0, 0, 0.2);
   border: 2px solid rgba(255, 0, 0, 0.5);
@@ -68,82 +69,88 @@
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
 }
 
+/* Контент магазина */
 .shop-content {
   display: flex;
+  flex-direction: column;
   flex: 1;
   overflow: hidden;
 }
 
-/* Левая панель с категориями */
-.shop-sidebar {
-  width: 200px;
-  background: rgba(10, 15, 30, 0.8);
-  border-right: 2px solid rgba(0, 255, 255, 0.2);
-  padding: 15px 10px;
+/* ВЕРХНЯЯ ПАНЕЛЬ РАЗДЕЛОВ */
+.shop-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
+  gap: 10px;
+  padding: 10px 18px 12px 18px;
+  border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+  background: rgba(10, 15, 30, 0.9);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  overflow-x: auto;
 }
 
-.shop-category-button {
-  padding: 12px 15px;
+.shop-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.shop-tabs::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.4);
+  border-radius: 999px;
+}
+
+.shop-tab-button {
+  padding: 8px 14px;
   background: rgba(20, 30, 60, 0.6);
+  border-radius: 999px;
   border: 2px solid rgba(0, 200, 255, 0.3);
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
+  transition: all 0.25s ease;
+  white-space: nowrap;
 }
 
-.shop-category-button:hover {
-  background: rgba(30, 40, 70, 0.8);
-  border-color: rgba(0, 255, 255, 0.5);
+.shop-tab-button:hover {
+  background: rgba(30, 40, 70, 0.85);
+  border-color: rgba(0, 255, 255, 0.6);
   color: #00ffff;
-  transform: translateX(5px);
+  transform: translateY(-1px);
 }
 
-.shop-category-button.active {
-  background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 100, 200, 0.3));
-  border-color: rgba(0, 255, 255, 0.8);
+.shop-tab-button.active {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 200, 255, 0.4),
+    rgba(0, 100, 200, 0.6)
+  );
+  border-color: rgba(0, 255, 255, 0.9);
   color: #00ffff;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
 }
 
-.shop-sidebar-divider {
-  height: 2px;
-  background: rgba(0, 255, 255, 0.2);
-  margin: 10px 0;
-}
-
-.shop-sidebar-info {
-  margin-top: auto;
-  padding-top: 15px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
-  text-align: center;
-}
-
-/* Сетка товаров */
+/* СЕТКА ТОВАРОВ */
 .shop-items-grid {
   flex: 1;
-  padding: 20px;
+  padding: 16px 18px 20px 18px;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 15px;
-  align-content: start;
+  grid-template-columns: 1fr; /* одна карточка в столбик (как на скрине) */
+  gap: 12px;
 }
 
+/* Карточка товара */
 .shop-item-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(20, 30, 60, 0.8), rgba(40, 50, 80, 0.8));
-  border: 2px solid rgba(0, 200, 255, 0.4);
-  border-radius: 12px;
-  padding: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(20, 30, 60, 0.85),
+    rgba(40, 50, 80, 0.95)
+  );
+  border: 2px solid rgba(0, 200, 255, 0.5);
+  border-radius: 16px;
+  padding: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -151,31 +158,21 @@
 }
 
 .shop-item-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(0, 255, 255, 0.8);
+  transform: translateY(-4px);
+  border-color: rgba(0, 255, 255, 0.9);
   box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3);
-  background: linear-gradient(135deg, rgba(30, 40, 70, 0.9), rgba(50, 60, 90, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(30, 40, 70, 0.95),
+    rgba(50, 60, 90, 0.98)
+  );
 }
 
-.shop-item-discount {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: linear-gradient(135deg, #ff4444, #cc0000);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  z-index: 1;
-  box-shadow: 0 2px 10px rgba(255, 0, 0, 0.4);
-}
-
+/* Изображение товара */
 .shop-item-image {
   width: 100%;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,14 +182,15 @@
 
 .shop-item-image img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
-  border-radius: 8px;
 }
 
+/* Информация под картинкой */
 .shop-item-info {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
 }
 
@@ -201,23 +199,12 @@
   font-size: 13px;
   font-weight: 500;
   text-align: center;
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .shop-item-price {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-}
-
-.shop-item-original-price {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
-  text-decoration: line-through;
+  gap: 4px;
 }
 
 .shop-item-current-price {
@@ -227,7 +214,15 @@
   text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
 }
 
-/* Модальное окно товара */
+/* Пустой раздел */
+.shop-empty {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* МОДАЛКА ТОВАРА */
 .shop-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -280,10 +275,10 @@
   transform: rotate(90deg);
 }
 
+/* Картинка в модалке */
 .shop-modal-image {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
   border-radius: 15px;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
@@ -295,23 +290,11 @@
 
 .shop-modal-image img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
 }
 
-.shop-modal-discount {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: linear-gradient(135deg, #ff4444, #cc0000);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
-}
-
+/* Контент модалки */
 .shop-modal-content {
   display: flex;
   flex-direction: column;
@@ -337,19 +320,12 @@
 
 .shop-modal-price {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 5px;
   padding: 12px;
   background: rgba(0, 255, 255, 0.1);
   border-radius: 10px;
   border: 1px solid rgba(0, 255, 255, 0.3);
-}
-
-.shop-modal-original-price {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 14px;
-  text-decoration: line-through;
 }
 
 .shop-modal-current-price {
@@ -359,11 +335,16 @@
   text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
 }
 
+/* Кнопка купить */
 .shop-modal-buy-button {
   padding: 14px 30px;
   border-radius: 12px;
   border: 2px solid rgba(0, 255, 100, 0.6);
-  background: linear-gradient(135deg, rgba(0, 200, 100, 0.6), rgba(0, 150, 80, 0.6));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 200, 100, 0.6),
+    rgba(0, 150, 80, 0.6)
+  );
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -372,7 +353,11 @@
 }
 
 .shop-modal-buy-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(0, 220, 110, 0.8), rgba(0, 170, 90, 0.8));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 220, 110, 0.8),
+    rgba(0, 170, 90, 0.8)
+  );
   box-shadow: 0 0 25px rgba(0, 255, 100, 0.5);
   transform: translateY(-2px);
 }
@@ -393,6 +378,7 @@
   cursor: not-allowed;
 }
 
+/* Предупреждение о нехватке валюты */
 .shop-modal-warning {
   color: #ff6666;
   font-size: 13px;
@@ -404,41 +390,25 @@
 }
 
 /* Адаптивность */
-@media (max-width: 768px) {
-  .shop-sidebar {
-    width: 150px;
-  }
-
-  .shop-category-button {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .shop-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px;
-    padding: 15px;
-  }
-}
-
 @media (max-width: 480px) {
-  .shop-sidebar {
-    width: 120px;
-    padding: 10px 5px;
+  .shop-header h2 {
+    font-size: 18px;
   }
 
-  .shop-category-button {
-    padding: 8px 10px;
-    font-size: 11px;
+  .shop-currency {
+    padding: 6px 10px;
   }
 
-  .shop-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 10px;
-    padding: 12px;
+  .currency-amount {
+    font-size: 16px;
   }
 
-  .shop-item-name {
-    font-size: 11px;
+  .shop-tab-button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .shop-item-card {
+    padding: 10px;
   }
 }

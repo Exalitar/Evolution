@@ -179,13 +179,13 @@ export const Shop: React.FC<ShopProps> = ({
       </div>
 
       <div className="shop-content">
-        {/* Правый (у тебя визуально может быть слева/справа) столбец с разделами */}
-        <div className="shop-sidebar">
+        {/* ПАНЕЛЬ РАЗДЕЛОВ СВЕРХУ */}
+        <div className="shop-tabs">
           {(Object.keys(categoryNames) as ShopCategory[]).map((category) => (
             <button
               key={category}
               className={
-                'shop-category-button' +
+                'shop-tab-button' +
                 (selectedCategory === category ? ' active' : '')
               }
               onClick={() => setSelectedCategory(category)}
@@ -193,15 +193,9 @@ export const Shop: React.FC<ShopProps> = ({
               {categoryNames[category]}
             </button>
           ))}
-
-          <div className="shop-sidebar-divider" />
-
-          <div className="shop-sidebar-info">
-            <p>Налоги включены</p>
-          </div>
         </div>
 
-        {/* Сетка товаров */}
+        {/* СЕТКА ТОВАРОВ НИЖЕ */}
         <div className="shop-items-grid">
           {filteredItems.map((item) => (
             <div

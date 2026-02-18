@@ -142,7 +142,7 @@ export const Shop: React.FC<ShopProps> = ({
   const [purchaseStatus, setPurchaseStatus] =
     useState<'idle' | 'success' | 'error'>('idle');
 
-  // === Авто‑скролл панели разделов ===
+  // Авто‑скролл панели разделов
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const [isUserScrollingTabs, setIsUserScrollingTabs] = useState(false);
   const userScrollTimeoutRef = useRef<number | null>(null);
@@ -205,6 +205,15 @@ export const Shop: React.FC<ShopProps> = ({
     }, 3000); // 3 секунды паузы после ручного скролла
   };
 
+  // Скролл вкладок колесом мыши на ПК
+  const handleTabsWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
+    const el = tabsRef.current;
+    if (!el) return;
+
+    el.scrollLeft += e.deltaY; // вертикальное колесо -> горизонтальный скролл
+    handleTabsScroll();
+  };
+
   const handlePurchaseClick = () => {
     if (!selectedItem) return;
 
@@ -244,6 +253,7 @@ export const Shop: React.FC<ShopProps> = ({
           className="shop-tabs"
           ref={tabsRef}
           onScroll={handleTabsScroll}
+          onWheel={handleTabsWheel}
         >
           {(Object.keys(categoryNames) as ShopCategory[]).map(
             (category) => (

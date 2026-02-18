@@ -89,7 +89,7 @@
   z-index: 10;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-behavior: auto; /* без плавности, чтобы авто‑тик был ровный */
+  scroll-behavior: auto;
 }
 
 .shop-tabs::-webkit-scrollbar {
@@ -138,11 +138,11 @@
   padding: 10px;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* всегда 3 колонки */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
-/* Карточка товара — компактная */
+/* Карточка товара — одинаковая высота */
 .shop-item-card {
   position: relative;
   background: linear-gradient(
@@ -157,6 +157,8 @@
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px; /* фиксированная минимальная высота карточки */
 }
 
 .shop-item-card:hover {
@@ -164,10 +166,10 @@
   box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
 }
 
-/* квадратная картинка внутри карточки */
+/* квадратная картинка */
 .shop-item-image {
   width: 100%;
-  aspect-ratio: 1 / 1; /* квадрат */
+  aspect-ratio: 1 / 1;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
@@ -189,6 +191,7 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
+  min-height: 40px; /* одинаковое место под название+цену */
 }
 
 .shop-item-name {
@@ -219,7 +222,7 @@
   padding: 20px 0;
 }
 
-/* МОДАЛКА ТОВАРА */
+/* Модалка товара */
 .shop-modal-backdrop {
   position: fixed;
   inset: 0;

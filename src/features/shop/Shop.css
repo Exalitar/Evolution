@@ -88,6 +88,8 @@
   top: 0;
   z-index: 10;
   overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: auto; /* без плавности, чтобы авто‑тик был ровный */
 }
 
 .shop-tabs::-webkit-scrollbar {

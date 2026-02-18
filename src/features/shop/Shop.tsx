@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './Shop.css';
 
 type ShopCategory = 'all' | 'premium' | 'equip_boost' | 'synthesis_boost';
@@ -64,7 +64,8 @@ const shopItems: ShopItem[] = [
   {
     id: 'equip_boost_1d',
     name: 'Ускоритель оборудования 1 день',
-    description: 'Все улучшения оборудования проходят в 2 раза быстрее в течение 24 часов.',
+    description:
+      'Все улучшения оборудования проходят в 2 раза быстрее в течение 24 часов.',
     price: 200,
     image: '/assets/Shop/Equipment accelerator.png',
     category: 'equip_boost'
@@ -98,7 +99,8 @@ const shopItems: ShopItem[] = [
   {
     id: 'synth_boost_1d',
     name: 'Ускоритель синтеза 1 день',
-    description: 'Синтез материалов и существ происходит в 2 раза быстрее 24 часа.',
+    description:
+      'Синтез материалов и существ происходит в 2 раза быстрее 24 часа.',
     price: 200,
     image: '/assets/Shop/Synthesis accelerator.png',
     category: 'synthesis_boost'
@@ -140,10 +142,68 @@ export const Shop: React.FC<ShopProps> = ({
   const [purchaseStatus, setPurchaseStatus] =
     useState<'idle' | 'success' | 'error'>('idle');
 
+  // === Авто‑скролл панели разделов ===
+  const tabsRef = useRef<HTMLDivElement | null>(null);
+  const [isUserScrollingTabs, setIsUserScrollingTabs] = useState(false);
+  const userScrollTimeoutRef = useRef<number | null>(null);
+  const autoScrollDirectionRef = useRef<-1 | 1>(-1); // -1 влево, 1 вправо
+
   const filteredItems =
     selectedCategory === 'all'
       ? shopItems
       : shopItems.filter((item) => item.category === selectedCategory);
+
+  // Авто‑движение панели разделов
+  useEffect(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+
+    const speed = 0.3; // px за тик
+    const interval = 16; // ~60 FPS
+
+    const id = window.setInterval(() => {
+      if (isUserScrollingTabs) return;
+
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      const dir = autoScrollDirectionRef.current;
+      let next = el.scrollLeft + dir * speed;
+
+      if (next <= 0) {
+        next = 0;
+        autoScrollDirectionRef.current = 1;
+      } else if (next >= maxScroll) {
+        next = maxScroll;
+        autoScrollDirectionRef.current = -1;
+      }
+
+      el.scrollLeft = next;
+    }, interval);
+
+    return () => window.clearInterval(id);
+  }, [isUserScrollingTabs]);
+
+  // Очистка таймера при размонтировании
+  useEffect(() => {
+    return () => {
+      if (userScrollTimeoutRef.current) {
+        window.clearTimeout(userScrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleTabsScroll = () => {
+    setIsUserScrollingTabs(true);
+
+    if (userScrollTimeoutRef.current) {
+      window.clearTimeout(userScrollTimeoutRef.current);
+    }
+
+    userScrollTimeoutRef.current = window.setTimeout(() => {
+      setIsUserScrollingTabs(false);
+    }, 3000); // 3 секунды паузы после ручного скролла
+  };
 
   const handlePurchaseClick = () => {
     if (!selectedItem) return;
@@ -179,23 +239,29 @@ export const Shop: React.FC<ShopProps> = ({
       </div>
 
       <div className="shop-content">
-        {/* ПАНЕЛЬ РАЗДЕЛОВ СВЕРХУ */}
-        <div className="shop-tabs">
-          {(Object.keys(categoryNames) as ShopCategory[]).map((category) => (
-            <button
-              key={category}
-              className={
-                'shop-tab-button' +
-                (selectedCategory === category ? ' active' : '')
-              }
-              onClick={() => setSelectedCategory(category)}
-            >
-              {categoryNames[category]}
-            </button>
-          ))}
+        {/* Панель разделов сверху */}
+        <div
+          className="shop-tabs"
+          ref={tabsRef}
+          onScroll={handleTabsScroll}
+        >
+          {(Object.keys(categoryNames) as ShopCategory[]).map(
+            (category) => (
+              <button
+                key={category}
+                className={
+                  'shop-tab-button' +
+                  (selectedCategory === category ? ' active' : '')
+                }
+                onClick={() => setSelectedCategory(category)}
+              >
+                {categoryNames[category]}
+              </button>
+            )
+          )}
         </div>
 
-        {/* СЕТКА ТОВАРОВ НИЖЕ */}
+        {/* Сетка товаров (3 колонки) */}
         <div className="shop-items-grid">
           {filteredItems.map((item) => (
             <div

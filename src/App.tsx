@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
+import { Shop } from './features/shop/Shop';
 
 type CharacterId =
   | "species_1"
@@ -16,7 +17,8 @@ type Screen =
   | "premium"
   | "shop"
   | "info"
-  | "market";
+  | "market"
+  | "nftShop";
 
 interface Material {
   id: string;
@@ -333,6 +335,7 @@ function App() {
   const breedingTimerRef = useRef<number | null>(null);
 
   const [isAnyUpgrading, setIsAnyUpgrading] = useState(false);
+  const [playerCurrency, setPlayerCurrency] = useState(5000);
 
   const [equipment, setEquipment] = useState<Record<string, Equipment>>({
     microscope: {
@@ -471,6 +474,21 @@ function App() {
         upgradeStartTime: Date.now()
       }
     }));
+  };
+
+  const handlePurchase = (itemId: string, price: number) => {
+    setPlayerCurrency(prev => prev - price);
+    
+    // Здесь можно добавить логику для применения купленного товара
+    console.log(`Куплен товар: ${itemId} за ${price} кристаллов`);
+    
+    // Примеры применения товаров:
+    if (itemId === 'boost_breeding_speed') {
+      // Активировать ускорение скрещивания
+    } else if (itemId === 'premium_material_pack') {
+      // Добавить материалы в инвентарь
+    }
+    // и т.д.
   };
 
   const canBreedToLevel5 = (): { canBreed: boolean; missingRequirements: string[] } => {
@@ -768,7 +786,7 @@ function App() {
                 </div>
               </div>
 
-              <button className="market-button" onClick={() => setScreen("market")}>
+              <button className="market-button" onClick={() => setScreen("shop")}>
                 <div className="market-icon">🛒</div>
                 <span>Магазин</span>
               </button>
@@ -907,11 +925,11 @@ function App() {
                 <span className="nav-button-label">Премиум</span>
               </button>
 
-              <button className="nav-button" onClick={() => setScreen("shop")}>
+              <button className="nav-button" onClick={() => setScreen("nftShop")}>
                 <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Shop_button.png" alt="Магазин" draggable={false} />
+                  <img src="assets/Icon_button/Shop_button.png" alt="" draggable={false} />
                 </div>
-                <span className="nav-button-label">Магазин</span>
+                <span className="nav-button-label">NFT магазин</span>
               </button>
 
               <button className="nav-button" onClick={() => setScreen("info")}>
@@ -950,25 +968,22 @@ function App() {
       )}
 
       {screen === "shop" && (
-        <div className="secondary-screen">
-          <div className="secondary-header">
-            <h2>Игровой магазин</h2>
-            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
-          </div>
-          <div className="secondary-content">
-            <p>Магазин будет здесь</p>
-          </div>
-        </div>
+        <Shop 
+          onClose={() => setScreen("main")}
+          playerCurrency={playerCurrency}
+          onPurchase={handlePurchase}
+        />
       )}
 
-      {screen === "market" && (
+      {screen === "nftShop" && (
         <div className="secondary-screen">
           <div className="secondary-header">
-            <h2>Магазин</h2>
+            <h2>NFT магазин</h2>
             <button className="close-button" onClick={() => setScreen("main")}>✕</button>
           </div>
           <div className="secondary-content">
-            <p>Это другой магазин</p>
+            {/* Здесь потом сделаем сетку NFT как в основном магазине */}
+            <p>Здесь будет NFT‑маркетплейс</p>
           </div>
         </div>
       )}

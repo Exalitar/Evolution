@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import './Shop.css';
-import { TabsCarousel, TabsCarouselItem } from './TabsCarousel';
 
-type ShopCategory = 'all' | 'premium' | 'equip_boost' | 'synthesis_boost';
+type ShopCategory = 'premium' | 'equip_boost' | 'synthesis_boost';
 
 interface ShopItem {
   id: string;
@@ -19,8 +18,7 @@ interface ShopProps {
   onPurchase: (itemId: string, price: number) => void;
 }
 
-const categoryNames: Record<ShopCategory, string> = {
-  all: 'Всё',
+const categoryTitles: Record<ShopCategory, string> = {
   premium: 'Премиум',
   equip_boost: 'Ускорители оборудования',
   synthesis_boost: 'Ускорители синтеза'
@@ -137,16 +135,9 @@ export const Shop: React.FC<ShopProps> = ({
   playerCurrency,
   onPurchase
 }) => {
-  const [selectedCategory, setSelectedCategory] =
-    useState<ShopCategory>('all');
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [purchaseStatus, setPurchaseStatus] =
     useState<'idle' | 'success' | 'error'>('idle');
-
-  const filteredItems =
-    selectedCategory === 'all'
-      ? shopItems
-      : shopItems.filter((item) => item.category === selectedCategory);
 
   const handlePurchaseClick = () => {
     if (!selectedItem) return;
@@ -166,11 +157,10 @@ export const Shop: React.FC<ShopProps> = ({
     }
   };
 
-  const tabsItems: TabsCarouselItem[] = [
-    { id: 'all', label: 'Всё' },
-    { id: 'premium', label: 'Премиум' },
-    { id: 'equip_boost', label: 'Ускорители оборудования' },
-    { id: 'synthesis_boost', label: 'Ускорители синтеза' }
+  const sections: ShopCategory[] = [
+    'premium',
+    'equip_boost',
+    'synthesis_boost'
   ];
 
   return (
@@ -188,49 +178,60 @@ export const Shop: React.FC<ShopProps> = ({
         </button>
       </div>
 
-      <div className="shop-content">
-        {/* бесконечная карусель вкладок */}
-        <div className="shop-tabs-wrapper">
-          <TabsCarousel
-            items={tabsItems}
-            activeId={selectedCategory}
-            onSelect={(id) => setSelectedCategory(id as ShopCategory)}
-            height={42}
-            autoSpeed={20}
-          />
-        </div>
+      <div className="shop-content-vertical">
+        {sections.map((category) => {
+          const items = shopItems.filter(
+            (item) => item.category === category
+          );
 
-        {/* сетка товаров */}
-        <div className="shop-items-grid">
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className="shop-item-card"
-              onClick={() => setSelectedItem(item)}
+          if (items.length === 0) return null;
+
+          return (
+            <section
+              key={category}
+              className="shop-section"
             >
-              <div className="shop-item-image">
-                <img src={item.image} alt={item.name} draggable={false} />
+              <div className="shop-section-header">
+                <h3 className="shop-section-title">
+                  {categoryTitles[category]}
+                </h3>
+                <div className="shop-section-divider" />
               </div>
 
-              <div className="shop-item-info">
-                <div className="shop-item-name">{item.name}</div>
-                <div className="shop-item-price">
-                  <span className="shop-item-current-price">
-                    {item.price} 💎
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
+              <div className="shop-items-grid">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="shop-item-card"
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    <div className="shop-item-image">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        draggable={false}
+                      />
+                    </div>
 
-          {filteredItems.length === 0 && (
-            <div className="shop-empty">
-              В этом разделе пока нет товаров.
-            </div>
-          )}
-        </div>
+                    <div className="shop-item-info">
+                      <div className="shop-item-name">
+                        {item.name}
+                      </div>
+                      <div className="shop-item-price">
+                        <span className="shop-item-current-price">
+                          {item.price} 💎
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
 
+      {/* Модальное окно товара */}
       {selectedItem && (
         <div
           className="shop-modal-backdrop"
@@ -256,7 +257,9 @@ export const Shop: React.FC<ShopProps> = ({
             </div>
 
             <div className="shop-modal-content">
-              <h3 className="shop-modal-title">{selectedItem.name}</h3>
+              <h3 className="shop-modal-title">
+                {selectedItem.name}
+              </h3>
 
               <p className="shop-modal-description">
                 {selectedItem.description}
@@ -283,7 +286,8 @@ export const Shop: React.FC<ShopProps> = ({
               {playerCurrency < selectedItem.price &&
                 purchaseStatus === 'idle' && (
                   <div className="shop-modal-warning">
-                    Не хватает: {selectedItem.price - playerCurrency} 💎
+                    Не хватает:{' '}
+                    {selectedItem.price - playerCurrency} 💎
                   </div>
                 )}
             </div>

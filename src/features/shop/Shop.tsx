@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Shop.css';
+import { TabsCarousel, TabsCarouselItem } from './TabsCarousel';
 
 type ShopCategory = 'all' | 'premium' | 'equip_boost' | 'synthesis_boost';
 
@@ -142,44 +143,10 @@ export const Shop: React.FC<ShopProps> = ({
   const [purchaseStatus, setPurchaseStatus] =
     useState<'idle' | 'success' | 'error'>('idle');
 
-  // управление анимацией панели разделов
-  const [tabsPaused, setTabsPaused] = useState(false);
-  const tabsPauseTimeoutRef = useRef<number | null>(null);
-  const tabsTrackRef = useRef<HTMLDivElement | null>(null);
-
   const filteredItems =
     selectedCategory === 'all'
       ? shopItems
       : shopItems.filter((item) => item.category === selectedCategory);
-
-  const pauseTabsAnimation = () => {
-    setTabsPaused(true);
-    if (tabsPauseTimeoutRef.current) {
-      window.clearTimeout(tabsPauseTimeoutRef.current);
-    }
-    tabsPauseTimeoutRef.current = window.setTimeout(() => {
-      setTabsPaused(false);
-    }, 3000);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (tabsPauseTimeoutRef.current) {
-        window.clearTimeout(tabsPauseTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleTabsScroll = () => {
-    pauseTabsAnimation();
-  };
-
-  const handleTabsWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
-    const el = tabsTrackRef.current;
-    if (!el) return;
-    el.scrollLeft += e.deltaY;
-    pauseTabsAnimation();
-  };
 
   const handlePurchaseClick = () => {
     if (!selectedItem) return;
@@ -199,7 +166,12 @@ export const Shop: React.FC<ShopProps> = ({
     }
   };
 
-  const categories = Object.keys(categoryNames) as ShopCategory[];
+  const tabsItems: TabsCarouselItem[] = [
+    { id: 'all', label: 'Всё' },
+    { id: 'premium', label: 'Премиум' },
+    { id: 'equip_boost', label: 'Ускорители оборудования' },
+    { id: 'synthesis_boost', label: 'Ускорители синтеза' }
+  ];
 
   return (
     <div className="shop-screen">
@@ -217,50 +189,18 @@ export const Shop: React.FC<ShopProps> = ({
       </div>
 
       <div className="shop-content">
-        {/* Панель разделов сверху (цикличная лента) */}
-        <div
-          className={
-            'shop-tabs-container' + (tabsPaused ? ' paused' : '')
-          }
-        >
-          <div
-            className="shop-tabs-track"
-            ref={tabsTrackRef}
-            onScroll={handleTabsScroll}
-            onWheel={handleTabsWheel}
-          >
-            <div className="shop-tabs">
-              {/* первая копия */}
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className={
-                    'shop-tab-button' +
-                    (selectedCategory === category ? ' active' : '')
-                  }
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {categoryNames[category]}
-                </button>
-              ))}
-              {/* вторая копия для бесконечной ленты */}
-              {categories.map((category, idx) => (
-                <button
-                  key={category + '-dup-' + idx}
-                  className={
-                    'shop-tab-button' +
-                    (selectedCategory === category ? ' active' : '')
-                  }
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {categoryNames[category]}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* бесконечная карусель вкладок */}
+        <div className="shop-tabs-wrapper">
+          <TabsCarousel
+            items={tabsItems}
+            activeId={selectedCategory}
+            onSelect={(id) => setSelectedCategory(id as ShopCategory)}
+            height={42}
+            autoSpeed={20}
+          />
         </div>
 
-        {/* Сетка товаров (3 колонки) */}
+        {/* сетка товаров */}
         <div className="shop-items-grid">
           {filteredItems.map((item) => (
             <div
@@ -291,7 +231,6 @@ export const Shop: React.FC<ShopProps> = ({
         </div>
       </div>
 
-      {/* Модальное окно товара */}
       {selectedItem && (
         <div
           className="shop-modal-backdrop"

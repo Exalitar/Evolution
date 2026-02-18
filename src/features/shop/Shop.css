@@ -217,7 +217,7 @@
 .shop-modal {
   position: relative;
   width: 88%;
-  max-width: 320px;          /* было 450px */
+  max-width: 400px;          /* было 450px */
   background: linear-gradient(135deg, #0b1028 0%, #1a1f3e 100%);
   border: 3px solid rgba(0, 255, 255, 0.6);
   border-radius: 18px;       /* чуть меньше */
@@ -258,7 +258,7 @@
 .shop-modal-image {
   position: relative;
   width: 100%;
-  max-height: 220px;         /* ограничим высоту */
+  max-height: 280px;         /* ограничим высоту */
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.4);
   display: flex;

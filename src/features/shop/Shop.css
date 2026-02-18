@@ -80,10 +80,10 @@
 /* ВЕРХНЯЯ ПАНЕЛЬ РАЗДЕЛОВ */
 .shop-tabs {
   display: flex;
-  gap: 10px;
-  padding: 10px 18px 12px 18px;
-  border-bottom: 2px solid rgba(0, 255, 255, 0.2);
-  background: rgba(10, 15, 30, 0.9);
+  gap: 6px;
+  padding: 6px 8px 8px 8px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(10, 15, 30, 0.95);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -100,12 +100,12 @@
 }
 
 .shop-tab-button {
-  padding: 8px 14px;
-  background: rgba(20, 30, 60, 0.6);
+  padding: 5px 10px;
+  background: rgba(20, 30, 60, 0.7);
   border-radius: 999px;
-  border: 2px solid rgba(0, 200, 255, 0.3);
+  border: 1px solid rgba(0, 200, 255, 0.4);
   color: rgba(255, 255, 255, 0.85);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -113,8 +113,8 @@
 }
 
 .shop-tab-button:hover {
-  background: rgba(30, 40, 70, 0.85);
-  border-color: rgba(0, 255, 255, 0.6);
+  background: rgba(30, 40, 70, 0.9);
+  border-color: rgba(0, 255, 255, 0.7);
   color: #00ffff;
   transform: translateY(-1px);
 }
@@ -122,74 +122,57 @@
 .shop-tab-button.active {
   background: linear-gradient(
     135deg,
-    rgba(0, 200, 255, 0.4),
-    rgba(0, 100, 200, 0.6)
+    rgba(0, 200, 255, 0.5),
+    rgba(0, 100, 200, 0.8)
   );
   border-color: rgba(0, 255, 255, 0.9);
   color: #00ffff;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
 }
 
-/* СЕТКА ТОВАРОВ */
+/* СЕТКА ТОВАРОВ: РОВНО 3 КОЛОНКИ */
 .shop-items-grid {
   flex: 1;
-  padding: 16px 10px 20px 10px;
+  padding: 10px;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* всегда 3 колонки */
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* всегда 3 колонки */
+  gap: 8px;
 }
 
-@media (max-width: 600px) {
-  .shop-items-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 400px) {
-  .shop-items-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Карточка товара */
+/* Карточка товара — компактная */
 .shop-item-card {
   position: relative;
   background: linear-gradient(
     135deg,
-    rgba(20, 30, 60, 0.85),
+    rgba(20, 30, 60, 0.9),
     rgba(40, 50, 80, 0.95)
   );
-  border: 2px solid rgba(0, 200, 255, 0.5);
-  border-radius: 14px;
-  padding: 8px;                 /* меньше отступы */
+  border: 1px solid rgba(0, 200, 255, 0.6);
+  border-radius: 10px;
+  padding: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
 }
 
 .shop-item-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 255, 255, 0.9);
-  box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3);
-  background: linear-gradient(
-    135deg,
-    rgba(30, 40, 70, 0.95),
-    rgba(50, 60, 90, 0.98)
-  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
 }
 
-/* Изображение товара */
+/* квадратная картинка внутри карточки */
 .shop-item-image {
   width: 100%;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.35);
+  aspect-ratio: 1 / 1; /* квадрат */
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .shop-item-image img {
@@ -198,17 +181,17 @@
   object-fit: cover;
 }
 
-/* Информация под картинкой */
+/* текст под картинкой */
 .shop-item-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
 }
 
 .shop-item-name {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   text-align: center;
 }
@@ -216,14 +199,14 @@
 .shop-item-price {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .shop-item-current-price {
   color: #00ff88;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+  text-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
 }
 
 /* Пустой раздел */
@@ -401,26 +384,13 @@
   border: 1px solid rgba(255, 100, 100, 0.3);
 }
 
-/* Адаптивность */
+/* Лёгкая адаптивность заголовков/панели на очень маленьких экранах */
 @media (max-width: 480px) {
   .shop-header h2 {
     font-size: 18px;
   }
 
-  .shop-currency {
-    padding: 6px 10px;
-  }
-
   .currency-amount {
     font-size: 16px;
-  }
-
-  .shop-tab-button {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-
-  .shop-item-card {
-    padding: 10px;
   }
 }

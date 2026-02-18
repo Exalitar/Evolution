@@ -77,30 +77,56 @@
   overflow: hidden;
 }
 
-/* ВЕРХНЯЯ ПАНЕЛЬ РАЗДЕЛОВ */
-.shop-tabs {
-  display: flex;
-  gap: 6px;
-  padding: 6px 8px 8px 8px;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-  background: rgba(10, 15, 30, 0.95);
+/* === ПАНЕЛЬ РАЗДЕЛОВ (цикличная лента) === */
+.shop-tabs-container {
   position: sticky;
   top: 0;
   z-index: 10;
+  overflow: hidden;
+  background: rgba(10, 15, 30, 0.95);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.shop-tabs-track {
   overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: auto;
-  /* чтоб точно был скролл, делаем чуть меньше доступной ширины */
 }
 
-/* Скрытый вертикальный скролл */
-.shop-tabs::-webkit-scrollbar {
+.shop-tabs-track::-webkit-scrollbar {
   height: 4px;
 }
 
-.shop-tabs::-webkit-scrollbar-thumb {
+.shop-tabs-track::-webkit-scrollbar-thumb {
   background: rgba(0, 255, 255, 0.4);
   border-radius: 999px;
+}
+
+/* сама лента с двумя копиями вкладок */
+.shop-tabs {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px 8px 8px 8px;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* цикличная анимация – двигаем ленту на половину ширины (2 копии) */
+.shop-tabs-container:not(.paused) .shop-tabs {
+  animation: shop-tabs-loop 20s linear infinite;
+}
+
+.shop-tabs-container.paused .shop-tabs {
+  animation-play-state: paused;
+}
+
+@keyframes shop-tabs-loop {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .shop-tab-button {
@@ -113,7 +139,6 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
-  white-space: nowrap;
 }
 
 .shop-tab-button:hover {
@@ -134,7 +159,7 @@
   box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
 }
 
-/* СЕТКА ТОВАРОВ: РОВНО 3 КОЛОНКИ */
+/* === СЕТКА ТОВАРОВ: 3 КОЛОНКИ, фиксированная высота === */
 .shop-items-grid {
   flex: 1;
   padding: 10px;
@@ -144,7 +169,6 @@
   gap: 8px;
 }
 
-/* Карточка товара — фиксированный размер */
 .shop-item-card {
   position: relative;
   background: linear-gradient(
@@ -160,8 +184,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px; /* фиксируем минимальную высоту */
-  max-height: 170px; /* и максимальную, чтобы не росла */
+  min-height: 170px;
+  max-height: 170px;
   box-sizing: border-box;
 }
 
@@ -189,20 +213,20 @@
   object-fit: cover;
 }
 
-/* текст под картинкой */
+/* подписи под картинкой – увеличены на 3px */
 .shop-item-info {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   min-height: 40px;
-  max-height: 40px; /* одинаковое место под текст */
+  max-height: 40px;
   overflow: hidden;
 }
 
 .shop-item-name {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 10px;
+  font-size: 13px; /* было 10px */
   font-weight: 500;
   text-align: center;
 }
@@ -215,7 +239,7 @@
 
 .shop-item-current-price {
   color: #00ff88;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
 }
@@ -228,7 +252,7 @@
   padding: 20px 0;
 }
 
-/* Модалка товара */
+/* === Модалка товара === */
 .shop-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -281,7 +305,6 @@
   transform: rotate(90deg);
 }
 
-/* Картинка в модалке */
 .shop-modal-image {
   position: relative;
   width: 100%;
@@ -300,7 +323,6 @@
   object-fit: cover;
 }
 
-/* Контент модалки */
 .shop-modal-content {
   display: flex;
   flex-direction: column;
@@ -341,7 +363,6 @@
   text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
 }
 
-/* Кнопка купить */
 .shop-modal-buy-button {
   padding: 14px 30px;
   border-radius: 12px;
@@ -384,7 +405,6 @@
   cursor: not-allowed;
 }
 
-/* Предупреждение о нехватке валюты */
 .shop-modal-warning {
   color: #ff6666;
   font-size: 13px;
@@ -395,7 +415,7 @@
   border: 1px solid rgba(255, 100, 100, 0.3);
 }
 
-/* Лёгкая адаптивность заголовков на очень маленьких экранах */
+/* Адаптивность заголовка */
 @media (max-width: 480px) {
   .shop-header h2 {
     font-size: 18px;

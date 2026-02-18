@@ -142,80 +142,43 @@ export const Shop: React.FC<ShopProps> = ({
   const [purchaseStatus, setPurchaseStatus] =
     useState<'idle' | 'success' | 'error'>('idle');
 
-  // Авто‑скролл панели разделов
-  const tabsRef = useRef<HTMLDivElement | null>(null);
-  const [isUserScrollingTabs, setIsUserScrollingTabs] = useState(false);
-  const userScrollTimeoutRef = useRef<number | null>(null);
-  const autoScrollDirectionRef = useRef<-1 | 1>(-1); // -1 влево, 1 вправо
+  // управление анимацией панели разделов
+  const [tabsPaused, setTabsPaused] = useState(false);
+  const tabsPauseTimeoutRef = useRef<number | null>(null);
+  const tabsTrackRef = useRef<HTMLDivElement | null>(null);
 
   const filteredItems =
     selectedCategory === 'all'
       ? shopItems
       : shopItems.filter((item) => item.category === selectedCategory);
 
-  // Авто‑движение панели разделов
-  useEffect(() => {
-    const el = tabsRef.current;
-    if (!el) return;
+  const pauseTabsAnimation = () => {
+    setTabsPaused(true);
+    if (tabsPauseTimeoutRef.current) {
+      window.clearTimeout(tabsPauseTimeoutRef.current);
+    }
+    tabsPauseTimeoutRef.current = window.setTimeout(() => {
+      setTabsPaused(false);
+    }, 3000);
+  };
 
-    const speed = 0.4; // px за тик (чуть быстрее)
-    const interval = 16; // ~60 FPS
-
-    const id = window.setInterval(() => {
-      if (isUserScrollingTabs) return;
-
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return; // не из чего скроллить
-
-      const dir = autoScrollDirectionRef.current;
-      let next = el.scrollLeft + dir * speed;
-
-      if (next <= 0) {
-        next = 0;
-        autoScrollDirectionRef.current = 1;
-      } else if (next >= maxScroll) {
-        next = maxScroll;
-        autoScrollDirectionRef.current = -1;
-      }
-
-      el.scrollLeft = next;
-    }, interval);
-
-    return () => window.clearInterval(id);
-  }, [isUserScrollingTabs]);
-
-  // Очистка таймера при размонтировании
   useEffect(() => {
     return () => {
-      if (userScrollTimeoutRef.current) {
-        window.clearTimeout(userScrollTimeoutRef.current);
+      if (tabsPauseTimeoutRef.current) {
+        window.clearTimeout(tabsPauseTimeoutRef.current);
       }
     };
   }, []);
 
-  const startTabsPause = () => {
-    setIsUserScrollingTabs(true);
-
-    if (userScrollTimeoutRef.current) {
-      window.clearTimeout(userScrollTimeoutRef.current);
-    }
-
-    userScrollTimeoutRef.current = window.setTimeout(() => {
-      setIsUserScrollingTabs(false);
-    }, 3000);
-  };
-
   const handleTabsScroll = () => {
-    startTabsPause();
+    pauseTabsAnimation();
   };
 
-  // Скролл вкладок колесом мыши на ПК
   const handleTabsWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
-    const el = tabsRef.current;
+    const el = tabsTrackRef.current;
     if (!el) return;
-
     el.scrollLeft += e.deltaY;
-    startTabsPause();
+    pauseTabsAnimation();
   };
 
   const handlePurchaseClick = () => {
@@ -236,6 +199,8 @@ export const Shop: React.FC<ShopProps> = ({
     }
   };
 
+  const categories = Object.keys(categoryNames) as ShopCategory[];
+
   return (
     <div className="shop-screen">
       <div className="shop-header">
@@ -252,27 +217,47 @@ export const Shop: React.FC<ShopProps> = ({
       </div>
 
       <div className="shop-content">
-        {/* Панель разделов сверху */}
+        {/* Панель разделов сверху (цикличная лента) */}
         <div
-          className="shop-tabs"
-          ref={tabsRef}
-          onScroll={handleTabsScroll}
-          onWheel={handleTabsWheel}
+          className={
+            'shop-tabs-container' + (tabsPaused ? ' paused' : '')
+          }
         >
-          {(Object.keys(categoryNames) as ShopCategory[]).map(
-            (category) => (
-              <button
-                key={category}
-                className={
-                  'shop-tab-button' +
-                  (selectedCategory === category ? ' active' : '')
-                }
-                onClick={() => setSelectedCategory(category)}
-              >
-                {categoryNames[category]}
-              </button>
-            )
-          )}
+          <div
+            className="shop-tabs-track"
+            ref={tabsTrackRef}
+            onScroll={handleTabsScroll}
+            onWheel={handleTabsWheel}
+          >
+            <div className="shop-tabs">
+              {/* первая копия */}
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className={
+                    'shop-tab-button' +
+                    (selectedCategory === category ? ' active' : '')
+                  }
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {categoryNames[category]}
+                </button>
+              ))}
+              {/* вторая копия для бесконечной ленты */}
+              {categories.map((category, idx) => (
+                <button
+                  key={category + '-dup-' + idx}
+                  className={
+                    'shop-tab-button' +
+                    (selectedCategory === category ? ' active' : '')
+                  }
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {categoryNames[category]}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Сетка товаров (3 колонки) */}

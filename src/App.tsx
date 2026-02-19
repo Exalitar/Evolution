@@ -18,7 +18,8 @@ type Screen =
   | "shop"
   | "info"
   | "market"
-  | "nftShop";
+  | "nftShop"
+  | "settings";
 
 interface Material {
   id: string;
@@ -329,6 +330,7 @@ function App() {
 
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
+  const [showInfoScreen, setShowInfoScreen] = useState(false);
 
   const [isBreeding, setIsBreeding] = useState(false);
   const [breedingProgress, setBreedingProgress] = useState(0);
@@ -774,24 +776,37 @@ function App() {
 
       {screen === "main" && (
         <div className="main-screen">
-          {selectedCharacter && (
-            <>
-              <div className="player-info">
-                <div className="player-avatar">
-                  <img src={getCharacterImage()} alt="Player Avatar" draggable={false} />
+           {selectedCharacter && (
+              <>
+                <div
+                  className="player-info"
+                  onClick={() => {
+                    setScreen("info");
+                  }}
+                >
+                  <div className="player-avatar">
+                    <img
+                      src={getCharacterImage()}
+                      alt="Player Avatar"
+                      draggable={false}
+                    />
+                  </div>
+                  <div className="player-details">
+                    <div className="player-name">{playerName}</div>
+                    <div className="player-level">Уровень {playerLevel}</div>
+                  </div>
                 </div>
-                <div className="player-details">
-                  <div className="player-name">{playerName}</div>
-                  <div className="player-level">Уровень {playerLevel}</div>
-                </div>
-              </div>
 
-              <button className="market-button" onClick={() => setScreen("shop")}>
-                <div className="market-icon">🛒</div>
-                <span>Магазин</span>
-              </button>
-            </>
-          )}
+                {/* ТОЛЬКО ЭТА КНОПКА */}
+                <button
+                  className="market-button"
+                  onClick={() => setScreen("shop")}
+                >
+                  <span className="market-icon" />
+                  <span className="market-label">Магазин</span>
+                </button>
+              </>
+            )}
 
           <div
             className={`central-circle ${
@@ -932,11 +947,15 @@ function App() {
                 <span className="nav-button-label">NFT магазин</span>
               </button>
 
-              <button className="nav-button" onClick={() => setScreen("info")}>
+              <button className="nav-button" onClick={() => setScreen("settings")}>
                 <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Setting_button.png" alt="Информация" draggable={false} />
+                  <img
+                    src="/assets/Icon_button/Setting_button.png"
+                    alt=""
+                    draggable={false}
+                  />
                 </div>
-                <span className="nav-button-label">Информация</span>
+                <span className="nav-button-label">Настройки</span>
               </button>
             </div>
           )}
@@ -1078,6 +1097,25 @@ function App() {
                 <p>Персонаж еще не выбран</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {screen === "settings" && (
+        <div className="info-screen">
+          <div className="info-header">
+            <h2>Настройки</h2>
+            <button
+              className="close-button"
+              onClick={() => setScreen("main")}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="info-content">
+            {/* сюда позже добавишь реальные настройки */}
+            <p>Здесь будут настройки игры.</p>
           </div>
         </div>
       )}

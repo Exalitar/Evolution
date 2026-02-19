@@ -1,7 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Laboratory.css';
 
-type Screen = "main" | "game" | "laboratory" | "premium" | "shop" | "info" | "cabinet" | "market";
+type Screen =
+  | "main"
+  | "game"
+  | "laboratory"
+  | "premium"
+  | "shop"
+  | "info"
+  | "cabinet"
+  | "market"
+  | "settings";
+
 type LabSection = 'center' | 'left' | 'right';
 
 type EquipmentType =
@@ -330,7 +340,10 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
       </div>
 
       {/* UI элементы ФИКСИРОВАННЫЕ к экрану */}
-      <div className="player-info">
+      <div
+        className="player-info"
+        onClick={() => onNavigate("info")}
+      >
         <div className="player-avatar">
           <img src={playerAvatar} alt={playerName} draggable={false} />
         </div>
@@ -340,12 +353,9 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
         </div>
       </div>
 
-      <button 
-        className="market-button"
-        onClick={() => onNavigate('market')}
-      >
-        <span className="market-icon">🛒</span>
-        Магазин
+      <button className="market-button" onClick={() => onNavigate("shop")}>
+        <span className="market-icon" />
+        <span className="market-label">Магазин</span>
       </button>
 
       <div className="bottom-navigation">
@@ -370,11 +380,15 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           <span className="nav-button-label">Магазин</span>
         </button>
         
-        <button className="nav-button" onClick={() => onNavigate('info')}>
+        <button className="nav-button" onClick={() => onNavigate("settings")}>
           <div className="nav-button-icon">
-            <img src="/assets/Icon_button/Setting_button.png" alt="" draggable={false} />
+            <img
+              src="/assets/Icon_button/Setting_button.png"
+              alt=""
+              draggable={false}
+            />
           </div>
-          <span className="nav-button-label">Информация</span>
+          <span className="nav-button-label">Настройки</span>
         </button>
       </div>
 

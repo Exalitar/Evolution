@@ -302,6 +302,12 @@ img {
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
   z-index: 100;
   backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.player-info:active {
+  transform: none;              /* чтобы не прыгала при тапе */
+  box-shadow: none;
 }
 
 .player-avatar {

@@ -19,7 +19,11 @@ type Screen =
   | "info"
   | "market"
   | "nftShop"
-  | "settings";
+  | "settings"
+  | "id_person"
+  | "avatar"
+  | "language"
+  | "referal";
 
 interface Material {
   id: string;
@@ -338,6 +342,16 @@ function App() {
 
   const [isAnyUpgrading, setIsAnyUpgrading] = useState(false);
   const [playerCurrency, setPlayerCurrency] = useState(5000);
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const openSettings = () => setIsSettingsOpen(true);
+  const closeSettings = () => setIsSettingsOpen(false);
+
+  const goToScreen = (to: Screen) => {
+    setScreen(to);
+    setIsSettingsOpen(false);
+  };
 
   const [equipment, setEquipment] = useState<Record<string, Equipment>>({
     microscope: {
@@ -947,7 +961,7 @@ function App() {
                 <span className="nav-button-label">NFT магазин</span>
               </button>
 
-              <button className="nav-button" onClick={() => setScreen("settings")}>
+              <button className="nav-button" onClick={openSettings}>
                 <div className="nav-button-icon">
                   <img
                     src="/assets/Icon_button/Setting_button.png"
@@ -1101,21 +1115,49 @@ function App() {
         </div>
       )}
 
-      {screen === "settings" && (
-        <div className="info-screen">
-          <div className="info-header">
-            <h2>Настройки</h2>
-            <button
-              className="close-button"
-              onClick={() => setScreen("main")}
-            >
-              ✕
-            </button>
-          </div>
+      {screen === "id_person" && (
+        <div>Здесь будет экран с ID Telegram</div>
+      )}
 
-          <div className="info-content">
-            {/* сюда позже добавишь реальные настройки */}
-            <p>Здесь будут настройки игры.</p>
+      {screen === "avatar" && (
+        <div>Экран смены аватара</div>
+      )}
+
+      {screen === "language" && (
+        <div>Экран выбора языка</div>
+      )}
+
+      {screen === "referal" && (
+        <div>Экран с реферальной ссылкой</div>
+      )}
+
+      {isSettingsOpen && (
+        <div className="settings-modal-backdrop" onClick={closeSettings}>
+          <div
+            className="settings-modal"
+            onClick={(e) => e.stopPropagation()} // чтобы клик внутри не закрывал
+          >
+            <h2>Настройки</h2>
+
+            <button className="settings-btn" onClick={() => goToScreen("id_person")}>
+              ID Telegram
+            </button>
+
+            <button className="settings-btn" onClick={() => goToScreen("avatar")}>
+              Смена аватара
+            </button>
+
+            <button className="settings-btn" onClick={() => goToScreen("language")}>
+              Смена языка
+            </button>
+
+            <button className="settings-btn" onClick={() => goToScreen("referal")}>
+              Реферальная ссылка
+            </button>
+
+            <button className="settings-close" onClick={closeSettings}>
+              <span>×</span>
+            </button>
           </div>
         </div>
       )}

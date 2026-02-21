@@ -3,6 +3,13 @@ import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
 import { Shop } from './features/shop/Shop';
 
+import {
+  CharacterStats,
+  baseCharacterStats,
+  materialBonuses,
+  applyMaterialToStats
+} from "./features/balance/hooks/characterStats";
+
 type CharacterId =
   | "species_1"
   | "species_2"
@@ -31,22 +38,6 @@ interface Material {
   image: string;
   description: string;
 }
-
-interface CharacterStats {
-  attack: number;
-  health: number;
-  defense: number;
-  attackSpeed: number;
-}
-
-interface MaterialBonus {
-  attack: number;
-  health: number;
-  defense: number;
-  attackSpeed: number;
-}
-
-type MaterialBonusMap = Record<CharacterId, MaterialBonus>;
 
 interface StartMaterial {
   id: CharacterId;
@@ -80,11 +71,11 @@ const startMaterials: StartMaterial[] = [
 ];
 
 const breedingMaterialsStage1: Material[] = [
-  { id: "m1_1", name: "Материал 1‑1", image: "/assets/Material/Malecula1.jpg", description: "Материал 1‑1 для 1 пробуждения" },
-  { id: "m1_2", name: "Материал 1‑2", image: "/assets/Material/Malecula2.jpg", description: "Материал 1‑2 для 1 пробуждения" },
-  { id: "m1_3", name: "Материал 1‑3", image: "/assets/Material/Malecula3.jpg", description: "Материал 1‑3 для 1 пробуждения" },
-  { id: "m1_4", name: "Материал 1‑4", image: "/assets/Material/Malecula4.jpg", description: "Материал 1‑4 для 1 пробуждения" },
-  { id: "m1_5", name: "Материал 1‑5", image: "/assets/Material/Malecula5.jpg", description: "Материал 1‑5 для 1 пробуждения" },
+  { id: "m1_1", name: "Водород", image: "/assets/Material/Malecula1.jpg", description: "Материал 1‑1 для 1 пробуждения" },
+  { id: "m1_2", name: "Литий", image: "/assets/Material/Malecula2.jpg", description: "Материал 1‑2 для 1 пробуждения" },
+  { id: "m1_3", name: "Бериллий", image: "/assets/Material/Malecula3.jpg", description: "Материал 1‑3 для 1 пробуждения" },
+  { id: "m1_4", name: "Бор", image: "/assets/Material/Malecula4.jpg", description: "Материал 1‑4 для 1 пробуждения" },
+  { id: "m1_5", name: "Углерод", image: "/assets/Material/Malecula5.jpg", description: "Материал 1‑5 для 1 пробуждения" },
 ];
 
 const breedingMaterialsStage2: Material[] = [
@@ -118,196 +109,6 @@ const breedingMaterialsStage5: Material[] = [
   { id: "m5_4", name: "Материал 5‑4", image: "/assets/Material/Malecula24.jpg", description: "Материал 5‑4 для 5 пробуждения" },
   { id: "m5_5", name: "Материал 5‑5", image: "/assets/Material/Malecula25.jpg", description: "Материал 5‑5 для 5 пробуждения" },
 ];
-
-const initialCharacterStats: Record<CharacterId, CharacterStats> = {
-  species_1: { attack: 120, health: 80, defense: 60, attackSpeed: 1.5 },
-  species_2: { attack: 70, health: 150, defense: 100, attackSpeed: 0.8 },
-  species_3: { attack: 90, health: 70, defense: 50, attackSpeed: 2.0 },
-  species_4: { attack: 85, health: 100, defense: 80, attackSpeed: 1.2 },
-  species_5: { attack: 75, health: 110, defense: 110, attackSpeed: 1.0 }
-};
-
-const materialBonuses: Record<string, MaterialBonusMap> = {
-  "m1_1": {
-    species_1: { attack: 15, health: 5, defense: 3, attackSpeed: 0.1 },
-    species_2: { attack: 5, health: 20, defense: 10, attackSpeed: 0.05 },
-    species_3: { attack: 10, health: 3, defense: 2, attackSpeed: 0.15 },
-    species_4: { attack: 8, health: 10, defense: 6, attackSpeed: 0.08 },
-    species_5: { attack: 6, health: 12, defense: 12, attackSpeed: 0.06 }
-  },
-  "m1_2": {
-    species_1: { attack: 12, health: 8, defense: 4, attackSpeed: 0.12 },
-    species_2: { attack: 6, health: 18, defense: 12, attackSpeed: 0.04 },
-    species_3: { attack: 11, health: 5, defense: 3, attackSpeed: 0.18 },
-    species_4: { attack: 9, health: 11, defense: 7, attackSpeed: 0.09 },
-    species_5: { attack: 7, health: 13, defense: 13, attackSpeed: 0.07 }
-  },
-  "m1_3": {
-    species_1: { attack: 18, health: 6, defense: 5, attackSpeed: 0.09 },
-    species_2: { attack: 7, health: 22, defense: 11, attackSpeed: 0.06 },
-    species_3: { attack: 13, health: 4, defense: 4, attackSpeed: 0.16 },
-    species_4: { attack: 10, health: 12, defense: 8, attackSpeed: 0.1 },
-    species_5: { attack: 8, health: 14, defense: 14, attackSpeed: 0.08 }
-  },
-  "m1_4": {
-    species_1: { attack: 14, health: 7, defense: 6, attackSpeed: 0.11 },
-    species_2: { attack: 8, health: 19, defense: 13, attackSpeed: 0.07 },
-    species_3: { attack: 12, health: 6, defense: 5, attackSpeed: 0.17 },
-    species_4: { attack: 11, health: 13, defense: 9, attackSpeed: 0.11 },
-    species_5: { attack: 9, health: 15, defense: 15, attackSpeed: 0.09 }
-  },
-  "m1_5": {
-    species_1: { attack: 16, health: 9, defense: 7, attackSpeed: 0.13 },
-    species_2: { attack: 9, health: 21, defense: 14, attackSpeed: 0.08 },
-    species_3: { attack: 14, health: 7, defense: 6, attackSpeed: 0.19 },
-    species_4: { attack: 12, health: 14, defense: 10, attackSpeed: 0.12 },
-    species_5: { attack: 10, health: 16, defense: 16, attackSpeed: 0.1 }
-  },
-  
-  "m2_1": {
-    species_1: { attack: 20, health: 10, defense: 8, attackSpeed: 0.14 },
-    species_2: { attack: 10, health: 25, defense: 16, attackSpeed: 0.09 },
-    species_3: { attack: 16, health: 8, defense: 7, attackSpeed: 0.21 },
-    species_4: { attack: 14, health: 16, defense: 12, attackSpeed: 0.13 },
-    species_5: { attack: 12, health: 18, defense: 18, attackSpeed: 0.11 }
-  },
-  "m2_2": {
-    species_1: { attack: 22, health: 11, defense: 9, attackSpeed: 0.15 },
-    species_2: { attack: 11, health: 27, defense: 17, attackSpeed: 0.1 },
-    species_3: { attack: 18, health: 9, defense: 8, attackSpeed: 0.23 },
-    species_4: { attack: 15, health: 17, defense: 13, attackSpeed: 0.14 },
-    species_5: { attack: 13, health: 19, defense: 19, attackSpeed: 0.12 }
-  },
-  "m2_3": {
-    species_1: { attack: 24, health: 12, defense: 10, attackSpeed: 0.16 },
-    species_2: { attack: 12, health: 29, defense: 18, attackSpeed: 0.11 },
-    species_3: { attack: 20, health: 10, defense: 9, attackSpeed: 0.25 },
-    species_4: { attack: 16, health: 18, defense: 14, attackSpeed: 0.15 },
-    species_5: { attack: 14, health: 20, defense: 20, attackSpeed: 0.13 }
-  },
-  "m2_4": {
-    species_1: { attack: 26, health: 13, defense: 11, attackSpeed: 0.17 },
-    species_2: { attack: 13, health: 31, defense: 19, attackSpeed: 0.12 },
-    species_3: { attack: 22, health: 11, defense: 10, attackSpeed: 0.27 },
-    species_4: { attack: 17, health: 19, defense: 15, attackSpeed: 0.16 },
-    species_5: { attack: 15, health: 21, defense: 21, attackSpeed: 0.14 }
-  },
-  "m2_5": {
-    species_1: { attack: 28, health: 14, defense: 12, attackSpeed: 0.18 },
-    species_2: { attack: 14, health: 33, defense: 20, attackSpeed: 0.13 },
-    species_3: { attack: 24, health: 12, defense: 11, attackSpeed: 0.29 },
-    species_4: { attack: 18, health: 20, defense: 16, attackSpeed: 0.17 },
-    species_5: { attack: 16, health: 22, defense: 22, attackSpeed: 0.15 }
-  },
-
-  "m3_1": {
-    species_1: { attack: 30, health: 15, defense: 13, attackSpeed: 0.19 },
-    species_2: { attack: 15, health: 35, defense: 22, attackSpeed: 0.14 },
-    species_3: { attack: 26, health: 13, defense: 12, attackSpeed: 0.31 },
-    species_4: { attack: 20, health: 22, defense: 18, attackSpeed: 0.18 },
-    species_5: { attack: 18, health: 24, defense: 24, attackSpeed: 0.16 }
-  },
-  "m3_2": {
-    species_1: { attack: 32, health: 16, defense: 14, attackSpeed: 0.2 },
-    species_2: { attack: 16, health: 37, defense: 23, attackSpeed: 0.15 },
-    species_3: { attack: 28, health: 14, defense: 13, attackSpeed: 0.33 },
-    species_4: { attack: 21, health: 23, defense: 19, attackSpeed: 0.19 },
-    species_5: { attack: 19, health: 25, defense: 25, attackSpeed: 0.17 }
-  },
-  "m3_3": {
-    species_1: { attack: 34, health: 17, defense: 15, attackSpeed: 0.21 },
-    species_2: { attack: 17, health: 39, defense: 24, attackSpeed: 0.16 },
-    species_3: { attack: 30, health: 15, defense: 14, attackSpeed: 0.35 },
-    species_4: { attack: 22, health: 24, defense: 20, attackSpeed: 0.2 },
-    species_5: { attack: 20, health: 26, defense: 26, attackSpeed: 0.18 }
-  },
-  "m3_4": {
-    species_1: { attack: 36, health: 18, defense: 16, attackSpeed: 0.22 },
-    species_2: { attack: 18, health: 41, defense: 25, attackSpeed: 0.17 },
-    species_3: { attack: 32, health: 16, defense: 15, attackSpeed: 0.37 },
-    species_4: { attack: 23, health: 25, defense: 21, attackSpeed: 0.21 },
-    species_5: { attack: 21, health: 27, defense: 27, attackSpeed: 0.19 }
-  },
-  "m3_5": {
-    species_1: { attack: 38, health: 19, defense: 17, attackSpeed: 0.23 },
-    species_2: { attack: 19, health: 43, defense: 26, attackSpeed: 0.18 },
-    species_3: { attack: 34, health: 17, defense: 16, attackSpeed: 0.39 },
-    species_4: { attack: 24, health: 26, defense: 22, attackSpeed: 0.22 },
-    species_5: { attack: 22, health: 28, defense: 28, attackSpeed: 0.2 }
-  },
-
-  "m4_1": {
-    species_1: { attack: 40, health: 20, defense: 18, attackSpeed: 0.24 },
-    species_2: { attack: 20, health: 45, defense: 28, attackSpeed: 0.19 },
-    species_3: { attack: 36, health: 18, defense: 17, attackSpeed: 0.41 },
-    species_4: { attack: 26, health: 28, defense: 24, attackSpeed: 0.23 },
-    species_5: { attack: 24, health: 30, defense: 30, attackSpeed: 0.21 }
-  },
-  "m4_2": {
-    species_1: { attack: 42, health: 21, defense: 19, attackSpeed: 0.25 },
-    species_2: { attack: 21, health: 47, defense: 29, attackSpeed: 0.2 },
-    species_3: { attack: 38, health: 19, defense: 18, attackSpeed: 0.43 },
-    species_4: { attack: 27, health: 29, defense: 25, attackSpeed: 0.24 },
-    species_5: { attack: 25, health: 31, defense: 31, attackSpeed: 0.22 }
-  },
-  "m4_3": {
-    species_1: { attack: 44, health: 22, defense: 20, attackSpeed: 0.26 },
-    species_2: { attack: 22, health: 49, defense: 30, attackSpeed: 0.21 },
-    species_3: { attack: 40, health: 20, defense: 19, attackSpeed: 0.45 },
-    species_4: { attack: 28, health: 30, defense: 26, attackSpeed: 0.25 },
-    species_5: { attack: 26, health: 32, defense: 32, attackSpeed: 0.23 }
-  },
-  "m4_4": {
-    species_1: { attack: 46, health: 23, defense: 21, attackSpeed: 0.27 },
-    species_2: { attack: 23, health: 51, defense: 31, attackSpeed: 0.22 },
-    species_3: { attack: 42, health: 21, defense: 20, attackSpeed: 0.47 },
-    species_4: { attack: 29, health: 31, defense: 27, attackSpeed: 0.26 },
-    species_5: { attack: 27, health: 33, defense: 33, attackSpeed: 0.24 }
-  },
-  "m4_5": {
-    species_1: { attack: 48, health: 24, defense: 22, attackSpeed: 0.28 },
-    species_2: { attack: 24, health: 53, defense: 32, attackSpeed: 0.23 },
-    species_3: { attack: 44, health: 22, defense: 21, attackSpeed: 0.49 },
-    species_4: { attack: 30, health: 32, defense: 28, attackSpeed: 0.27 },
-    species_5: { attack: 28, health: 34, defense: 34, attackSpeed: 0.25 }
-  },
-
-  "m5_1": {
-    species_1: { attack: 50, health: 25, defense: 23, attackSpeed: 0.29 },
-    species_2: { attack: 25, health: 55, defense: 34, attackSpeed: 0.24 },
-    species_3: { attack: 46, health: 23, defense: 22, attackSpeed: 0.51 },
-    species_4: { attack: 32, health: 34, defense: 30, attackSpeed: 0.28 },
-    species_5: { attack: 30, health: 36, defense: 36, attackSpeed: 0.26 }
-  },
-  "m5_2": {
-    species_1: { attack: 52, health: 26, defense: 24, attackSpeed: 0.3 },
-    species_2: { attack: 26, health: 57, defense: 35, attackSpeed: 0.25 },
-    species_3: { attack: 48, health: 24, defense: 23, attackSpeed: 0.53 },
-    species_4: { attack: 33, health: 35, defense: 31, attackSpeed: 0.29 },
-    species_5: { attack: 31, health: 37, defense: 37, attackSpeed: 0.27 }
-  },
-  "m5_3": {
-    species_1: { attack: 54, health: 27, defense: 25, attackSpeed: 0.31 },
-    species_2: { attack: 27, health: 59, defense: 36, attackSpeed: 0.26 },
-    species_3: { attack: 50, health: 25, defense: 24, attackSpeed: 0.55 },
-    species_4: { attack: 34, health: 36, defense: 32, attackSpeed: 0.3 },
-    species_5: { attack: 32, health: 38, defense: 38, attackSpeed: 0.28 }
-  },
-  "m5_4": {
-    species_1: { attack: 56, health: 28, defense: 26, attackSpeed: 0.32 },
-    species_2: { attack: 28, health: 61, defense: 37, attackSpeed: 0.27 },
-    species_3: { attack: 52, health: 26, defense: 25, attackSpeed: 0.57 },
-    species_4: { attack: 35, health: 37, defense: 33, attackSpeed: 0.31 },
-    species_5: { attack: 33, health: 39, defense: 39, attackSpeed: 0.29 }
-  },
-  "m5_5": {
-    species_1: { attack: 58, health: 29, defense: 27, attackSpeed: 0.33 },
-    species_2: { attack: 29, health: 63, defense: 38, attackSpeed: 0.28 },
-    species_3: { attack: 54, health: 27, defense: 26, attackSpeed: 0.59 },
-    species_4: { attack: 36, health: 38, defense: 34, attackSpeed: 0.32 },
-    species_5: { attack: 34, health: 40, defense: 40, attackSpeed: 0.3 }
-  }
-};
 
 function App() {
   const [screen, setScreen] = useState<Screen>("start");
@@ -344,6 +145,7 @@ function App() {
   const [playerCurrency, setPlayerCurrency] = useState(5000);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [currentStats, setCurrentStats] = useState<CharacterStats | null>(null);
 
   const openSettings = () => setIsSettingsOpen(true);
   const closeSettings = () => setIsSettingsOpen(false);
@@ -457,13 +259,6 @@ function App() {
     }
   });
 
-  const [characterStats, setCharacterStats] = useState<CharacterStats>({
-    attack: 0,
-    health: 0,
-    defense: 0,
-    attackSpeed: 0
-  });
-
   const handleStart = () => setScreen("main");
 
   const getMaterialCharacterId = (materialId: string): CharacterId => {
@@ -560,7 +355,7 @@ function App() {
       const characterId = getMaterialCharacterId(draggedInitialMaterial.id);
       
       setSelectedCharacter(characterId);
-      setCharacterStats(initialCharacterStats[characterId]);
+      setCurrentStats(baseCharacterStats[characterId]);
       
       setUsedMaterials(new Set([draggedInitialMaterial.id]));
       setTotalUsedCount(1);
@@ -617,7 +412,7 @@ function App() {
   };
 
   const handleConfirmBreeding = () => {
-    if (!pendingBreedSelection || !selectedCharacter) {
+    if (!pendingBreedSelection || !selectedCharacter || !currentStats) {
       setIsBreedConfirmOpen(false);
       return;
     }
@@ -631,50 +426,45 @@ function App() {
     }
 
     setIsBreedConfirmOpen(false);
-    
     setIsBreeding(true);
     setBreedingProgress(0);
-    
+
     const breedDuration = 5000;
     const updateInterval = 100;
-    
+
     let progress = 0;
     const timer = window.setInterval(() => {
       progress += (updateInterval / breedDuration) * 100;
-      
+
       if (progress >= 100) {
         clearInterval(timer);
-        
-        const bonus = materialBonuses[pendingBreedSelection.id]?.[selectedCharacter];
+
+        const bonusMap = materialBonuses[pendingBreedSelection.id];
+        const bonus = bonusMap?.[selectedCharacter];
+
         if (bonus) {
-          setCharacterStats((prev) => ({
-            attack: prev.attack + bonus.attack,
-            health: prev.health + bonus.health,
-            defense: prev.defense + bonus.defense,
-            attackSpeed: Math.round((prev.attackSpeed + bonus.attackSpeed) * 100) / 100,
-          }));
+          // применяем новый модуль характеристик
+          const updatedStats = applyMaterialToStats(currentStats, bonus);
+          setCurrentStats(updatedStats);
         }
-        
+
         setUsedMaterials((prev) => new Set([...prev, pendingBreedSelection.id]));
-        
+
         const newTotalCount = totalUsedCount + 1;
         setTotalUsedCount(newTotalCount);
         setCharacterForm((prev) => Math.min(prev + 1, 5));
-        
+
         const newPlayerLevel = playerLevel + 1;
         setPlayerLevel(newPlayerLevel);
-        
-        // ========== ДОБАВЬТЕ ЭТУ ПРОВЕРКУ ==========
-        // При достижении 5 уровня сохраняем изображение последнего материала
+
         if (newPlayerLevel === 5) {
-          // Извлекаем номер материала из id (например "m1_1" -> "Bio1-1")
-          const materialNumber = pendingBreedSelection.id.replace('m', '').replace('_', '-');
+          const materialNumber = pendingBreedSelection.id.replace("m", "").replace("_", "-");
           setFinalBioImage(`/assets/Material/Bio${materialNumber}.jpg`);
-          
+
           setCurrentBreedingMaterials(breedingMaterialsStage2);
           setUsedMaterials(new Set());
         }
-        
+
         if (newTotalCount > 0 && newTotalCount % 5 === 0) {
           const nextStage = Math.floor(newTotalCount / 5) + 1;
           if (nextStage === 2) {
@@ -690,11 +480,11 @@ function App() {
             setAwakeningStage(5);
             setCurrentBreedingMaterials(breedingMaterialsStage5);
           }
-          
+
           const newEvolutionStage = Math.min(evolutionStage + 1, 5);
           setEvolutionStage(newEvolutionStage);
         }
-        
+
         setIsBreeding(false);
         setBreedingProgress(0);
         setPendingBreedSelection(null);
@@ -702,7 +492,7 @@ function App() {
         setBreedingProgress(progress);
       }
     }, updateInterval);
-    
+
     breedingTimerRef.current = timer;
   };
 
@@ -1043,49 +833,243 @@ function App() {
                 </div>
                 
                 <div className="info-stats-list">
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">⚔️</span>
-                      <span className="stat-name">Атака</span>
-                      <span className="stat-value">{characterStats.attack}</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div className="stat-bar attack" style={{ width: `${Math.min((characterStats.attack / 300) * 100, 100)}%` }} />
-                    </div>
-                  </div>
-                  
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">❤️</span>
-                      <span className="stat-name">Здоровье</span>
-                      <span className="stat-value">{characterStats.health}</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div className="stat-bar health" style={{ width: `${Math.min((characterStats.health / 350) * 100, 100)}%` }} />
-                    </div>
-                  </div>
-                  
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">🛡️</span>
-                      <span className="stat-name">Защита</span>
-                      <span className="stat-value">{characterStats.defense}</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div className="stat-bar defense" style={{ width: `${Math.min((characterStats.defense / 250) * 100, 100)}%` }} />
-                    </div>
-                  </div>
-                  
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">⚡</span>
-                      <span className="stat-name">Скорость атаки</span>
-                      <span className="stat-value">{characterStats.attackSpeed.toFixed(2)}</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div className="stat-bar speed" style={{ width: `${Math.min((characterStats.attackSpeed / 5.0) * 100, 100)}%` }} />
-                    </div>
-                  </div>
+                  {currentStats && (
+                    <>
+                      {/* 1. Сила удара */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">⚔️</span>
+                          <span className="stat-name">Сила удара</span>
+                          <span className="stat-value">{currentStats.strikePower}</span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar attack"
+                            style={{ width: `${Math.min((currentStats.strikePower / 300) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Базовый наносимый урон всеми атаками. Эффективен в коротких боях,
+                          усиливается скоростью и критическим потенциалом.
+                        </div>
+                      </div>
+
+                      {/* 2. Биоресурс */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">💚</span>
+                          <span className="stat-name">Биоресурс</span>
+                          <span className="stat-value">{currentStats.bioResource}</span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar health"
+                            style={{ width: `${Math.min((currentStats.bioResource / 400) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Общий запас жизненной энергии организма. Повышает выживаемость,
+                          может усиливать вампиризм и сопротивления.
+                        </div>
+                      </div>
+
+                      {/* 3. Матрица защиты (покажем 6 типов строкой) */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">🛡️</span>
+                          <span className="stat-name">Матрица защиты</span>
+                          <span className="stat-value">
+                            {currentStats.defenseMatrix.kinetic +
+                              currentStats.defenseMatrix.energy +
+                              currentStats.defenseMatrix.bio +
+                              currentStats.defenseMatrix.toxic +
+                              currentStats.defenseMatrix.psionic +
+                              currentStats.defenseMatrix.tech}
+                          </span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar defense"
+                            style={{
+                              width: `${Math.min(
+                                ((currentStats.defenseMatrix.kinetic +
+                                  currentStats.defenseMatrix.energy +
+                                  currentStats.defenseMatrix.bio +
+                                  currentStats.defenseMatrix.toxic +
+                                  currentStats.defenseMatrix.psionic +
+                                  currentStats.defenseMatrix.tech) /
+                                  600) *
+                                  100,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Система сопротивлений организма. Кинетическая, энергетическая,
+                          биологическая, токсическая, псионическая и технологическая защита
+                          снижают урон соответствующего типа.
+                        </div>
+                      </div>
+
+                      {/* 4. Темп атаки */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">⚡</span>
+                          <span className="stat-name">Темп атаки</span>
+                          <span className="stat-value">{currentStats.attackTempo.toFixed(2)}</span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar speed"
+                            style={{ width: `${Math.min((currentStats.attackTempo / 3) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Определяет, кто ходит первым и насколько часто атакует. При высоком
+                          значении позволяет навязывать инициативу и прерывать действия врага.
+                        </div>
+                      </div>
+
+                      {/* 5. Реактивная защита */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">🌀</span>
+                          <span className="stat-name">Реактивная защита</span>
+                          <span className="stat-value">
+                            Парир: {currentStats.reactiveDefense.parryChance}% · Сопрот:{" "}
+                            {currentStats.reactiveDefense.mitigationChance}% /
+                            {currentStats.reactiveDefense.mitigationValue}%
+                          </span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar defense"
+                            style={{
+                              width: `${Math.min(
+                                (currentStats.reactiveDefense.parryChance +
+                                  currentStats.reactiveDefense.mitigationChance) /
+                                  2,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Сложная защитная система. Парирование даёт шанс полностью избежать
+                          урона, сопротивление частично поглощает 33–50% входящего урона.
+                        </div>
+                      </div>
+
+                      {/* 6. Критический потенциал */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">💥</span>
+                          <span className="stat-name">Критический потенциал</span>
+                          <span className="stat-value">
+                            {currentStats.critPotential.critChance}% ×
+                            {currentStats.critPotential.critMultiplier.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar attack"
+                            style={{ width: `${Math.min(currentStats.critPotential.critChance, 100)}%` }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Отвечает за взрывной урон. Включает шанс критического удара и
+                          множитель урона критов.
+                        </div>
+                      </div>
+
+                      {/* 7. Хищный резонанс (вампиризм) */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">🩸</span>
+                          <span className="stat-name">Хищный резонанс</span>
+                          <span className="stat-value">
+                            {currentStats.predatoryResonance.lifestealPercent}% ·{" "}
+                            {currentStats.predatoryResonance.lifestealChance}%
+                          </span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar health"
+                            style={{
+                              width: `${Math.min(
+                                (currentStats.predatoryResonance.lifestealPercent *
+                                  currentStats.predatoryResonance.lifestealChance) /
+                                  50,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Восстанавливает здоровье за счёт нанесённого урона. Особенно силён
+                          при высокой скорости атак.
+                        </div>
+                      </div>
+
+                      {/* 8. Токсичность */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">☣️</span>
+                          <span className="stat-name">Токсичность</span>
+                          <span className="stat-value">
+                            {currentStats.toxicity.dotDamage} / {currentStats.toxicity.dotChance}%
+                          </span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar attack"
+                            style={{
+                              width: `${Math.min(
+                                (currentStats.toxicity.dotDamage * currentStats.toxicity.dotChance) / 60,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Наносит урон со временем. Сочетает периодический урон и шанс
+                          наложения эффекта.
+                        </div>
+                      </div>
+
+                      {/* 9. Нейрошок */}
+                      <div className="stat-item">
+                        <div className="stat-header">
+                          <span className="stat-icon">🧠</span>
+                          <span className="stat-name">Нейрошок</span>
+                          <span className="stat-value">
+                            урн {currentStats.neuroShock.shockDamage} · шанс{" "}
+                            {currentStats.neuroShock.stunChance}% ·{" "}
+                            {currentStats.neuroShock.stunDuration}s / cd{" "}
+                            {currentStats.neuroShock.stunCooldown}s
+                          </span>
+                        </div>
+                        <div className="stat-bar-container">
+                          <div
+                            className="stat-bar control"
+                            style={{
+                              width: `${Math.min(
+                                (currentStats.neuroShock.stunChance *
+                                  currentStats.neuroShock.stunDuration) /
+                                  (currentStats.neuroShock.stunCooldown || 1),
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="stat-description">
+                          Контрольная характеристика: шанс оглушить врага, длительность стана и
+                          откат после срабатывания.
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
                 
                 <div className="info-description">
@@ -1173,12 +1157,12 @@ function App() {
             {materialBonuses[pendingBreedSelection.id]?.[selectedCharacter] && (
               <div className="breed-modal-info">
                 <div className="breed-modal-bonus">
-                  <div className="bonus-title">Бонусы:</div>
+                  <div className="bonus-title">Бонусы (примерные):</div>
                   <div className="bonus-stats">
-                    <span>⚔️ Атака: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attack}</span>
-                    <span>❤️ Здоровье: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].health}</span>
-                    <span>🛡️ Защита: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].defense}</span>
-                    <span>⚡ Скорость: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attackSpeed.toFixed(2)}</span>
+                    <span>⚔ Сила удара: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].strikePower}</span>
+                    <span>💚 Биоресурс: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].bioResource}</span>
+                    <span>🛡 Матрица защиты: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].defenseMatrix?.kinetic ?? 0}</span>
+                    <span>⚡ Темп атаки: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attackTempo}</span>
                   </div>
                 </div>
               </div>

@@ -102,7 +102,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  z-index: 10;
+  z-index: 20;
   overflow: hidden;
 }
 
@@ -142,20 +142,21 @@
   height: 100%;
   border-radius: 20px;
   object-fit: fill;
+  z-index: 20
 }
 
 /* ===== контейнер для материалов вверху ===== */
 
 .materials-container {
   position: fixed;
-  top: 70px;  /* Изменено с 60px на 70px - опущено ниже на 10px */
+  top: 74px;  /* Изменено с 60px на 70px - опущено ниже на 10px */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: center;
-  z-index: 5;
+  z-index: 30;
   padding: 0 10px;
 }
 
@@ -1143,7 +1144,7 @@ img {
   padding: 10px 14px;
   border-radius: 10px;
   color: #fff;
-  z-index: 50;
+  z-index: 40;
   font-size: 12px;
   max-width: 320px;
   backdrop-filter: blur(4px);
@@ -1163,14 +1164,13 @@ img {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 60px;          /* опустить вниз на 30px */
-
+  margin-top: 30px;          /* опустить вниз на 30px */
   border: 2px solid #38bdf8; /* рамка */
   border-radius: 10px;
   padding: 8px 12px;
-
   background: rgba(56, 189, 248, 0.2); /* полупрозрачный голубой */
-  backdrop-filter: blur(6px);           /* опционально, лёгкий блюр */
+  backdrop-filter: blur(6px);  
+  z-index: 50         /* опционально, лёгкий блюр */
 }
 
 .materials-row-wrapper {
@@ -1225,6 +1225,12 @@ img {
   box-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
 }
 
+.reroll-circle-button > span,
+.reroll-circle-button > svg,
+.reroll-circle-button > .icon { 
+  transform: translateY(-1px);
+}
+
 .reroll-circle-button:hover:not(:disabled) {
   box-shadow: 0 0 18px rgba(0, 255, 255, 0.9);
   transform: scale(1.03);
@@ -1248,4 +1254,3 @@ img {
   align-items: center;
   justify-content: center;
 }
-

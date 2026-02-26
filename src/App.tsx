@@ -7,8 +7,21 @@ import {
   CharacterStats,
   baseCharacterStats,
   materialBonuses,
-  applyMaterialToStats
+  applyMaterialToStats,
+  detectCurrentFocus,
+  MaterialBonus,
+  MainFocus,
 } from "./features/balance/hooks/characterStats";
+
+import {
+  materialDefinitions,
+  breedingMaterialsStage1,
+  breedingMaterialsStage2,
+  breedingMaterialsStage3,
+  breedingMaterialsStage4,
+  breedingMaterialsStage5,
+  MaterialDefinition,
+} from "./features/balance/hooks/materialsConfig";
 
 type CharacterId =
   | "species_1"
@@ -32,18 +45,13 @@ type Screen =
   | "language"
   | "referal";
 
-interface Material {
-  id: string;
-  name: string;
-  image: string;
-  description: string;
-}
-
 interface StartMaterial {
   id: CharacterId;
   name: string;
   image: string;
 }
+
+type Material = MaterialDefinition;
 
 type EquipmentType =
   | 'microscope' | 'control_panel' | 'analyzer'
@@ -70,68 +78,197 @@ const startMaterials: StartMaterial[] = [
   { id: "species_5", name: "Страж", image: "/assets/Material/Malecula5.jpg" },
 ];
 
-const breedingMaterialsStage1: Material[] = [
-  { id: "m1_1", name: "Водород", image: "/assets/Material/Malecula1.jpg", description: "Материал 1‑1 для 1 пробуждения" },
-  { id: "m1_2", name: "Литий", image: "/assets/Material/Malecula2.jpg", description: "Материал 1‑2 для 1 пробуждения" },
-  { id: "m1_3", name: "Бериллий", image: "/assets/Material/Malecula3.jpg", description: "Материал 1‑3 для 1 пробуждения" },
-  { id: "m1_4", name: "Бор", image: "/assets/Material/Malecula4.jpg", description: "Материал 1‑4 для 1 пробуждения" },
-  { id: "m1_5", name: "Углерод", image: "/assets/Material/Malecula5.jpg", description: "Материал 1‑5 для 1 пробуждения" },
-];
+const buildAdaptiveMaterials = (
+    baseMaterials: MaterialDefinition[],
+    stats: CharacterStats
+  ): MaterialDefinition[] => {
+    // доступные «типы» характеристик
+    const focuses = [
+      "strikePower",
+      "bioResource",
+      "defense",
+      "crit",
+      "lifesteal",
+      "dot",
+      "stun",
+    ] as const;
 
-const breedingMaterialsStage2: Material[] = [
-  { id: "m2_1", name: "Материал 2‑1", image: "/assets/Material/Malecula6.jpg", description: "Материал 2‑1 для 2 пробуждения" },
-  { id: "m2_2", name: "Материал 2‑2", image: "/assets/Material/Malecula7.jpg", description: "Материал 2‑2 для 2 пробуждения" },
-  { id: "m2_3", name: "Материал 2‑3", image: "/assets/Material/Malecula8.jpg", description: "Материал 2‑3 для 2 пробуждения" },
-  { id: "m2_4", name: "Материал 2‑4", image: "/assets/Material/Malecula9.jpg", description: "Материал 2‑4 для 2 пробуждения" },
-  { id: "m2_5", name: "Материал 2‑5", image: "/assets/Material/Malecula10.jpg", description: "Материал 2‑5 для 2 пробуждения" },
-];
+    type Focus = (typeof focuses)[number];
 
-const breedingMaterialsStage3: Material[] = [
-  { id: "m3_1", name: "Материал 3‑1", image: "/assets/Material/Malecula11.jpg", description: "Материал 3‑1 для 3 пробуждения" },
-  { id: "m3_2", name: "Материал 3‑2", image: "/assets/Material/Malecula12.jpg", description: "Материал 3‑2 для 3 пробуждения" },
-  { id: "m3_3", name: "Материал 3‑3", image: "/assets/Material/Malecula13.jpg", description: "Материал 3‑3 для 3 пробуждения" },
-  { id: "m3_4", name: "Материал 3‑4", image: "/assets/Material/Malecula14.jpg", description: "Материал 3‑4 для 3 пробуждения" },
-  { id: "m3_5", name: "Материал 3‑5", image: "/assets/Material/Malecula15.jpg", description: "Материал 3‑5 для 3 пробуждения" },
-];
+    const getRandomFocusPair = (): [Focus, Focus] => {
+      const f1 = focuses[Math.floor(Math.random() * focuses.length)];
+      let f2: Focus;
+      do {
+        f2 = focuses[Math.floor(Math.random() * focuses.length)];
+      } while (f2 === f1);
+      return [f1, f2];
+    };
 
-const breedingMaterialsStage4: Material[] = [
-  { id: "m4_1", name: "Материал 4‑1", image: "/assets/Material/Malecula16.jpg", description: "Материал 4‑1 для 4 пробуждения" },
-  { id: "m4_2", name: "Материал 4‑2", image: "/assets/Material/Malecula17.jpg", description: "Материал 4‑2 для 4 пробуждения" },
-  { id: "m4_3", name: "Материал 4‑3", image: "/assets/Material/Malecula18.jpg", description: "Материал 4‑3 для 4 пробуждения" },
-  { id: "m4_4", name: "Материал 4‑4", image: "/assets/Material/Malecula19.jpg", description: "Материал 4‑4 для 4 пробуждения" },
-  { id: "m4_5", name: "Материал 4‑5", image: "/assets/Material/Malecula20.jpg", description: "Материал 4‑5 для 4 пробуждения" },
-];
+    const makePartBonus = (focus: Focus): MaterialBonus => {
+      switch (focus) {
+        case "strikePower":
+          return { strikePower: 5 + Math.floor(Math.random() * 6) }; // 5–10
+        case "bioResource":
+          return { bioResource: 10 + Math.floor(Math.random() * 21) }; // 10–30
+        case "defense": {
+          const v = 1 + Math.floor(Math.random() * 4); // 1–4
+          return {
+            defenseMatrix: {
+              kinetic: v,
+              energy: v,
+              bio: v,
+              toxic: v,
+              psionic: v,
+              tech: v,
+            },
+          };
+        }
+        case "crit":
+          return {
+            critPotential: {
+              critChance: 2 + Math.floor(Math.random() * 4), // 2–5
+              critMultiplier: 0.1 + Math.random() * 0.3, // 0.1–0.4
+            },
+          };
+        case "lifesteal":
+          return {
+            predatoryResonance: {
+              lifestealPercent: 2 + Math.floor(Math.random() * 4),
+              lifestealChance: 8 + Math.floor(Math.random() * 13),
+            },
+          };
+        case "dot":
+          return {
+            toxicity: {
+              dotDamage: 1 + Math.floor(Math.random() * 4),
+              dotChance: 8 + Math.floor(Math.random() * 13),
+            },
+          };
+        case "stun":
+          return {
+            neuroShock: {
+              stunChance: 2 + Math.floor(Math.random() * 5),
+              stunDuration: 0.2 + Math.random() * 0.5,
+              stunCooldown: 5,
+            },
+          };
+      }
+    };
 
-const breedingMaterialsStage5: Material[] = [
-  { id: "m5_1", name: "Материал 5‑1", image: "/assets/Material/Malecula21.jpg", description: "Материал 5‑1 для 5 пробуждения" },
-  { id: "m5_2", name: "Материал 5‑2", image: "/assets/Material/Malecula22.jpg", description: "Материал 5‑2 для 5 пробуждения" },
-  { id: "m5_3", name: "Материал 5‑3", image: "/assets/Material/Malecula23.jpg", description: "Материал 5‑3 для 5 пробуждения" },
-  { id: "m5_4", name: "Материал 5‑4", image: "/assets/Material/Malecula24.jpg", description: "Материал 5‑4 для 5 пробуждения" },
-  { id: "m5_5", name: "Материал 5‑5", image: "/assets/Material/Malecula25.jpg", description: "Материал 5‑5 для 5 пробуждения" },
-];
+    const mergeBonuses = (a: MaterialBonus, b: MaterialBonus): MaterialBonus => {
+      const res: MaterialBonus = { ...a };
+
+      if (b.strikePower) {
+        res.strikePower = (res.strikePower ?? 0) + b.strikePower;
+      }
+      if (b.bioResource) {
+        res.bioResource = (res.bioResource ?? 0) + b.bioResource;
+      }
+      if (b.defenseMatrix) {
+        res.defenseMatrix = res.defenseMatrix ?? {};
+        for (const k of ["kinetic","energy","bio","toxic","psionic","tech"] as const) {
+          const v = b.defenseMatrix[k];
+          if (v != null) {
+            res.defenseMatrix[k] = (res.defenseMatrix[k] ?? 0) + v;
+          }
+        }
+      }
+      if (b.critPotential) {
+        res.critPotential = res.critPotential ?? {};
+        if (b.critPotential.critChance != null) {
+          res.critPotential.critChance =
+            (res.critPotential.critChance ?? 0) + b.critPotential.critChance;
+        }
+        if (b.critPotential.critMultiplier != null) {
+          res.critPotential.critMultiplier =
+            (res.critPotential.critMultiplier ?? 0) +
+            b.critPotential.critMultiplier;
+        }
+      }
+      if (b.predatoryResonance) {
+        res.predatoryResonance = res.predatoryResonance ?? {};
+        if (b.predatoryResonance.lifestealPercent != null) {
+          res.predatoryResonance.lifestealPercent =
+            (res.predatoryResonance.lifestealPercent ?? 0) +
+            b.predatoryResonance.lifestealPercent;
+        }
+        if (b.predatoryResonance.lifestealChance != null) {
+          res.predatoryResonance.lifestealChance =
+            (res.predatoryResonance.lifestealChance ?? 0) +
+            b.predatoryResonance.lifestealChance;
+        }
+      }
+      if (b.toxicity) {
+        res.toxicity = res.toxicity ?? {};
+        if (b.toxicity.dotDamage != null) {
+          res.toxicity.dotDamage =
+            (res.toxicity.dotDamage ?? 0) + b.toxicity.dotDamage;
+        }
+        if (b.toxicity.dotChance != null) {
+          res.toxicity.dotChance =
+            (res.toxicity.dotChance ?? 0) + b.toxicity.dotChance;
+        }
+      }
+      if (b.neuroShock) {
+        res.neuroShock = res.neuroShock ?? {};
+        if (b.neuroShock.stunChance != null) {
+          res.neuroShock.stunChance =
+            (res.neuroShock.stunChance ?? 0) + b.neuroShock.stunChance;
+        }
+        if (b.neuroShock.stunDuration != null) {
+          res.neuroShock.stunDuration =
+            (res.neuroShock.stunDuration ?? 0) + b.neuroShock.stunDuration;
+        }
+        if (b.neuroShock.stunCooldown != null) {
+          res.neuroShock.stunCooldown = b.neuroShock.stunCooldown;
+        }
+      }
+
+      return res;
+    };
+
+    return baseMaterials.map((mat, index) => {
+      const [f1, f2] = getRandomFocusPair();
+      const b1 = makePartBonus(f1);
+      const b2 = makePartBonus(f2);
+      const bonus = mergeBonuses(b1, b2); // ровно два типа характеристик
+
+      return {
+        ...mat,
+        bonus,
+      };
+    });
+  };
 
 function App() {
   const [screen, setScreen] = useState<Screen>("start");
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterId | null>(null);
+  
   const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");
-  const [playerLevel, setPlayerLevel] = useState(1);
+  const [playerLevel, setPlayerLevel] = useState(0);
 
   const [awakeningStage, setAwakeningStage] = useState<number>(1);
   const [evolutionStage, setEvolutionStage] = useState<number>(1);
-  const [currentBreedingMaterials, setCurrentBreedingMaterials] = useState<Material[]>(breedingMaterialsStage1);
+  const [currentBreedingMaterials, setCurrentBreedingMaterials] =
+  useState<Material[]>(() =>
+    buildAdaptiveMaterials(
+      breedingMaterialsStage1,
+      baseCharacterStats["unknown_dna"]
+    )
+  );
   const [characterForm, setCharacterForm] = useState<number>(1);
+  const [rerollsLeft, setRerollsLeft] = useState(3);
 
   const [draggedInitialMaterial, setDraggedInitialMaterial] = useState<Material | null>(null);
   const [isOverCenterInitial, setIsOverCenterInitial] = useState(false);
+  
+  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [draggedBreedMaterial, setDraggedBreedMaterial] = useState<Material | null>(null);
   const [isOverCenterForBreed, setIsOverCenterForBreed] = useState(false);
   const [pendingBreedSelection, setPendingBreedSelection] = useState<Material | null>(null);
   const [isBreedConfirmOpen, setIsBreedConfirmOpen] = useState(false);
-
-  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
@@ -145,7 +282,25 @@ function App() {
   const [playerCurrency, setPlayerCurrency] = useState(5000);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [currentStats, setCurrentStats] = useState<CharacterStats | null>(null);
+  const [currentStats, setCurrentStats] = useState<CharacterStats>(
+    baseCharacterStats["unknown_dna"]
+  );
+
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialDefinition | null>(null);
+  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
+  const [hoveredMaterial, setHoveredMaterial] = useState<MaterialDefinition | null>(null);
+  const [adaptiveMaterials, setAdaptiveMaterials] = useState<MaterialDefinition[]>(currentBreedingMaterials);
+
+  const openMaterialModal = (materialId: string) => {
+    const material = materialDefinitions.find((m) => m.id === materialId) || null;
+    setSelectedMaterial(material);
+    setIsMaterialModalOpen(!!material);
+  };
+
+  const closeMaterialModal = () => {
+    setIsMaterialModalOpen(false);
+    setSelectedMaterial(null);
+  };
 
   const openSettings = () => setIsSettingsOpen(true);
   const closeSettings = () => setIsSettingsOpen(false);
@@ -324,18 +479,11 @@ function App() {
 
   const handleDragStartInitial = (material: Material, e: React.DragEvent) => {
     setDraggedInitialMaterial(material);
-    setIsDragging(true);
-    
-    const img = new Image();
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(img, 0, 0);
   };
 
   const handleDragEndInitial = () => {
     setDraggedInitialMaterial(null);
     setIsOverCenterInitial(false);
-    setIsDragging(false);
-    setDragPosition(null);
   };
 
   const handleDragOverCenterInitial = (e: React.DragEvent) => {
@@ -350,46 +498,43 @@ function App() {
   const handleDropOnCenterInitial = (e: React.DragEvent) => {
     e.preventDefault();
     setIsOverCenterInitial(false);
-    
-    if (draggedInitialMaterial && !selectedCharacter) {
-      const characterId = getMaterialCharacterId(draggedInitialMaterial.id);
-      
-      setSelectedCharacter(characterId);
-      setCurrentStats(baseCharacterStats[characterId]);
-      
-      setUsedMaterials(new Set([draggedInitialMaterial.id]));
-      setTotalUsedCount(1);
-      
-      setAwakeningStage(1);
-      setEvolutionStage(1);
-      setCharacterForm(1);
-      setCurrentBreedingMaterials(breedingMaterialsStage1);
-      
-      setDraggedInitialMaterial(null);
-      setIsDragging(false);
-      setDragPosition(null);
-    }
-  };
+
+    if (!draggedInitialMaterial) return;
+
+    // Базовые статы Неопознанного ДНК
+    const baseStats = baseCharacterStats["unknown_dna"];
+
+    // Бонус от стартового материала
+    const bonus = materialBonuses[draggedInitialMaterial.id];
+    const updatedStats = bonus
+      ? applyMaterialToStats(baseStats, bonus)
+      : baseStats;
+
+    setCurrentStats(updatedStats);
+
+    // пересчёт списка материалов текущей стадии
+    setCurrentBreedingMaterials((prev) =>
+      buildAdaptiveMaterials(prev, updatedStats)
+    );
+
+    setUsedMaterials(new Set([draggedInitialMaterial.id]));
+    setTotalUsedCount(1);
+
+    setAwakeningStage(1);
+    setEvolutionStage(1);
+    setCharacterForm(1);
+    setCurrentBreedingMaterials(breedingMaterialsStage1);
+
+    setDraggedInitialMaterial(null);
+  }
 
   const handleDragStartBreed = (material: Material, e: React.DragEvent) => {
     setDraggedBreedMaterial(material);
-    setIsDragging(true);
-    
-    const img = new Image();
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(img, 0, 0);
   };
 
   const handleDragEndBreed = () => {
     setDraggedBreedMaterial(null);
     setIsOverCenterForBreed(false);
-    setIsDragging(false);
-    setDragPosition(null);
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    if (e.clientX === 0 && e.clientY === 0) return;
-    setDragPosition({ x: e.clientX, y: e.clientY });
   };
 
   const handleDragOverCenterForBreed = (e: React.DragEvent) => {
@@ -405,84 +550,104 @@ function App() {
     e.preventDefault();
     setIsOverCenterForBreed(false);
 
-    if (draggedBreedMaterial && selectedCharacter && !isBreeding) {
+    if (draggedBreedMaterial && !isBreeding) {
       setPendingBreedSelection(draggedBreedMaterial);
       setIsBreedConfirmOpen(true);
     }
   };
 
   const handleConfirmBreeding = () => {
-    if (!pendingBreedSelection || !selectedCharacter || !currentStats) {
-      setIsBreedConfirmOpen(false);
-      return;
-    }
-
-    // Проверка требований для 4→5
-    if (playerLevel === 4) {
-      const { canBreed } = canBreedToLevel5();
-      if (!canBreed) {
-        return;
-      }
-    }
+    if (!pendingBreedSelection || isBreeding) return;
 
     setIsBreedConfirmOpen(false);
     setIsBreeding(true);
     setBreedingProgress(0);
 
-    const breedDuration = 5000;
-    const updateInterval = 100;
+    const duration = 3000;
+    const updateInterval = 50;
+    const steps = duration / updateInterval;
+    let currentStep = 0;
 
-    let progress = 0;
+    // Берём материал из текущего пула
+    const material = currentBreedingMaterials.find(
+      (m) => m.id === pendingBreedSelection.id
+    );
+    const bonus = material?.bonus;
+
     const timer = window.setInterval(() => {
-      progress += (updateInterval / breedDuration) * 100;
+      currentStep += 1;
+      const progress = Math.min((currentStep / steps) * 100, 100);
 
       if (progress >= 100) {
-        clearInterval(timer);
-
-        const bonusMap = materialBonuses[pendingBreedSelection.id];
-        const bonus = bonusMap?.[selectedCharacter];
+        window.clearInterval(timer);
+        breedingTimerRef.current = null;
 
         if (bonus) {
-          // применяем новый модуль характеристик
-          const updatedStats = applyMaterialToStats(currentStats, bonus);
-          setCurrentStats(updatedStats);
-        }
+          setCurrentStats((prevStats) => {
+            const updatedStats = applyMaterialToStats(prevStats, bonus);
 
-        setUsedMaterials((prev) => new Set([...prev, pendingBreedSelection.id]));
+            // Рандомно пересобираем бонусы всех оставшихся материалов
+            setCurrentBreedingMaterials((prevMats) =>
+              buildAdaptiveMaterials(prevMats, updatedStats)
+            );
 
-        const newTotalCount = totalUsedCount + 1;
-        setTotalUsedCount(newTotalCount);
-        setCharacterForm((prev) => Math.min(prev + 1, 5));
+            // Помечаем использованный материал
+            setUsedMaterials((prev) =>
+              new Set([...prev, pendingBreedSelection!.id])
+            );
 
-        const newPlayerLevel = playerLevel + 1;
-        setPlayerLevel(newPlayerLevel);
+            const newTotalCount = totalUsedCount + 1;
+            setTotalUsedCount(newTotalCount);
+            setCharacterForm((prev) => Math.min(prev + 1, 5));
 
-        if (newPlayerLevel === 5) {
-          const materialNumber = pendingBreedSelection.id.replace("m", "").replace("_", "-");
-          setFinalBioImage(`/assets/Material/Bio${materialNumber}.jpg`);
+            const newPlayerLevel = playerLevel + 1;
+            setPlayerLevel(newPlayerLevel);
 
-          setCurrentBreedingMaterials(breedingMaterialsStage2);
-          setUsedMaterials(new Set());
-        }
+            // Переход на stage2 по уровню
+            if (newPlayerLevel === 5) {
+              const materialNumber = pendingBreedSelection!.id
+                .replace("m", "")
+                .replace("_", "-");
+              setFinalBioImage(`/assets/Material/Bio${materialNumber}.jpg`);
 
-        if (newTotalCount > 0 && newTotalCount % 5 === 0) {
-          const nextStage = Math.floor(newTotalCount / 5) + 1;
-          if (nextStage === 2) {
-            setAwakeningStage(2);
-            setCurrentBreedingMaterials(breedingMaterialsStage2);
-          } else if (nextStage === 3) {
-            setAwakeningStage(3);
-            setCurrentBreedingMaterials(breedingMaterialsStage3);
-          } else if (nextStage === 4) {
-            setAwakeningStage(4);
-            setCurrentBreedingMaterials(breedingMaterialsStage4);
-          } else if (nextStage === 5) {
-            setAwakeningStage(5);
-            setCurrentBreedingMaterials(breedingMaterialsStage5);
-          }
+              setCurrentBreedingMaterials(
+                buildAdaptiveMaterials(breedingMaterialsStage2, updatedStats)
+              );
+              setUsedMaterials(new Set());
+            }
 
-          const newEvolutionStage = Math.min(evolutionStage + 1, 5);
-          setEvolutionStage(newEvolutionStage);
+            // Переходы по стадиям каждые 5 синтезов
+            if (newTotalCount > 0 && newTotalCount % 5 === 0) {
+              const nextStage = Math.floor(newTotalCount / 5) + 1;
+
+              if (nextStage === 2) {
+                setAwakeningStage(2);
+                setCurrentBreedingMaterials(
+                  buildAdaptiveMaterials(breedingMaterialsStage2, updatedStats)
+                );
+              } else if (nextStage === 3) {
+                setAwakeningStage(3);
+                setCurrentBreedingMaterials(
+                  buildAdaptiveMaterials(breedingMaterialsStage3, updatedStats)
+                );
+              } else if (nextStage === 4) {
+                setAwakeningStage(4);
+                setCurrentBreedingMaterials(
+                  buildAdaptiveMaterials(breedingMaterialsStage4, updatedStats)
+                );
+              } else if (nextStage === 5) {
+                setAwakeningStage(5);
+                setCurrentBreedingMaterials(
+                  buildAdaptiveMaterials(breedingMaterialsStage5, updatedStats)
+                );
+              }
+
+              const newEvolutionStage = Math.min(evolutionStage + 1, 5);
+              setEvolutionStage(newEvolutionStage);
+            }
+
+            return updatedStats;
+          });
         }
 
         setIsBreeding(false);
@@ -496,6 +661,15 @@ function App() {
     breedingTimerRef.current = timer;
   };
 
+  const handleRerollMaterials = () => {
+    if (rerollsLeft <= 0 || isBreeding) return;
+
+    setCurrentBreedingMaterials(prev =>
+      buildAdaptiveMaterials(prev, currentStats)
+    );
+    setRerollsLeft(prev => prev - 1);
+  };
+
   const handleCancelBreeding = () => {
     setIsBreedConfirmOpen(false);
     setPendingBreedSelection(null);
@@ -506,14 +680,12 @@ function App() {
   };
 
   const getCharacterImage = () => {
-    if (!selectedCharacter) return "";
-    
     // Если уровень 5 и есть финальное изображение
     if (playerLevel === 5 && finalBioImage) {
       return finalBioImage;
     }
-    
-    // Для уровней 1-4 используем базовое изображение Bio
+
+    // Для уровней 1–4 используем базовое изображение Неопознанного ДНК
     return "/assets/Material/Bio.png";
   };
 
@@ -580,189 +752,232 @@ function App() {
 
       {screen === "main" && (
         <div className="main-screen">
-           {selectedCharacter && (
-              <>
-                <div
-                  className="player-info"
-                  onClick={() => {
-                    setScreen("info");
-                  }}
-                >
-                  <div className="player-avatar">
-                    <img
-                      src={getCharacterImage()}
-                      alt="Player Avatar"
-                      draggable={false}
-                    />
-                  </div>
-                  <div className="player-details">
-                    <div className="player-name">{playerName}</div>
-                    <div className="player-level">Уровень {playerLevel}</div>
-                  </div>
-                </div>
+          {/* верхняя панель игрока и кнопка Магазин всегда видны */}
+          <div
+            className="player-info"
+            onClick={() => {
+              setScreen("info");
+            }}
+          >
+            <div className="player-avatar">
+              <img
+                src={getCharacterImage()}
+                alt="Player Avatar"
+                draggable={true}
+              />
+            </div>
+            <div className="player-details">
+              <div className="player-name">{playerName}</div>
+              <div className="player-level">Уровень {playerLevel}</div>
+            </div>
+          </div>
 
-                {/* ТОЛЬКО ЭТА КНОПКА */}
-                <button
-                  className="market-button"
-                  onClick={() => setScreen("shop")}
-                >
-                  <span className="market-icon" />
-                  <span className="market-label">Магазин</span>
-                </button>
-              </>
-            )}
+          <button
+            className="market-button"
+            onClick={() => setScreen("shop")}
+          >
+            <span className="market-icon" />
+            <span className="market-label">Магазин</span>
+          </button>
 
+          {/* Центральный круг — всегда есть персонаж */}
           <div
             className={`central-circle ${
-              !selectedCharacter
-                ? isOverCenterInitial
-                  ? "drag-over"
-                  : ""
-                : isOverCenterForBreed && !isBreeding
+              isBreeding
+                ? ""
+                : isOverCenterForBreed
                 ? "drag-over-breed"
                 : "has-character"
             }`}
-            onDragOver={
-              isBreeding
-                ? undefined
-                : !selectedCharacter
-                ? handleDragOverCenterInitial
-                : handleDragOverCenterForBreed
-            }
-            onDragLeave={
-              isBreeding
-                ? undefined
-                : !selectedCharacter
-                ? handleDragLeaveCenterInitial
-                : handleDragLeaveCenterForBreed
-            }
-            onDrop={
-              isBreeding
-                ? undefined
-                : !selectedCharacter
-                ? handleDropOnCenterInitial
-                : handleDropOnCenterForBreed
-            }
-            onClick={selectedCharacter ? handleCentralCircleClick : undefined}
+            onDragOver={isBreeding ? undefined : handleDragOverCenterForBreed}
+            onDragLeave={isBreeding ? undefined : handleDragLeaveCenterForBreed}
+            onDrop={isBreeding ? undefined : handleDropOnCenterForBreed}
+            onClick={handleCentralCircleClick}
           >
-            {!selectedCharacter ? (
-              <div className="central-placeholder">
-                Перетащите материал сюда, чтобы начать
-              </div>
-            ) : (
-              <>
-                <img
-                  src={getCharacterImage()}
-                  alt="Selected Character"
-                  className="central-character-image"
-                  draggable={false}
+            <img
+              src={getCharacterImage()}
+              alt="Selected Character"
+              className="central-character-image"
+              draggable={false}
+            />
+
+            {isBreeding && (
+              <div className="breeding-timer-overlay">
+                <div
+                  className="breeding-progress-bar"
+                  style={{ width: `${breedingProgress}%` }}
                 />
-                
-                {/* Таймер скрещивания */}
-                {isBreeding && (
-                  <div className="breeding-timer-overlay">
-                    <div 
-                      className="breeding-progress-bar"
-                      style={{ width: `${breedingProgress}%` }}
-                    />
-                    <span className="breeding-timer-text">
-                      {Math.ceil((5000 * (100 - breedingProgress)) / 100 / 1000)}s
-                    </span>
-                  </div>
-                )}
-              </>
+                <span className="breeding-timer-text">
+                  {Math.ceil((5000 * (100 - breedingProgress)) / 100 / 1000)}s
+                </span>
+              </div>
             )}
           </div>
 
-          <div className="materials-container">
-            {currentBreedingMaterials.map((material) => {
-              const isDraggingThis = selectedCharacter 
-                ? draggedBreedMaterial?.id === material.id
-                : draggedInitialMaterial?.id === material.id;
-              const isUsed = usedMaterials.has(material.id);
-              
-              return (
-                <div
-                  key={material.id}
-                  className={`small-circle breeding-material ${
-                    isDraggingThis ? "is-dragging" : ""
-                  } ${isUsed || isBreeding ? "is-used" : ""}`}
-                  draggable={!isUsed && !isBreeding}
-                  onDragStart={(e) => {
-                    if (isUsed || isBreeding) return;
-                    if (selectedCharacter) {
+          {/* Материалы + реролл справа */}
+          <div className="materials-row">
+            <div className="materials-container">
+              {currentBreedingMaterials.map((material) => {
+                const isUsed = usedMaterials.has(material.id);
+
+                return (
+                  <div
+                    key={material.id}
+                    className={`small-circle breeding-material ${
+                      isUsed || isBreeding ? "is-used" : ""
+                    }`}
+                    draggable={!isUsed && !isBreeding}
+                    onDragStart={(e) => {
+                      if (isUsed || isBreeding) return;
                       handleDragStartBreed(material, e);
-                    } else {
-                      handleDragStartInitial(material, e);
-                    }
-                  }}
-                  onDrag={handleDrag}
-                  onDragEnd={selectedCharacter ? handleDragEndBreed : handleDragEndInitial}
-                >
-                  <img
-                    src={material.image}
-                    alt={material.name}
-                    className="small-circle-image"
-                    draggable={false}
-                  />
-                  <div className="small-circle-name">{material.name}</div>
-                </div>
-              );
-            })}
+                    }}
+                    onDragEnd={handleDragEndBreed}
+                    onClick={() => {
+                      setHoveredMaterial(prev =>
+                        prev && prev.id === material.id
+                          ? null
+                          : materialDefinitions.find(m => m.id === material.id) || null
+                      );
+                    }}
+                  >
+                    <img
+                      src={material.image}
+                      alt={material.name}
+                      className="small-circle-image"
+                      draggable={false}
+                    />
+                    <div className="small-circle-name">{material.name}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              className="reroll-circle-button"
+              onClick={handleRerollMaterials}
+              disabled={rerollsLeft <= 0 || isBreeding}
+            >
+              ⟳
+              <span className="reroll-counter">{rerollsLeft}</span>
+            </button>
           </div>
 
-          {isDragging && dragPosition && (draggedBreedMaterial || draggedInitialMaterial) && (
-            <div 
-              className="dragging-ghost"
-              style={{
-                left: `${dragPosition.x}px`,
-                top: `${dragPosition.y}px`,
-              }}
-            >
-              <img 
-                src={(draggedBreedMaterial || draggedInitialMaterial)!.image} 
-                alt="Dragging"
-                className="dragging-ghost-image"
-                draggable={false}
-              />
+          {hoveredMaterial && (
+            <div className="material-tooltip">
+              <div className="material-tooltip-title">{hoveredMaterial.name}</div>
+              {(() => {
+                const bonus =
+                  currentBreedingMaterials.find(m => m.id === hoveredMaterial.id)?.bonus;
+                if (!bonus) return null;
+
+                const lines: React.ReactNode[] = [];
+
+                if (bonus.strikePower) {
+                  lines.push(<div key="sp">Сила удара: +{bonus.strikePower}</div>);
+                }
+
+                if (bonus.bioResource) {
+                  lines.push(<div key="br">Биоресурс: +{bonus.bioResource}</div>);
+                }
+
+                if (bonus.defenseMatrix) {
+                  const sum =
+                    (bonus.defenseMatrix.kinetic ?? 0) +
+                    (bonus.defenseMatrix.energy ?? 0) +
+                    (bonus.defenseMatrix.bio ?? 0) +
+                    (bonus.defenseMatrix.toxic ?? 0) +
+                    (bonus.defenseMatrix.psionic ?? 0) +
+                    (bonus.defenseMatrix.tech ?? 0);
+                  lines.push(<div key="def">Защита суммарно: +{sum}</div>);
+                }
+
+                if (bonus.critPotential) {
+                  lines.push(
+                    <div key="crit">
+                      Крит: шанс +{bonus.critPotential.critChance ?? 0}%, множитель +
+                      {(bonus.critPotential.critMultiplier ?? 0).toFixed(2)}
+                    </div>
+                  );
+                }
+
+                if (bonus.predatoryResonance) {
+                  lines.push(
+                    <div key="lifesteal">
+                      Вампиризм: +{bonus.predatoryResonance.lifestealPercent ?? 0}%,
+                      шанс {bonus.predatoryResonance.lifestealChance ?? 0}%
+                    </div>
+                  );
+                }
+
+                if (bonus.toxicity) {
+                  lines.push(
+                    <div key="dot">
+                      Токсичность: урон {bonus.toxicity.dotDamage ?? 0},
+                      шанс {bonus.toxicity.dotChance ?? 0}%
+                    </div>
+                  );
+                }
+
+                if (bonus.neuroShock) {
+                  lines.push(
+                    <div key="stun">
+                      Нейрошок: шанс {bonus.neuroShock.stunChance ?? 0}%,
+                      длительность {(bonus.neuroShock.stunDuration ?? 0).toFixed(1)} c
+                    </div>
+                  );
+                }
+
+                return lines.length ? lines : <div>Нет бонусов</div>;
+              })()}
             </div>
           )}
 
-          {selectedCharacter && (
-            <div className="bottom-navigation">
-              <button className="nav-button" onClick={() => setScreen("laboratory")}>
-                <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Lab_button.png" alt="Лаборатория" draggable={false} />
-                </div>
-                <span className="nav-button-label">Лаборатория</span>
-              </button>
+          {/* нижняя навигация всегда доступна */}
+          <div className="bottom-navigation">
+            <button className="nav-button" onClick={() => setScreen("laboratory")}>
+              <div className="nav-button-icon">
+                <img
+                  src="/assets/Icon_button/Lab_button.png"
+                  alt="Лаборатория"
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">Лаборатория</span>
+            </button>
 
-              <button className="nav-button" onClick={() => setScreen("premium")}>
-                <div className="nav-button-icon">
-                  <img src="/assets/Icon_button/Premium_button.png" alt="Премиум" draggable={false} />
-                </div>
-                <span className="nav-button-label">Премиум</span>
-              </button>
+            <button className="nav-button" onClick={() => setScreen("premium")}>
+              <div className="nav-button-icon">
+                <img
+                  src="/assets/Icon_button/Premium_button.png"
+                  alt="Премиум"
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">Премиум</span>
+            </button>
 
-              <button className="nav-button" onClick={() => setScreen("nftShop")}>
-                <div className="nav-button-icon">
-                  <img src="assets/Icon_button/Shop_button.png" alt="" draggable={false} />
-                </div>
-                <span className="nav-button-label">NFT магазин</span>
-              </button>
+            <button className="nav-button" onClick={() => setScreen("nftShop")}>
+              <div className="nav-button-icon">
+                <img
+                  src="assets/Icon_button/Shop_button.png"
+                  alt=""
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">NFT магазин</span>
+            </button>
 
-              <button className="nav-button" onClick={openSettings}>
-                <div className="nav-button-icon">
-                  <img
-                    src="/assets/Icon_button/Setting_button.png"
-                    alt=""
-                    draggable={false}
-                  />
-                </div>
-                <span className="nav-button-label">Настройки</span>
-              </button>
-            </div>
-          )}
+            <button className="nav-button" onClick={openSettings}>
+              <div className="nav-button-icon">
+                <img
+                  src="/assets/Icon_button/Setting_button.png"
+                  alt=""
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">Настройки</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -815,286 +1030,336 @@ function App() {
         <div className="info-screen">
           <div className="info-header">
             <h2>Характеристики персонажа</h2>
-            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
+            <button className="close-button" onClick={() => setScreen("main")}>
+              ✕
+            </button>
           </div>
-          
+
           <div className="info-content">
-            {selectedCharacter ? (
-              <>
-                <div className="info-character-preview">
-                  <img src={getCharacterImage()} alt={selectedCharacter} className="info-character-image" draggable={false} />
-                  <div className="info-character-name">
-                    {selectedCharacter === "species_1" && "Хищник"}
-                    {selectedCharacter === "species_2" && "Титан"}
-                    {selectedCharacter === "species_3" && "Спринтер"}
-                    {selectedCharacter === "species_4" && "Универсал"}
-                    {selectedCharacter === "species_5" && "Страж"}
+            <div className="info-character-preview">
+              <img
+                src={getCharacterImage()}
+                alt="Неопознанный ДНК"
+                className="info-character-image"
+                draggable={false}
+              />
+              <div className="character-description">
+                Неопознанный ДНК — базовое нестабильное существо с минимальными
+                характеристиками. Его потенциал раскрывается через синтез материалов.
+              </div>
+            </div>
+
+            <div className="info-stats-list">
+              {currentStats && (
+                <>
+                  {/* 1. Сила удара */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">⚔️</span>
+                      <span className="stat-name">Сила удара</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar attack"
+                        style={{
+                          width: `${Math.min(
+                            (currentStats.strikePower / 300) * 100,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Базовый урон и частота атак.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>Урон: {currentStats.strikePower}</div>
+                      <div>
+                        Скорость атаки: {currentStats.attackTempo.toFixed(2)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="info-stats-list">
-                  {currentStats && (
-                    <>
-                      {/* 1. Сила удара */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">⚔️</span>
-                          <span className="stat-name">Сила удара</span>
-                          <span className="stat-value">{currentStats.strikePower}</span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar attack"
-                            style={{ width: `${Math.min((currentStats.strikePower / 300) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Базовый наносимый урон всеми атаками. Эффективен в коротких боях,
-                          усиливается скоростью и критическим потенциалом.
-                        </div>
-                      </div>
 
-                      {/* 2. Биоресурс */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">💚</span>
-                          <span className="stat-name">Биоресурс</span>
-                          <span className="stat-value">{currentStats.bioResource}</span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar health"
-                            style={{ width: `${Math.min((currentStats.bioResource / 400) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Общий запас жизненной энергии организма. Повышает выживаемость,
-                          может усиливать вампиризм и сопротивления.
-                        </div>
-                      </div>
+                  {/* 2. Биоресурс */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">💚</span>
+                      <span className="stat-name">Биоресурс</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar health"
+                        style={{
+                          width: `${Math.min(
+                            (currentStats.bioResource / 400) * 100,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Запас жизни и устойчивость к фокусу.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>ХП: {currentStats.bioResource}</div>
+                    </div>
+                  </div>
 
-                      {/* 3. Матрица защиты (покажем 6 типов строкой) */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">🛡️</span>
-                          <span className="stat-name">Матрица защиты</span>
-                          <span className="stat-value">
-                            {currentStats.defenseMatrix.kinetic +
+                  {/* 3. Матрица защиты */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">🛡️</span>
+                      <span className="stat-name">Матрица защиты</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar defense"
+                        style={{
+                          width: `${Math.min(
+                            ((currentStats.defenseMatrix.kinetic +
                               currentStats.defenseMatrix.energy +
                               currentStats.defenseMatrix.bio +
                               currentStats.defenseMatrix.toxic +
                               currentStats.defenseMatrix.psionic +
-                              currentStats.defenseMatrix.tech}
-                          </span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar defense"
-                            style={{
-                              width: `${Math.min(
-                                ((currentStats.defenseMatrix.kinetic +
-                                  currentStats.defenseMatrix.energy +
-                                  currentStats.defenseMatrix.bio +
-                                  currentStats.defenseMatrix.toxic +
-                                  currentStats.defenseMatrix.psionic +
-                                  currentStats.defenseMatrix.tech) /
-                                  600) *
-                                  100,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Система сопротивлений организма. Кинетическая, энергетическая,
-                          биологическая, токсическая, псионическая и технологическая защита
-                          снижают урон соответствующего типа.
-                        </div>
+                              currentStats.defenseMatrix.tech) /
+                              600) *
+                              100,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Уменьшение входящего урона по разным типам.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>
+                        Защита:{" "}
+                        {currentStats.defenseMatrix.kinetic +
+                          currentStats.defenseMatrix.energy +
+                          currentStats.defenseMatrix.bio +
+                          currentStats.defenseMatrix.toxic +
+                          currentStats.defenseMatrix.psionic +
+                          currentStats.defenseMatrix.tech}
                       </div>
-
-                      {/* 4. Темп атаки */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">⚡</span>
-                          <span className="stat-name">Темп атаки</span>
-                          <span className="stat-value">{currentStats.attackTempo.toFixed(2)}</span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar speed"
-                            style={{ width: `${Math.min((currentStats.attackTempo / 3) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Определяет, кто ходит первым и насколько часто атакует. При высоком
-                          значении позволяет навязывать инициативу и прерывать действия врага.
-                        </div>
+                      <div>
+                        Кинетическая: {currentStats.defenseMatrix.kinetic}
                       </div>
-
-                      {/* 5. Реактивная защита */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">🌀</span>
-                          <span className="stat-name">Реактивная защита</span>
-                          <span className="stat-value">
-                            Парир: {currentStats.reactiveDefense.parryChance}% · Сопрот:{" "}
-                            {currentStats.reactiveDefense.mitigationChance}% /
-                            {currentStats.reactiveDefense.mitigationValue}%
-                          </span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar defense"
-                            style={{
-                              width: `${Math.min(
-                                (currentStats.reactiveDefense.parryChance +
-                                  currentStats.reactiveDefense.mitigationChance) /
-                                  2,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Сложная защитная система. Парирование даёт шанс полностью избежать
-                          урона, сопротивление частично поглощает 33–50% входящего урона.
-                        </div>
+                      <div>
+                        Энергетическая: {currentStats.defenseMatrix.energy}
                       </div>
-
-                      {/* 6. Критический потенциал */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">💥</span>
-                          <span className="stat-name">Критический потенциал</span>
-                          <span className="stat-value">
-                            {currentStats.critPotential.critChance}% ×
-                            {currentStats.critPotential.critMultiplier.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar attack"
-                            style={{ width: `${Math.min(currentStats.critPotential.critChance, 100)}%` }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Отвечает за взрывной урон. Включает шанс критического удара и
-                          множитель урона критов.
-                        </div>
+                      <div>
+                        Биологическая: {currentStats.defenseMatrix.bio}
                       </div>
-
-                      {/* 7. Хищный резонанс (вампиризм) */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">🩸</span>
-                          <span className="stat-name">Хищный резонанс</span>
-                          <span className="stat-value">
-                            {currentStats.predatoryResonance.lifestealPercent}% ·{" "}
-                            {currentStats.predatoryResonance.lifestealChance}%
-                          </span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar health"
-                            style={{
-                              width: `${Math.min(
-                                (currentStats.predatoryResonance.lifestealPercent *
-                                  currentStats.predatoryResonance.lifestealChance) /
-                                  50,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Восстанавливает здоровье за счёт нанесённого урона. Особенно силён
-                          при высокой скорости атак.
-                        </div>
+                      <div>
+                        Токсическая: {currentStats.defenseMatrix.toxic}
                       </div>
-
-                      {/* 8. Токсичность */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">☣️</span>
-                          <span className="stat-name">Токсичность</span>
-                          <span className="stat-value">
-                            {currentStats.toxicity.dotDamage} / {currentStats.toxicity.dotChance}%
-                          </span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar attack"
-                            style={{
-                              width: `${Math.min(
-                                (currentStats.toxicity.dotDamage * currentStats.toxicity.dotChance) / 60,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Наносит урон со временем. Сочетает периодический урон и шанс
-                          наложения эффекта.
-                        </div>
+                      <div>
+                        Псионическая: {currentStats.defenseMatrix.psionic}
                       </div>
-
-                      {/* 9. Нейрошок */}
-                      <div className="stat-item">
-                        <div className="stat-header">
-                          <span className="stat-icon">🧠</span>
-                          <span className="stat-name">Нейрошок</span>
-                          <span className="stat-value">
-                            урн {currentStats.neuroShock.shockDamage} · шанс{" "}
-                            {currentStats.neuroShock.stunChance}% ·{" "}
-                            {currentStats.neuroShock.stunDuration}s / cd{" "}
-                            {currentStats.neuroShock.stunCooldown}s
-                          </span>
-                        </div>
-                        <div className="stat-bar-container">
-                          <div
-                            className="stat-bar control"
-                            style={{
-                              width: `${Math.min(
-                                (currentStats.neuroShock.stunChance *
-                                  currentStats.neuroShock.stunDuration) /
-                                  (currentStats.neuroShock.stunCooldown || 1),
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                        <div className="stat-description">
-                          Контрольная характеристика: шанс оглушить врага, длительность стана и
-                          откат после срабатывания.
-                        </div>
+                      <div>
+                        Технологическая: {currentStats.defenseMatrix.tech}
                       </div>
-                    </>
-                  )}
-                </div>
-                
-                <div className="info-description">
-                  <h3>Особенности</h3>
-                  <p>
-                    {selectedCharacter === "species_1" && "Высокая атака и скорость, но слабая защита. Идеален для агрессивного стиля игры."}
-                    {selectedCharacter === "species_2" && "Максимальное здоровье и защита. Медленный, но очень живучий персонаж."}
-                    {selectedCharacter === "species_3" && "Самый быстрый персонаж в игре. Наносит частые удары, но хрупок."}
-                    {selectedCharacter === "species_4" && "Сбалансированные характеристики. Подходит для универсальной стратегии."}
-                    {selectedCharacter === "species_5" && "Специализируется на защите. Отлично выдерживает атаки врагов."}
-                  </p>
-                </div>
-                
-                <div className="info-stage-display">
-                  <div className="stage-badge">
-                    <span className="stage-label">Стадия эволюции</span>
-                    <span className="stage-number">{evolutionStage}/5</span>
+                    </div>
                   </div>
-                </div>
-              </>
-            ) : (
-              <div className="info-no-character">
-                <p>Персонаж еще не выбран</p>
+
+                  {/* 4. Реактивная защита */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">🌀</span>
+                      <span className="stat-name">Реактивная защита</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar defense"
+                        style={{
+                          width: `${Math.min(
+                            (currentStats.reactiveDefense.parryChance +
+                              currentStats.reactiveDefense.mitigationChance) /
+                              2,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Шанс среагировать на входящий урон.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>
+                        Шанс уклонения:{" "}
+                        {currentStats.reactiveDefense.parryChance.toFixed(2)}%
+                      </div>
+                      <div>
+                        Шанс блокировки:{" "}
+                        {currentStats.reactiveDefense.mitigationChance.toFixed(2)}%
+                      </div>
+                      <div>
+                        Поглощение:{" "}
+                        {currentStats.reactiveDefense.mitigationValue.toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 5. Критический потенциал */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">💥</span>
+                      <span className="stat-name">Критический потенциал</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar attack"
+                        style={{
+                          width: `${Math.min(
+                            currentStats.critPotential.critChance,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Отвечает за взрывной урон.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>
+                        Шанс крита:{" "}
+                        {currentStats.critPotential.critChance.toFixed(2)}%
+                      </div>
+                      <div>
+                        Увеличение крита: ×
+                        {currentStats.critPotential.critMultiplier.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 6. Хищный резонанс */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">🩸</span>
+                      <span className="stat-name">Хищный резонанс</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar health"
+                        style={{
+                          width: `${Math.min(
+                            (currentStats.predatoryResonance.lifestealPercent *
+                              currentStats.predatoryResonance.lifestealChance) /
+                              50,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Откачивает жизнь у цели.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>
+                        Кража здоровья:{" "}
+                        {currentStats.predatoryResonance.lifestealPercent.toFixed(
+                          2
+                        )}
+                        %
+                      </div>
+                      <div>
+                        Шанс успеха:{" "}
+                        {currentStats.predatoryResonance.lifestealChance.toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 7. Токсичность */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">☣️</span>
+                      <span className="stat-name">Токсичность</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar attack"
+                        style={{
+                          width: `${Math.min(
+                            (currentStats.toxicity.dotDamage *
+                              currentStats.toxicity.dotChance) /
+                              60,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Наносит урон ядом.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>
+                        Шанс успеха:{" "}
+                        {currentStats.toxicity.dotChance.toFixed(2)}%
+                      </div>
+                      <div>
+                        Урон в секунду:{" "}
+                        {currentStats.toxicity.dotDamage.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 8. Нейрошок */}
+                  <div className="stat-item">
+                    <div className="stat-header">
+                      <span className="stat-icon">🧠</span>
+                      <span className="stat-name">Нейрошок</span>
+                    </div>
+                    <div className="stat-bar-container">
+                      <div
+                        className="stat-bar control"
+                        style={{
+                          width: `${Math.min(
+                            (currentStats.neuroShock.stunChance *
+                              currentStats.neuroShock.stunDuration) /
+                              (currentStats.neuroShock.stunCooldown || 1),
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="stat-description">
+                      Контролирует действия противника.
+                    </div>
+                    <div className="stat-subgrid">
+                      <div>
+                        Шанс успеха:{" "}
+                        {currentStats.neuroShock.stunChance.toFixed(2)}%
+                      </div>
+                      <div>
+                        Длительность:{" "}
+                        {currentStats.neuroShock.stunDuration.toFixed(2)} c
+                      </div>
+                      <div>
+                        Кулдаун:{" "}
+                        {currentStats.neuroShock.stunCooldown.toFixed(2)} c
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="info-description">
+              <h3>Особенности</h3>
+              <p>
+                Неопознанный ДНК начинает как слабое существо, но с каждым синтезом
+                материалов его характеристики могут развиваться в разные стороны:
+                от мощного танка до быстрого хищника.
+              </p>
+            </div>
+
+            <div className="info-stage-display">
+              <div className="stage-badge">
+                <span className="stage-label">Стадия эволюции</span>
+                <span className="stage-number">{evolutionStage}/5</span>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
@@ -1119,7 +1384,7 @@ function App() {
         <div className="settings-modal-backdrop" onClick={closeSettings}>
           <div
             className="settings-modal"
-            onClick={(e) => e.stopPropagation()} // чтобы клик внутри не закрывал
+            onClick={(e) => e.stopPropagation()}
           >
             <h2>Настройки</h2>
 
@@ -1146,60 +1411,135 @@ function App() {
         </div>
       )}
 
-      {isBreedConfirmOpen && pendingBreedSelection && selectedCharacter && (
+      {isBreedConfirmOpen && pendingBreedSelection && (
         <div className="breed-modal-backdrop">
           <div className="breed-modal">
-            <div className="breed-modal-title">Вы точно хотите выполнить это скрещивание?</div>
+            <div className="breed-modal-title">
+              Вы точно хотите выполнить это скрещивание?
+            </div>
             <div className="breed-modal-text">
               Скрестить {pendingBreedSelection.name}?
             </div>
 
-            {materialBonuses[pendingBreedSelection.id]?.[selectedCharacter] && (
-              <div className="breed-modal-info">
-                <div className="breed-modal-bonus">
-                  <div className="bonus-title">Бонусы (примерные):</div>
-                  <div className="bonus-stats">
-                    <span>⚔ Сила удара: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].strikePower}</span>
-                    <span>💚 Биоресурс: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].bioResource}</span>
-                    <span>🛡 Матрица защиты: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].defenseMatrix?.kinetic ?? 0}</span>
-                    <span>⚡ Темп атаки: +{materialBonuses[pendingBreedSelection.id][selectedCharacter].attackTempo}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Блок с бонусами материала */}
+            {materialBonuses[pendingBreedSelection.id] && (() => {
+              const bonus = materialBonuses[pendingBreedSelection.id];
 
-            {/* Требования для скрещивания 4→5 */}
-            {playerLevel === 4 && (() => {
-              const { canBreed, missingRequirements } = canBreedToLevel5();
-              if (!canBreed) {
-                return (
-                  <div className="breed-requirements">
-                    <div className="requirements-title">⚠️ Требования не выполнены:</div>
-                    <div className="requirements-list">
-                      {missingRequirements.map((req, index) => (
-                        <div key={index} className="requirement-item">❌ {req}</div>
-                      ))}
-                    </div>
-                  </div>
+              const lines: React.ReactNode[] = [];
+
+              if (bonus.strikePower) {
+                lines.push(
+                  <div key="sp">⚔ Сила удара: +{bonus.strikePower}</div>
                 );
-              } else {
-                return (
-                  <div className="breed-requirements">
-                    <div className="requirements-title-success">✅ Все требования выполнены!</div>
+              }
+
+              if (bonus.bioResource) {
+                lines.push(
+                  <div key="br">💚 Биоресурс: +{bonus.bioResource}</div>
+                );
+              }
+
+              if (bonus.defenseMatrix) {
+                const sum =
+                  (bonus.defenseMatrix.kinetic ?? 0) +
+                  (bonus.defenseMatrix.energy ?? 0) +
+                  (bonus.defenseMatrix.bio ?? 0) +
+                  (bonus.defenseMatrix.toxic ?? 0) +
+                  (bonus.defenseMatrix.psionic ?? 0) +
+                  (bonus.defenseMatrix.tech ?? 0);
+
+                lines.push(
+                  <div key="def">🛡 Матрица защиты: +{sum}</div>
+                );
+              }
+
+              if (bonus.critPotential) {
+                lines.push(
+                  <div key="crit">
+                    🎯 Крит: шанс +{bonus.critPotential.critChance ?? 0}%,
+                    множитель +{(bonus.critPotential.critMultiplier ?? 0).toFixed(2)}
                   </div>
                 );
               }
+
+              if (bonus.predatoryResonance) {
+                lines.push(
+                  <div key="lifesteal">
+                    🩸 Вампиризм: +{bonus.predatoryResonance.lifestealPercent ?? 0}%,
+                    шанс {bonus.predatoryResonance.lifestealChance ?? 0}%
+                  </div>
+                );
+              }
+
+              if (bonus.toxicity) {
+                lines.push(
+                  <div key="dot">
+                    ☣️ Токсичность: урон {bonus.toxicity.dotDamage ?? 0},
+                    шанс {bonus.toxicity.dotChance ?? 0}%
+                  </div>
+                );
+              }
+
+              if (bonus.neuroShock) {
+                lines.push(
+                  <div key="stun">
+                    ⚡ Нейрошок: шанс {bonus.neuroShock.stunChance ?? 0}%,
+                    длительность {(bonus.neuroShock.stunDuration ?? 0).toFixed(1)} c
+                  </div>
+                );
+              }
+
+              return (
+                <div className="breed-bonus-list">
+                  {lines.length ? lines : <div>Без явных бонусов</div>}
+                </div>
+              );
             })()}
+
+            {/* Требования для скрещивания 4→5 */}
+            {playerLevel === 4 &&
+              (() => {
+                const { canBreed, missingRequirements } = canBreedToLevel5();
+                if (!canBreed) {
+                  return (
+                    <div className="breed-requirements">
+                      <div className="requirements-title">
+                        ⚠️ Требования не выполнены:
+                      </div>
+                      <div className="requirements-list">
+                        {missingRequirements.map((req, index) => (
+                          <div key={index} className="requirement-item">
+                            ❌ {req}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="breed-requirements">
+                      <div className="requirements-title-success">
+                        ✅ Все требования выполнены!
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
 
             <div className="breed-modal-buttons">
               <button
-                className={`breed-modal-button yes ${playerLevel === 4 && !canBreedToLevel5().canBreed ? 'disabled' : ''}`}
+                className={`breed-modal-button yes ${
+                  playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""
+                }`}
                 onClick={handleConfirmBreeding}
                 disabled={playerLevel === 4 && !canBreedToLevel5().canBreed}
               >
                 Да
               </button>
-              <button className="breed-modal-button no" onClick={handleCancelBreeding}>
+              <button
+                className="breed-modal-button no"
+                onClick={handleCancelBreeding}
+              >
                 Нет
               </button>
             </div>

@@ -1,21 +1,17 @@
 // src/app/features/balance/characterStats.ts
 
-// === Типы персонажей ===
+// ===== Тип персонажа =====
 
-export type CharacterId =
-  | "species_1"
-  | "species_2"
-  | "species_3"
-  | "species_4"
-  | "species_5";
+export type CharacterId = "unknown_dna";
 
-// === Характеристики персонажа в стиле научной фантастики ===
+// ===== Основные характеристики персонажа =====
 
 export interface CharacterStats {
-  // 1. Сила удара (базовый урон)
-  strikePower: number;
+  // 1. Сила удара + темп атаки
+  strikePower: number;   // общее «очко» силы удара
+  attackTempo: number;   // итоговый темп атаки (ударов в секунду)
 
-  // 2. Биоресурс (здоровье)
+  // 2. Биоресурс
   bioResource: number;
 
   // 3. Матрица защиты — 6 типов
@@ -28,348 +24,110 @@ export interface CharacterStats {
     tech: number;
   };
 
-  // 4. Темп атаки (скорость / инициатива)
-  attackTempo: number;
-
-  // 5. Реактивная защита
+  // 4. Реактивная защита (детальный вариант)
   reactiveDefense: {
-    parryChance: number;        // %
-    mitigationChance: number;   // %
-    mitigationValue: number;    // % поглощения
+    triggerChance: number;    // общий шанс срабатывания реактивной защиты, %
+    parryChance: number;      // шанс, что сработавшая защита будет «уклонением», %
+    mitigationChance: number; // шанс, что сработавшая защита будет «блоком», %
+    mitigationValue: number;  // сколько урона блок поглощает, %
   };
 
-  // 6. Критический потенциал
+  // 5. Критический потенциал
   critPotential: {
-    critChance: number;         // %
-    critMultiplier: number;     // ×1.5, ×2 и т.п.
+    critChance: number;     // шанс крита, %
+    critMultiplier: number; // множитель крита, например 1.5 = +50%
   };
 
-  // 7. Хищный резонанс (вампиризм)
+  // 6. Хищный резонанс (вампиризм)
   predatoryResonance: {
-    lifestealPercent: number;   // % от урона
-    lifestealChance: number;    // %
+    lifestealPercent: number; // % от нанесённого урона, который лечит
+    lifestealChance: number;  // шанс срабатывания, %
   };
 
-  // 8. Токсичность (dot)
+  // 7. Токсичность (dot)
   toxicity: {
-    dotDamage: number;          // урон за тик
-    dotChance: number;          // %
+    dotDamage: number; // урон в секунду
+    dotChance: number; // шанс наложить эффект, %
   };
 
-  // 9. Нейрошок (стан)
+  // 8. Нейрошок (стан)
   neuroShock: {
-    shockDamage: number;        // урон при срабатывании
-    stunChance: number;         // %
-    stunDuration: number;       // сек
-    stunCooldown: number;       // сек
+    stunChance: number;   // шанс успеха, %
+    stunDuration: number; // длительность стана, сек
+    stunCooldown: number; // кулдаун способности, сек
   };
 }
 
-// === БАЗОВЫЕ СТАТЫ ПЕРСОНАЖЕЙ (сырая версия, под баланс) ===
+// ===== Вспомогательная функция: темп атаки от силы удара =====
 
-const rawCharacterStats: Record<CharacterId, CharacterStats> = {
-  // Агрессивный хищник
-  species_1: {
-    strikePower: 120,
-    bioResource: 80,
-    defenseMatrix: {
-      kinetic: 40,
-      energy: 25,
-      bio: 20,
-      toxic: 20,
-      psionic: 15,
-      tech: 20
-    },
-    attackTempo: 1.6,
-    reactiveDefense: {
-      parryChance: 8,
-      mitigationChance: 10,
-      mitigationValue: 35
-    },
-    critPotential: {
-      critChance: 22,
-      critMultiplier: 1.8
-    },
-    predatoryResonance: {
-      lifestealPercent: 9,
-      lifestealChance: 35
-    },
-    toxicity: {
-      dotDamage: 4,
-      dotChance: 18
-    },
-    neuroShock: {
-      shockDamage: 6,
-      stunChance: 10,
-      stunDuration: 1.2,
-      stunCooldown: 9
-    }
-  },
+export const getBaseAttackTempoFromStrike = (strikePower: number): number => {
+  if (strikePower <= 0) return 0;
 
-  // Танк‑титан
-  species_2: {
-    strikePower: 85,
-    bioResource: 150,
-    defenseMatrix: {
-      kinetic: 55,
-      energy: 50,
-      bio: 40,
-      toxic: 35,
-      psionic: 30,
-      tech: 45
-    },
-    attackTempo: 0.9,
-    reactiveDefense: {
-      parryChance: 6,
-      mitigationChance: 22,
-      mitigationValue: 45
-    },
-    critPotential: {
-      critChance: 14,
-      critMultiplier: 1.6
-    },
-    predatoryResonance: {
-      lifestealPercent: 6,
-      lifestealChance: 25
-    },
-    toxicity: {
-      dotDamage: 3,
-      dotChance: 14
-    },
-    neuroShock: {
-      shockDamage: 4,
-      stunChance: 16,
-      stunDuration: 1.6,
-      stunCooldown: 11
-    }
-  },
+  const minStrike = 1;
+  const maxStrike = 100;   // условный максимум очков силы
+  const minTempo = 0.3;    // очень медленно
+  const maxTempo = 1.8;    // очень быстро
 
-  // Быстрый спринтер
-  species_3: {
-    strikePower: 95,
-    bioResource: 75,
-    defenseMatrix: {
-      kinetic: 30,
-      energy: 30,
-      bio: 25,
-      toxic: 25,
-      psionic: 25,
-      tech: 25
-    },
-    attackTempo: 2.0,
-    reactiveDefense: {
-      parryChance: 10,
-      mitigationChance: 12,
-      mitigationValue: 33
-    },
-    critPotential: {
-      critChance: 26,
-      critMultiplier: 1.9
-    },
-    predatoryResonance: {
-      lifestealPercent: 8,
-      lifestealChance: 40
-    },
-    toxicity: {
-      dotDamage: 5,
-      dotChance: 22
-    },
-    neuroShock: {
-      shockDamage: 5,
-      stunChance: 12,
-      stunDuration: 1.1,
-      stunCooldown: 8
-    }
-  },
-
-  // Универсал
-  species_4: {
-    strikePower: 100,
-    bioResource: 100,
-    defenseMatrix: {
-      kinetic: 40,
-      energy: 40,
-      bio: 35,
-      toxic: 35,
-      psionic: 30,
-      tech: 35
-    },
-    attackTempo: 1.3,
-    reactiveDefense: {
-      parryChance: 9,
-      mitigationChance: 14,
-      mitigationValue: 38
-    },
-    critPotential: {
-      critChance: 20,
-      critMultiplier: 1.7
-    },
-    predatoryResonance: {
-      lifestealPercent: 7,
-      lifestealChance: 30
-    },
-    toxicity: {
-      dotDamage: 4,
-      dotChance: 18
-    },
-    neuroShock: {
-      shockDamage: 5,
-      stunChance: 13,
-      stunDuration: 1.3,
-      stunCooldown: 10
-    }
-  },
-
-  // Защитный страж
-  species_5: {
-    strikePower: 90,
-    bioResource: 120,
-    defenseMatrix: {
-      kinetic: 50,
-      energy: 45,
-      bio: 45,
-      toxic: 40,
-      psionic: 35,
-      tech: 50
-    },
-    attackTempo: 1.1,
-    reactiveDefense: {
-      parryChance: 7,
-      mitigationChance: 20,
-      mitigationValue: 42
-    },
-    critPotential: {
-      critChance: 16,
-      critMultiplier: 1.6
-    },
-    predatoryResonance: {
-      lifestealPercent: 7,
-      lifestealChance: 30
-    },
-    toxicity: {
-      dotDamage: 3,
-      dotChance: 16
-    },
-    neuroShock: {
-      shockDamage: 4,
-      stunChance: 15,
-      stunDuration: 1.4,
-      stunCooldown: 10
-    }
-  }
+  const clamped = Math.min(Math.max(strikePower, minStrike), maxStrike);
+  const t = (clamped - minStrike) / (maxStrike - minStrike); // 0..1
+  const tempo = minTempo + (maxTempo - minTempo) * t * 0.7;  // сглаживаем
+  return Number(tempo.toFixed(2));
 };
 
-// === Оценка «силы» персонажа для баланса ===
+// ===== Базовые статы Неопознанного ДНК =====
 
-export const getCharacterPower = (s: CharacterStats): number => {
-  const defenseSum =
-    s.defenseMatrix.kinetic +
-    s.defenseMatrix.energy +
-    s.defenseMatrix.bio +
-    s.defenseMatrix.toxic +
-    s.defenseMatrix.psionic +
-    s.defenseMatrix.tech;
+const baseUnknownDNA: CharacterStats = {
+  strikePower: 0,
+  attackTempo: 0,
+  bioResource: 10,
 
-  const baseDamageBlock =
-    s.strikePower * 1.0 +
-    s.attackTempo * 40 +
-    s.critPotential.critChance * 1.3 +
-    s.critPotential.critMultiplier * 20;
+  defenseMatrix: {
+    kinetic: 0,
+    energy: 0,
+    bio: 0,
+    toxic: 0,
+    psionic: 0,
+    tech: 0,
+  },
 
-  const survivabilityBlock =
-    s.bioResource * 0.7 +
-    defenseSum * 0.5 +
-    s.reactiveDefense.parryChance * 1.2 +
-    s.reactiveDefense.mitigationChance * 1.0 +
-    s.reactiveDefense.mitigationValue * 1.0;
+  reactiveDefense: {
+    triggerChance: 0,
+    parryChance: 0,
+    mitigationChance: 0,
+    mitigationValue: 0,
+  },
 
-  const vampPoisonControlBlock =
-    (s.predatoryResonance.lifestealPercent *
-      s.predatoryResonance.lifestealChance) /
-      3 +
-    (s.toxicity.dotDamage * s.toxicity.dotChance) / 2.5 +
-    (s.neuroShock.shockDamage *
-      s.neuroShock.stunChance *
-      s.neuroShock.stunDuration) /
-      (s.neuroShock.stunCooldown || 1);
+  critPotential: {
+    critChance: 0,
+    critMultiplier: 1,
+  },
 
-  return baseDamageBlock + survivabilityBlock + vampPoisonControlBlock;
+  predatoryResonance: {
+    lifestealPercent: 0,
+    lifestealChance: 0,
+  },
+
+  toxicity: {
+    dotDamage: 0,
+    dotChance: 0,
+  },
+
+  neuroShock: {
+    stunChance: 0,
+    stunDuration: 0,
+    stunCooldown: 0,
+  },
 };
 
-// Нормализация статов к целевой «мощности»
-
-const TARGET_POWER = 1000;
-
-const normalizeStatsToTargetPower = (stats: CharacterStats): CharacterStats => {
-  const currentPower = getCharacterPower(stats);
-  const k = TARGET_POWER / currentPower;
-
-  const scale = (v: number, power = 1) => v * Math.pow(k, power);
-
-  return {
-    strikePower: Math.round(scale(stats.strikePower)),
-    bioResource: Math.round(scale(stats.bioResource)),
-    defenseMatrix: {
-      kinetic: Math.round(scale(stats.defenseMatrix.kinetic)),
-      energy: Math.round(scale(stats.defenseMatrix.energy)),
-      bio: Math.round(scale(stats.defenseMatrix.bio)),
-      toxic: Math.round(scale(stats.defenseMatrix.toxic)),
-      psionic: Math.round(scale(stats.defenseMatrix.psionic)),
-      tech: Math.round(scale(stats.defenseMatrix.tech))
-    },
-    attackTempo: Number(scale(stats.attackTempo, 0.3).toFixed(2)),
-    reactiveDefense: {
-      parryChance: Number(scale(stats.reactiveDefense.parryChance, 0.5).toFixed(2)),
-      mitigationChance: Number(
-        scale(stats.reactiveDefense.mitigationChance, 0.5).toFixed(2)
-      ),
-      mitigationValue: Number(
-        scale(stats.reactiveDefense.mitigationValue, 0.5).toFixed(2)
-      )
-    },
-    critPotential: {
-      critChance: Number(scale(stats.critPotential.critChance, 0.5).toFixed(2)),
-      critMultiplier: Number(
-        scale(stats.critPotential.critMultiplier, 0.3).toFixed(2)
-      )
-    },
-    predatoryResonance: {
-      lifestealPercent: Number(
-        scale(stats.predatoryResonance.lifestealPercent, 0.5).toFixed(2)
-      ),
-      lifestealChance: Number(
-        scale(stats.predatoryResonance.lifestealChance, 0.5).toFixed(2)
-      )
-    },
-    toxicity: {
-      dotDamage: Number(scale(stats.toxicity.dotDamage, 0.7).toFixed(2)),
-      dotChance: Number(scale(stats.toxicity.dotChance, 0.5).toFixed(2))
-    },
-    neuroShock: {
-      shockDamage: Number(scale(stats.neuroShock.shockDamage, 0.7).toFixed(2)),
-      stunChance: Number(scale(stats.neuroShock.stunChance, 0.5).toFixed(2)),
-      stunDuration: Number(scale(stats.neuroShock.stunDuration, 0.3).toFixed(2)),
-      stunCooldown: Number(scale(stats.neuroShock.stunCooldown, 0.3).toFixed(2))
-    }
-  };
-};
-
-// Итоговые базовые статы после нормализации
 export const baseCharacterStats: Record<CharacterId, CharacterStats> = {
-  species_1: normalizeStatsToTargetPower(rawCharacterStats.species_1),
-  species_2: normalizeStatsToTargetPower(rawCharacterStats.species_2),
-  species_3: normalizeStatsToTargetPower(rawCharacterStats.species_3),
-  species_4: normalizeStatsToTargetPower(rawCharacterStats.species_4),
-  species_5: normalizeStatsToTargetPower(rawCharacterStats.species_5)
+  unknown_dna: baseUnknownDNA,
 };
 
-// === БОНУСЫ МАТЕРИАЛОВ ===
-
+// ===== Бонусы материалов =====
 export interface MaterialBonus {
   strikePower?: number;
   bioResource?: number;
   defenseMatrix?: Partial<CharacterStats["defenseMatrix"]>;
-  attackTempo?: number;
   reactiveDefense?: Partial<CharacterStats["reactiveDefense"]>;
   critPotential?: Partial<CharacterStats["critPotential"]>;
   predatoryResonance?: Partial<CharacterStats["predatoryResonance"]>;
@@ -377,66 +135,21 @@ export interface MaterialBonus {
   neuroShock?: Partial<CharacterStats["neuroShock"]>;
 }
 
-export type MaterialBonusMap = Record<CharacterId, MaterialBonus>;
+export type MaterialBonusMap = Record<string, MaterialBonus>;
 
-// Пример: сюда нужно перенести все твои материалы m1_1..m5_5
-export const materialBonuses: Record<string, MaterialBonusMap> = {
-  m1_1: {
-    species_1: {
-      strikePower: 12,
-      bioResource: 6,
-      defenseMatrix: { kinetic: 5 },
-      attackTempo: 0.05,
-      critPotential: { critChance: 3, critMultiplier: 0.05 },
-      predatoryResonance: { lifestealPercent: 2 },
-      toxicity: { dotDamage: 1, dotChance: 3 },
-      neuroShock: { stunChance: 2 }
-    },
-    species_2: {
-      strikePower: 8,
-      bioResource: 10,
-      defenseMatrix: { energy: 6 },
-      attackTempo: 0.03,
-      critPotential: { critChance: 2, critMultiplier: 0.04 },
-      predatoryResonance: { lifestealPercent: 1 },
-      toxicity: { dotDamage: 1, dotChance: 2 },
-      neuroShock: { stunChance: 2 }
-    },
-    species_3: {
-      strikePower: 11,
-      bioResource: 5,
-      defenseMatrix: { kinetic: 3 },
-      attackTempo: 0.06,
-      critPotential: { critChance: 4, critMultiplier: 0.06 },
-      predatoryResonance: { lifestealPercent: 2 },
-      toxicity: { dotDamage: 1, dotChance: 3 },
-      neuroShock: { stunChance: 1 }
-    },
-    species_4: {
-      strikePower: 9,
-      bioResource: 8,
-      defenseMatrix: { bio: 4 },
-      attackTempo: 0.04,
-      critPotential: { critChance: 3, critMultiplier: 0.05 },
-      predatoryResonance: { lifestealPercent: 2 },
-      toxicity: { dotDamage: 1, dotChance: 2 },
-      neuroShock: { stunChance: 2 }
-    },
-    species_5: {
-      strikePower: 7,
-      bioResource: 9,
-      defenseMatrix: { tech: 5 },
-      attackTempo: 0.03,
-      critPotential: { critChance: 2, critMultiplier: 0.04 },
-      predatoryResonance: { lifestealPercent: 2 },
-      toxicity: { dotDamage: 1, dotChance: 2 },
-      neuroShock: { stunChance: 2 }
-    }
-  }
-  // m1_2, m1_3, ... добавляешь здесь по аналогии
-};
+// импортируем конфиг материалов, где у каждого есть свой bonus
+import { materialDefinitions } from "./materialsConfig";
 
-// === РАНДОМ 5–10% ДЛЯ БОНУСОВ ===
+// строим карту id материала → его бонус
+export const materialBonuses: MaterialBonusMap = materialDefinitions.reduce(
+  (acc, material) => {
+    acc[material.id] = material.bonus as MaterialBonus;
+    return acc;
+  },
+  {} as MaterialBonusMap
+);
+
+// ===== Рандом 5–10% и применение бонусов =====
 
 const applyRandomSpread = (base: number | undefined): number => {
   if (!base) return 0;
@@ -445,70 +158,122 @@ const applyRandomSpread = (base: number | undefined): number => {
   return Number((base + base * spread * sign).toFixed(2));
 };
 
-// Применение бонуса материала к статам персонажа
 export const applyMaterialToStats = (
   stats: CharacterStats,
   bonus: MaterialBonus
 ): CharacterStats => {
   const next: CharacterStats = JSON.parse(JSON.stringify(stats));
 
-  next.strikePower += applyRandomSpread(bonus.strikePower);
-  next.bioResource += applyRandomSpread(bonus.bioResource);
-  next.attackTempo = Number(
-    (next.attackTempo + applyRandomSpread(bonus.attackTempo) / 10).toFixed(2)
-  );
+  // Сила удара и пересчёт темпа
+  if (bonus.strikePower) {
+    next.strikePower += applyRandomSpread(bonus.strikePower);
+    next.attackTempo = getBaseAttackTempoFromStrike(next.strikePower);
+  }
 
+  // Биоресурс
+  if (bonus.bioResource) {
+    next.bioResource += applyRandomSpread(bonus.bioResource);
+  }
+
+  // Матрица защиты
   if (bonus.defenseMatrix) {
-    for (const key of Object.keys(bonus.defenseMatrix) as Array<
+    (Object.keys(bonus.defenseMatrix) as Array<
       keyof CharacterStats["defenseMatrix"]
-    >) {
-      next.defenseMatrix[key] += applyRandomSpread(bonus.defenseMatrix[key]);
-    }
+    >).forEach((k) => {
+      const add = applyRandomSpread(bonus.defenseMatrix![k]);
+      next.defenseMatrix[k] += add;
+    });
   }
 
+  // Реактивная защита
   if (bonus.reactiveDefense) {
-    for (const key of Object.keys(bonus.reactiveDefense) as Array<
+    (Object.keys(bonus.reactiveDefense) as Array<
       keyof CharacterStats["reactiveDefense"]
-    >) {
-      next.reactiveDefense[key] += applyRandomSpread(
-        bonus.reactiveDefense[key]
-      );
-    }
+    >).forEach((k) => {
+      const add = applyRandomSpread(bonus.reactiveDefense![k]);
+      next.reactiveDefense[k] =
+        (next.reactiveDefense[k] ?? 0) + add;
+    });
   }
 
+  // Критический потенциал
   if (bonus.critPotential) {
-    for (const key of Object.keys(bonus.critPotential) as Array<
+    (Object.keys(bonus.critPotential) as Array<
       keyof CharacterStats["critPotential"]
-    >) {
-      next.critPotential[key] += applyRandomSpread(bonus.critPotential[key]);
-    }
+    >).forEach((k) => {
+      const add = applyRandomSpread(bonus.critPotential![k]);
+      next.critPotential[k] += add;
+    });
   }
 
+  // Хищный резонанс
   if (bonus.predatoryResonance) {
-    for (const key of Object.keys(bonus.predatoryResonance) as Array<
+    (Object.keys(bonus.predatoryResonance) as Array<
       keyof CharacterStats["predatoryResonance"]
-    >) {
-      next.predatoryResonance[key] += applyRandomSpread(
-        bonus.predatoryResonance[key]
-      );
-    }
+    >).forEach((k) => {
+      const add = applyRandomSpread(bonus.predatoryResonance![k]);
+      next.predatoryResonance[k] += add;
+    });
   }
 
+  // Токсичность
   if (bonus.toxicity) {
-    for (const key of Object.keys(bonus.toxicity) as Array<
+    (Object.keys(bonus.toxicity) as Array<
       keyof CharacterStats["toxicity"]
-    >) {
-      next.toxicity[key] += applyRandomSpread(bonus.toxicity[key]);
-    }
+    >).forEach((k) => {
+      const add = applyRandomSpread(bonus.toxicity![k]);
+      next.toxicity[k] += add;
+    });
   }
 
+  // Нейрошок
   if (bonus.neuroShock) {
-    for (const key of Object.keys(bonus.neuroShock) as Array<
+    (Object.keys(bonus.neuroShock) as Array<
       keyof CharacterStats["neuroShock"]
-    >) {
-      next.neuroShock[key] += applyRandomSpread(bonus.neuroShock[key]);
-    }
+    >).forEach((k) => {
+      const add = applyRandomSpread(bonus.neuroShock![k]);
+      next.neuroShock[k] += add;
+    });
   }
 
   return next;
+};
+
+export type MainFocus =
+  | 'strikePower'
+  | 'bioResource'
+  | 'defense'
+  | 'crit'
+  | 'lifesteal'
+  | 'dot'
+  | 'stun';
+
+export interface AdaptiveMaterialBonus extends MaterialBonus {
+  mainFocus: MainFocus;
+}
+
+// вычисляем, какая характеристика сейчас «сильная» у персонажа
+export const detectCurrentFocus = (stats: CharacterStats): MainFocus => {
+  const totals = {
+    strikePower: stats.strikePower,
+    bioResource: stats.bioResource,
+    defense:
+      stats.defenseMatrix.kinetic +
+      stats.defenseMatrix.energy +
+      stats.defenseMatrix.bio +
+      stats.defenseMatrix.toxic +
+      stats.defenseMatrix.psionic +
+      stats.defenseMatrix.tech,
+    crit:
+      stats.critPotential.critChance * stats.critPotential.critMultiplier,
+    lifesteal:
+      stats.predatoryResonance.lifestealPercent *
+      stats.predatoryResonance.lifestealChance,
+    dot: stats.toxicity.dotDamage * stats.toxicity.dotChance,
+    stun: stats.neuroShock.stunChance * stats.neuroShock.stunDuration,
+  };
+
+  return (Object.keys(totals) as MainFocus[]).reduce((best, key) =>
+    totals[key] > totals[best] ? key : best
+  );
 };

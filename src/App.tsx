@@ -25,6 +25,8 @@ import {
   MaterialDefinition,
 } from "./features/balance/hooks/materialsConfig";
 
+const API = import.meta.env.VITE_API_URL || "";
+
 type CharacterId =
   | "species_1"
   | "species_2"
@@ -481,7 +483,7 @@ function App() {
 
       // 2. Затем запрашиваем бэкенд (он приоритетнее для Уровня и ЭП)
       try {
-        const response = await fetch("/api/user/sync", {
+        const response = await fetch(`${API}/api/user/sync`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ telegramId })
@@ -545,7 +547,7 @@ function App() {
 
     const timeout = setTimeout(() => {
       const state = latestState.current;
-      fetch("/api/user/save", {
+      fetch(`${API}/api/user/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -750,7 +752,7 @@ function App() {
       setIsGeneratingImage(true);
       console.log(`[ComfyUI] Начат процесс генерации через бэкенд для уровня ${nextLevel} (заранее)`);
 
-      fetch('/api/comfy/generate', { method: 'POST' })
+      fetch(`${API}/api/comfy/generate`, { method: 'POST' })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.base64) {

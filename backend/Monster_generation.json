@@ -1,0 +1,226 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "Realistic_Vision_V7.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "2": {
+    "inputs": {
+      "text": [
+        "43",
+        0
+      ],
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "text": "low quality, lowres, blurry, pixelated, noisy, text, caption, watermark, logo, ui, background clutter, extra characters, cropped, out of frame,\nhuman, humanoid, human-like body, realistic person, female body, anime girl, cute character, disney style, big cute eyes, cat face, feline head,\nsame body shape every time, identical proportions every time,\nblue-purple color scheme, dominant purple, magenta glow, neon violet",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "seed": 1013641680051107,
+      "steps": 20,
+      "cfg": 5,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "samples": [
+        "4",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "7": {
+    "inputs": {
+      "images": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "43": {
+    "inputs": {
+      "text": "A single small 3D creature for a genetics game, experimental lifeform grown from fused chemical elements and mixed molecules,\nfull body, centered, no other characters, shown on a simple neutral lab pedestal,\nnon-humanoid creature, not human, not bipedal, no human face,\n\n{land-based predator with powerful legs and claws, xenomorph-like biomechanical anatomy|\ncthulhu-inspired eldritch creature with tentacles and irregular mass|\nreptilian or dinosaur-like creature with thick tail and claws|\ninsectoid creature with segmented body, chitin and multiple legs|\nstone or crystal golem-like creature with jagged rock plates|\nmetallic biomechanical creature made of armor plates and cables|\namorphous slime creature with pseudopods and dripping goo|\norganic alien creature with strange muscles and exposed organs|\nfloating otherworldly creature with tendrils and bioluminescent sacs},\n\n{two|four|six|eight} limbs or limb-like appendages,\n{bulky and heavy|long and thin|multi-segmented insect-like|crustacean-like exoskeleton|jellyfish-like translucent body},\n\nvaried and unpredictable color palette, different dominant color each time, no dominant blue or purple,\n{earthy browns and greens|toxic greens and yellows|fiery reds and oranges|cold cyans and teals|muted grays with glowing accents},\nmixed materials and textures (slime, crystals, stone, metal, fur, scales, chitin, translucent gel, glowing veins),\n\nstrange eyes or sensory organs (eye clusters, stalked eyes, bioluminescent spots, single huge eye, or no visible face),\nmenacing and unsettling but still stylized for a game (not cute humanoid character),\nsoft studio lighting, high-detail creature concept render, clean gradient lab background\n",
+      "seed": 1718,
+      "autorefresh": "Yes"
+    },
+    "class_type": "DPRandomGenerator",
+    "_meta": {
+      "title": "Random Prompts"
+    }
+  },
+  "152": {
+    "inputs": {
+      "text": "{H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al|Si|P|S|Cl|Ar|K|Ca},{Fe|Cu|Zn|Ag|Au|Pb|Sn|Ti|Cr|Mn|Ni|Co},{U|Pu|Ra|Rn|Xe|Kr|Hg|Cd|Sr|Ba}\n",
+      "seed": 1085,
+      "autorefresh": "No"
+    },
+    "class_type": "DPCombinatorialGenerator",
+    "_meta": {
+      "title": "Combinatorial Prompts"
+    }
+  },
+  "164": {
+    "inputs": {
+      "string_a": [
+        "228",
+        2
+      ],
+      "string_b": "",
+      "delimiter": "|"
+    },
+    "class_type": "StringConcatenate",
+    "_meta": {
+      "title": "Concatenate"
+    }
+  },
+  "165": {
+    "inputs": {
+      "string_a": [
+        "164",
+        0
+      ],
+      "string_b": [
+        "152",
+        0
+      ],
+      "delimiter": ""
+    },
+    "class_type": "StringConcatenate",
+    "_meta": {
+      "title": "Concatenate"
+    }
+  },
+  "167": {
+    "inputs": {
+      "preview": "",
+      "previewMode": null,
+      "source": [
+        "165",
+        0
+      ]
+    },
+    "class_type": "PreviewAny",
+    "_meta": {
+      "title": "Preview as Text"
+    }
+  },
+  "228": {
+    "inputs": {
+      "text_input": "",
+      "task": "detailed_caption",
+      "fill_mask": true,
+      "keep_model_loaded": false,
+      "max_new_tokens": 1024,
+      "num_beams": 3,
+      "do_sample": true,
+      "output_mask_select": "",
+      "seed": 829207477021979,
+      "image": [
+        "6",
+        0
+      ],
+      "florence2_model": [
+        "233",
+        0
+      ]
+    },
+    "class_type": "Florence2Run",
+    "_meta": {
+      "title": "Florence2Run"
+    }
+  },
+  "233": {
+    "inputs": {
+      "model": "microsoft/Florence-2-base",
+      "precision": "bf16",
+      "attention": "eager",
+      "convert_to_safetensors": false
+    },
+    "class_type": "DownloadAndLoadFlorence2Model",
+    "_meta": {
+      "title": "DownloadAndLoadFlorence2Model"
+    }
+  },
+  "235": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  }
+}

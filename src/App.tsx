@@ -3,7 +3,7 @@ import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
 import { Shop } from './features/shop/Shop';
 import { BottomNavigation } from './components/BottomNavigation/BottomNavigation';
-import { generateMonsterImage } from './services/comfyUI';
+
 
 import {
   CharacterStats,
@@ -259,7 +259,9 @@ function App() {
 
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
-  const telegramId = "dev_user_123";
+  // Получаем реальный Telegram ID
+  const WebApp = (window as any).Telegram?.WebApp;
+  const telegramId = WebApp?.initDataUnsafe?.user?.id?.toString() || "dev_user_123";
 
   const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");
@@ -740,20 +742,25 @@ function App() {
     // Если следующий уровень кратен 5, запускаем генерацию заранее!
     if (nextLevel > 0 && nextLevel % 5 === 0 && nextLevel !== lastGeneratedLevel && !isGeneratingImage) {
       setIsGeneratingImage(true);
-      console.log(`[ComfyUI] Начат процесс генерации для уровня ${nextLevel} (заранее)`);
-      generateMonsterImage().then((imageUrl) => {
-        if (imageUrl) {
-          setFinalBioImage(imageUrl);
-          setLastGeneratedLevel(nextLevel);
-          console.log(`[ComfyUI] Картинка успешно сгенерирована для уровня ${nextLevel}`);
-        } else {
-          console.error(`[ComfyUI] Ошибка генерации: функция вернула null`);
-        }
-      }).catch(error => {
-        console.error(`[ComfyUI] Ошибка при генерации картинки:`, error);
-      }).finally(() => {
-        setIsGeneratingImage(false);
-      });
+      console.log(`[ComfyUI] Начат процесс генерации через бэкенд для уровня ${nextLevel} (заранее)`);
+
+      fetch('http://localhost:3001/api/comfy/generate', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.base64) {
+            setFinalBioImage(data.base64);
+            setLastGeneratedLevel(nextLevel);
+            console.log(`[ComfyUI] Картинка успешно скачана с бэкенда для уровня ${nextLevel}`);
+          } else {
+            console.error(`[ComfyUI] Ошибка генерации:`, data.error);
+          }
+        })
+        .catch(error => {
+          console.error(`[ComfyUI] Ошибка сети при запросе к бэкенду:`, error);
+        })
+        .finally(() => {
+          setIsGeneratingImage(false);
+        });
     }
 
     const duration = 3000;

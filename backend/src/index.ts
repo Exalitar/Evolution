@@ -4,6 +4,10 @@ import cors from 'cors';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs/promises';
+import path from 'path';
+
+const COMFY_API_URL = "http://127.0.0.1:8188";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -112,6 +116,94 @@ app.post('/api/user/save', async (req, res) => {
     } catch (error) {
         console.error('[SAVE] Ошибка при сохранении:', error);
         res.status(500).json({ error: 'Database Error' });
+    }
+});
+
+// Эндпоинт генерации Monster Image (прокси для ComfyUI)
+app.post('/api/comfy/generate', async (req, res) => {
+    try {
+        console.log('[COMFY] Запрос на генерацию картинки получен');
+        const workflowPath = path.join(__dirname, '..', 'Monster_generation.json');
+        const workflowContent = await fs.readFile(workflowPath, 'utf8');
+        const prompt = JSON.parse(workflowContent);
+
+        // Рандомизируем сиды
+        if (prompt["4"]?.inputs) prompt["4"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+        if (prompt["43"]?.inputs) prompt["43"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+        if (prompt["152"]?.inputs) prompt["152"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+        if (prompt["228"]?.inputs) prompt["228"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+
+        const clientId = Math.random().toString(36).substring(2, 15);
+
+        // 1. Отправляем запрос на генерацию
+        const genRes = await fetch(`${COMFY_API_URL}/prompt`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt, client_id: clientId }),
+        });
+
+        if (!genRes.ok) {
+            console.error('[COMFY] Ошибка запуска генерации', await genRes.text());
+            res.status(500).json({ error: 'Failed to start generation' });
+            return;
+        }
+
+        const { prompt_id } = await genRes.json() as { prompt_id: string };
+        console.log(`[COMFY] Генерация начата (ID: ${prompt_id}). Ожидание...`);
+
+        // 2. Поллинг готовности (максимум 60 секунд)
+        let isDone = false;
+        let imageUrl = null;
+        let attempts = 0;
+        const maxAttempts = 30;
+
+        while (!isDone && attempts < maxAttempts) {
+            attempts++;
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Ждем 2 сек
+
+            const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
+            const history = await historyRes.json() as any;
+
+            if (history[prompt_id]) {
+                isDone = true;
+                const outputs = history[prompt_id].outputs;
+
+                let outputNode = null;
+                if (outputs["235"]) outputNode = outputs["235"];
+                else if (outputs["7"]) outputNode = outputs["7"];
+
+                if (outputNode && outputNode.images && outputNode.images.length > 0) {
+                    const imageInfo = outputNode.images[0];
+                    const params = new URLSearchParams({
+                        filename: imageInfo.filename,
+                        subfolder: imageInfo.subfolder || "",
+                        type: imageInfo.type
+                    });
+                    imageUrl = `${COMFY_API_URL}/view?${params.toString()}`;
+                }
+            }
+        }
+
+        if (!imageUrl) {
+            console.error('[COMFY] Картинка не найдена в результатах или тайм-аут');
+            res.status(500).json({ error: 'Image not found or timeout' });
+            return;
+        }
+
+        // 3. Скачиваем картинку из локального ComfyUI
+        const imgRes = await fetch(imageUrl);
+        if (!imgRes.ok) throw new Error("Failed to download image from ComfyUI");
+
+        const arrayBuffer = await imgRes.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64Image = `data:image/png;base64,${buffer.toString('base64')}`;
+
+        console.log('[COMFY] Картинка успешно сгенерирована и преобразована в Base64');
+        res.json({ success: true, base64: base64Image });
+
+    } catch (error) {
+        console.error('[COMFY] Общая ошибка:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

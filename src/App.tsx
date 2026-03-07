@@ -263,6 +263,12 @@ function App() {
   const WebApp = (window as any).Telegram?.WebApp;
   const telegramId = WebApp?.initDataUnsafe?.user?.id?.toString() || "dev_user_123";
 
+  useEffect(() => {
+    if (WebApp) {
+      WebApp.ready();
+    }
+  }, [WebApp]);
+
   const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");
   const [playerLevel, setPlayerLevel] = useState(0);
@@ -1536,8 +1542,15 @@ function App() {
             <h2>ID Telegram</h2>
             <button className="close-button" onClick={() => setScreen("main")}>✕</button>
           </div>
-          <div className="secondary-content">
+          <div className="secondary-content" style={{ overflowY: "auto", paddingBottom: "100px" }}>
             <p>Ваш ID: {telegramId}</p>
+            <hr style={{ margin: "20px 0", borderColor: "#333" }} />
+            <h4 style={{ color: "#ffd700" }}>Debug Info (Send Screenshot):</h4>
+            <p style={{ wordBreak: "break-all", fontSize: "10px", lineHeight: "1.2", color: "#aaa" }}>
+              WebApp Ready: {typeof WebApp !== 'undefined' ? "Yes" : "No"} <br />
+              initData: {WebApp?.initData} <br />
+              initDataUnsafe: {JSON.stringify(WebApp?.initDataUnsafe || {})}
+            </p>
           </div>
         </div>
       )}

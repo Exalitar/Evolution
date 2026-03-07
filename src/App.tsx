@@ -475,7 +475,7 @@ function App() {
 
       // 2. Затем запрашиваем бэкенд (он приоритетнее для Уровня и ЭП)
       try {
-        const response = await fetch("http://localhost:3001/api/user/sync", {
+        const response = await fetch("/api/user/sync", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ telegramId })
@@ -539,7 +539,7 @@ function App() {
 
     const timeout = setTimeout(() => {
       const state = latestState.current;
-      fetch("http://localhost:3001/api/user/save", {
+      fetch("/api/user/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -744,7 +744,7 @@ function App() {
       setIsGeneratingImage(true);
       console.log(`[ComfyUI] Начат процесс генерации через бэкенд для уровня ${nextLevel} (заранее)`);
 
-      fetch('http://localhost:3001/api/comfy/generate', { method: 'POST' })
+      fetch('/api/comfy/generate', { method: 'POST' })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.base64) {

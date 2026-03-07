@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Laboratory.css';
+import { BottomNavigation } from '../../components/BottomNavigation/BottomNavigation';
 
 type Screen =
   | "main"
@@ -10,6 +11,7 @@ type Screen =
   | "info"
   | "cabinet"
   | "market"
+  | "nftShop"
   | "settings";
 
 type LabSection = 'center' | 'left' | 'right';
@@ -32,21 +34,27 @@ interface Equipment {
 interface LaboratoryProps {
   playerName: string;
   playerLevel: number;
+  playerEP: number;
   playerAvatar: string;
   onNavigate: (screen: Screen) => void;
   equipment: Record<string, Equipment>;
   onUpgrade: (equipmentId: string) => void;
   isAnyUpgrading: boolean;
+  onAvatarClick: () => void;
+  openSettings: () => void;
 }
 
 export const Laboratory: React.FC<LaboratoryProps> = ({
   playerName,
   playerLevel,
+  playerEP,
   playerAvatar,
   onNavigate,
   equipment,
   onUpgrade,
-  isAnyUpgrading
+  isAnyUpgrading,
+  onAvatarClick,
+  openSettings
 }) => {
   const [currentSection, setCurrentSection] = useState<LabSection>('center');
   const [position, setPosition] = useState({ x: 0 });
@@ -106,8 +114,8 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.equipment-hotspot') ||
-        (e.target as HTMLElement).closest('.lab-ui-element') ||
-        (e.target as HTMLElement).closest('.dna-zoom-button')) return;
+      (e.target as HTMLElement).closest('.lab-ui-element') ||
+      (e.target as HTMLElement).closest('.dna-zoom-button')) return;
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x
@@ -129,8 +137,8 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('.equipment-hotspot') ||
-        (e.target as HTMLElement).closest('.lab-ui-element') ||
-        (e.target as HTMLElement).closest('.dna-zoom-button')) return;
+      (e.target as HTMLElement).closest('.lab-ui-element') ||
+      (e.target as HTMLElement).closest('.dna-zoom-button')) return;
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({
@@ -170,7 +178,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
 
   return (
     <div className="laboratory-page">
-      <div 
+      <div
         ref={containerRef}
         className="laboratory-background-container"
         onMouseDown={handleMouseDown}
@@ -181,7 +189,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div 
+        <div
           ref={imageRef}
           className="laboratory-background"
           style={{
@@ -194,7 +202,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           {currentSection === 'center' && (
             <>
               {/* Кнопка возврата на главную на ДНК */}
-              <button 
+              <button
                 className="dna-zoom-button"
                 onClick={() => onNavigate('main')}
               >
@@ -202,7 +210,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                 <span className="zoom-label">Вернуться</span>
               </button>
 
-              <div 
+              <div
                 className="equipment-hotspot microscope-hotspot"
                 onClick={() => handleEquipmentClick('microscope')}
               >
@@ -210,7 +218,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.microscope.name} (lvl {equipment.microscope.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot control-panel-hotspot"
                 onClick={() => handleEquipmentClick('control_panel')}
               >
@@ -218,7 +226,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.control_panel.name} (lvl {equipment.control_panel.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot analyzer-hotspot"
                 onClick={() => handleEquipmentClick('analyzer')}
               >
@@ -232,7 +240,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           {/* Интерактивные зоны Block B (Left) */}
           {currentSection === 'left' && (
             <>
-              <div 
+              <div
                 className="equipment-hotspot robot-manipulator-hotspot"
                 onClick={() => handleEquipmentClick('robot_manipulator')}
               >
@@ -240,7 +248,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.robot_manipulator.name} (lvl {equipment.robot_manipulator.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot control-panel-left-hotspot"
                 onClick={() => handleEquipmentClick('control_panel_left')}
               >
@@ -248,7 +256,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.control_panel_left.name} (lvl {equipment.control_panel_left.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot analyzing-module-hotspot"
                 onClick={() => handleEquipmentClick('analyzing_module')}
               >
@@ -262,7 +270,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           {/* Интерактивные зоны Block C (Right) */}
           {currentSection === 'right' && (
             <>
-              <div 
+              <div
                 className="equipment-hotspot synthesizer-hotspot"
                 onClick={() => handleEquipmentClick('synthesizer')}
               >
@@ -270,7 +278,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.synthesizer.name} (lvl {equipment.synthesizer.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot sequencer-hotspot"
                 onClick={() => handleEquipmentClick('sequencer')}
               >
@@ -278,7 +286,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.sequencer.name} (lvl {equipment.sequencer.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot thermostat-hotspot"
                 onClick={() => handleEquipmentClick('thermostat')}
               >
@@ -286,7 +294,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   {equipment.thermostat.name} (lvl {equipment.thermostat.level})
                 </div>
               </div>
-              <div 
+              <div
                 className="equipment-hotspot cultivator-hotspot"
                 onClick={() => handleEquipmentClick('cultivator')}
               >
@@ -300,14 +308,14 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           {/* Навигационные кнопки между блоками */}
           {currentSection === 'center' && (
             <>
-              <button 
+              <button
                 className="lab-nav-button left"
                 onClick={() => handleSectionChange('left')}
               >
                 <div className="nav-arrow left-arrow">◀</div>
                 <span className="nav-label">Block B</span>
               </button>
-              <button 
+              <button
                 className="lab-nav-button right"
                 onClick={() => handleSectionChange('right')}
               >
@@ -318,7 +326,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           )}
 
           {currentSection === 'left' && (
-            <button 
+            <button
               className="lab-nav-button right"
               onClick={() => handleSectionChange('center')}
             >
@@ -328,7 +336,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           )}
 
           {currentSection === 'right' && (
-            <button 
+            <button
               className="lab-nav-button left"
               onClick={() => handleSectionChange('center')}
             >
@@ -344,12 +352,19 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
         className="player-info"
         onClick={() => onNavigate("info")}
       >
-        <div className="player-avatar">
+        <div
+          className="player-avatar"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAvatarClick();
+          }}
+        >
           <img src={playerAvatar} alt={playerName} draggable={false} />
         </div>
         <div className="player-details">
           <div className="player-name">{playerName}</div>
           <div className="player-level">Уровень {playerLevel}</div>
+          <div className="player-ep">ЭП: {playerEP}</div>
         </div>
       </div>
 
@@ -358,60 +373,32 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
         <span className="market-label">Магазин</span>
       </button>
 
-      <div className="bottom-navigation">
-        <button className="nav-button active">
-          <div className="nav-button-icon">
-            <img src="/assets/Icon_button/Lab_button.png" alt="" draggable={false} />
-          </div>
-          <span className="nav-button-label">Лаборатория</span>
-        </button>
-        
-        <button className="nav-button" onClick={() => onNavigate('premium')}>
-          <div className="nav-button-icon">
-            <img src="/assets/Icon_button/Premium_button.png" alt="" draggable={false} />
-          </div>
-          <span className="nav-button-label">Премиум</span>
-        </button>
-        
-        <button className="nav-button" onClick={() => onNavigate('shop')}>
-          <div className="nav-button-icon">
-            <img src="/assets/Icon_button/Shop_button.png" alt="" draggable={false} />
-          </div>
-          <span className="nav-button-label">Магазин</span>
-        </button>
-        
-        <button className="nav-button" onClick={() => onNavigate("settings")}>
-          <div className="nav-button-icon">
-            <img
-              src="/assets/Icon_button/Setting_button.png"
-              alt=""
-              draggable={false}
-            />
-          </div>
-          <span className="nav-button-label">Настройки</span>
-        </button>
-      </div>
+      <BottomNavigation
+        currentScreen="laboratory"
+        onNavigate={onNavigate}
+        openSettings={openSettings}
+      />
 
       {/* Модальное окно улучшения */}
       {selectedEquipment && (
         <div className="equipment-modal-backdrop" onClick={closeModal}>
           <div className="equipment-modal" onClick={(e) => e.stopPropagation()}>
             <button className="equipment-modal-close" onClick={closeModal}>×</button>
-            
+
             <div className="equipment-modal-content">
               <h2 className="equipment-modal-title">
                 {equipment[selectedEquipment].name}
               </h2>
-              
+
               <div className="equipment-level-display">
                 <span className="level-label">Уровень</span>
                 <span className="level-number">{equipment[selectedEquipment].level}</span>
               </div>
-              
+
               <p className="equipment-description">
                 {equipment[selectedEquipment].description}
               </p>
-              
+
               <div className="equipment-stats">
                 <div className="stat-row">
                   <span className="stat-label">Производительность:</span>
@@ -422,16 +409,14 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                   <span className="stat-value">+{equipment[selectedEquipment].level * 5}%</span>
                 </div>
               </div>
-              
+
               <div className="equipment-upgrade-section">
-                <div className="upgrade-cost">
-                  <span className="cost-label">Стоимость улучшения:</span>
-                  <span className="cost-value">{equipment[selectedEquipment].level * 1000} 💎</span>
+                <div className="upgrade-ep-reward" style={{ marginBottom: "10px", color: "rgba(200, 255, 100, 0.9)", fontSize: "14px", fontWeight: "bold" }}>
+                  Награда за улучшение: +{Math.floor(5 * Math.pow(1.2, equipment[selectedEquipment].level - 1))} ЭП
                 </div>
-                
                 {equipment[selectedEquipment].isUpgrading ? (
                   <div className="upgrade-progress-container">
-                    <div 
+                    <div
                       className="upgrade-progress-bar"
                       style={{ width: `${equipment[selectedEquipment].upgradeProgress}%` }}
                     />
@@ -440,7 +425,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     className={`upgrade-button ${isAnyUpgrading ? 'disabled' : ''}`}
                     onClick={() => onUpgrade(selectedEquipment)}
                     disabled={isAnyUpgrading}

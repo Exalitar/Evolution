@@ -4,6 +4,7 @@
   from {
     background-position: 0 0;
   }
+
   to {
     background-position: -626px 0;
   }
@@ -15,9 +16,11 @@
   0% {
     background-position: 0 0;
   }
+
   50% {
     background-position: 100% 0;
   }
+
   100% {
     background-position: 0 0;
   }
@@ -81,7 +84,8 @@
   right: 0;
   bottom: 0;
   overflow: hidden;
-  padding-bottom: 75px;  /* Изменено с 90px на 75px */
+  padding-bottom: 75px;
+  /* Изменено с 90px на 75px */
   padding-top: 80px;
 }
 
@@ -149,7 +153,8 @@
 
 .materials-container {
   position: fixed;
-  top: 74px;  /* Изменено с 60px на 70px - опущено ниже на 10px */
+  top: 74px;
+  /* Изменено с 60px на 70px - опущено ниже на 10px */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -164,10 +169,14 @@
 
 .small-circle {
   position: relative;
-  width: 45px;              /* = ширине картинки */
-  height: auto;             /* пусть высота растёт за счёт текста */
-  border-radius: 0;         /* круг больше не нужен у контейнера */
-  background: none;         /* фон и бордер перенесём на картинку */
+  width: 45px;
+  /* = ширине картинки */
+  height: auto;
+  /* пусть высота растёт за счёт текста */
+  border-radius: 0;
+  /* круг больше не нужен у контейнера */
+  background: none;
+  /* фон и бордер перенесём на картинку */
   border: none;
   display: flex;
   flex-direction: column;
@@ -310,7 +319,8 @@ img {
 }
 
 .player-info:active {
-  transform: none;              /* чтобы не прыгала при тапе */
+  transform: none;
+  /* чтобы не прыгала при тапе */
   box-shadow: none;
 }
 
@@ -346,6 +356,12 @@ img {
   font-size: 11px;
   color: rgba(0, 255, 255, 0.9);
   font-weight: 500;
+}
+
+.player-ep {
+  font-size: 11px;
+  color: rgba(200, 255, 100, 0.9);
+  font-weight: 600;
 }
 
 /* ===== кнопка магазина (верхний правый угол) ===== */
@@ -393,13 +409,15 @@ img {
   bottom: 0;
   left: 0;
   right: 0;
-  height: auto;  /* Изменено с 85px на auto */
+  height: auto;
+  /* Изменено с 85px на auto */
   background: linear-gradient(180deg, rgba(10, 15, 30, 0.5) 0%, rgba(10, 15, 30, 0.7) 100%);
   backdrop-filter: blur(15px);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 10px 15px;  /* Изменено с 8px 15px на 10px 15px */
+  padding: 10px 15px;
+  /* Изменено с 8px 15px на 10px 15px */
   box-shadow: 0 -4px 20px rgba(0, 255, 255, 0.2);
   z-index: 100;
 }
@@ -413,7 +431,8 @@ img {
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 0;  /* Изменено с 4px на 0 */
+  padding: 0;
+  /* Изменено с 4px на 0 */
 }
 
 .nav-button:hover {
@@ -433,7 +452,8 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2px;  /* Изменено с 4px на 2px */
+  margin-bottom: 2px;
+  /* Изменено с 4px на 2px */
   transition: all 0.3s ease;
 }
 
@@ -501,6 +521,42 @@ img {
   padding: 18px;
   color: white;
   font-size: 15px;
+}
+
+/* ===== сетка выбора аватара ===== */
+
+.avatar-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 15px;
+  justify-items: center;
+  padding: 10px;
+}
+
+.avatar-option {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+}
+
+.avatar-option:hover {
+  transform: scale(1.05);
+  border-color: rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.avatar-option.selected {
+  border: 3px solid rgba(0, 255, 255, 1);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+  transform: scale(1.1);
 }
 
 /* ===== общая кнопка закрытия ===== */
@@ -969,20 +1025,20 @@ img {
   .laboratory-buttons-grid {
     gap: 15px;
   }
-  
+
   .lab-room-button {
     padding: 15px;
   }
-  
+
   .lab-room-icon {
     width: 70px;
     height: 70px;
   }
-  
+
   .lab-room-name {
     font-size: 13px;
   }
-  
+
   .laboratory-header h2 {
     font-size: 20px;
   }
@@ -992,12 +1048,12 @@ img {
   .laboratory-modal {
     padding: 20px;
   }
-  
+
   .lab-room-icon {
     width: 65px;
     height: 65px;
   }
-  
+
   .lab-room-button {
     padding: 12px;
     gap: 8px;
@@ -1061,28 +1117,30 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 3500;
 }
 
 .settings-modal {
   position: relative;
-  background: linear-gradient(135deg, #6a40ce, #1114c2);
+  background: linear-gradient(135deg, rgba(10, 15, 30, 0.95), rgba(20, 30, 50, 0.95));
   border-radius: 16px;
   padding: 28px 24px 24px;
   width: 90%;
   max-width: 340px;
-  min-height: 400px;           /* было ~280, сделали выше в 1.5 раза */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-  border: 2px solid #a855ff;
-  color: #ffd700;
-  font-size: 18px;             /* общий размер текста побольше */
+  min-height: 400px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 18px;
 }
 
 .settings-modal h2 {
   margin: 0 0 36px;
   text-align: center;
   font-size: 22px;
-  color: #ffd700;            /* золотой */
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 .settings-btn {
@@ -1090,41 +1148,48 @@ img {
   margin-bottom: 35px;
   padding: 14px 18px;
   border-radius: 10px;
-  border: none;
-  background: rgba(0, 0, 0, 0.45);
-  color: #ffd700;            /* золотой текст */
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  background: rgba(0, 255, 255, 0.1);
+  color: #00ffff;
   cursor: pointer;
   font-size: 18px;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: all 0.2s ease;
 }
 
 .settings-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
 }
 
-/* Кнопка закрытия: красный квадрат, чёрный X */
 .settings-close {
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  background: #ff1e1e;
-  border-radius: 4px;
-  border: 2px solid #7f0000;
+  background: rgba(255, 0, 0, 0.2);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .settings-close span {
-  color: #000;
+  color: #fff;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
+}
+
+.settings-close:hover {
+  background: rgba(255, 0, 0, 0.4);
+  border-color: rgba(255, 0, 0, 0.8);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
 }
 
 .stat-subgrid {
@@ -1136,9 +1201,11 @@ img {
 }
 
 .material-hover-panel {
-  position: fixed;          /* важно: fixed, не absolute */
+  position: fixed;
+  /* важно: fixed, не absolute */
   left: 50%;
-  top: 135px;               /* 70 (материалы) + ~50px высота кругов */
+  top: 135px;
+  /* 70 (материалы) + ~50px высота кругов */
   transform: translateX(-50%);
   background: rgba(5, 10, 25, 0.9);
   padding: 10px 14px;
@@ -1156,7 +1223,7 @@ img {
   text-align: center;
 }
 
-.material-hover-stats > div {
+.material-hover-stats>div {
   margin-bottom: 2px;
 }
 
@@ -1164,13 +1231,17 @@ img {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 30px;          /* опустить вниз на 30px */
-  border: 2px solid #38bdf8; /* рамка */
+  margin-top: 30px;
+  /* опустить вниз на 30px */
+  border: 2px solid #38bdf8;
+  /* рамка */
   border-radius: 10px;
   padding: 8px 12px;
-  background: rgba(56, 189, 248, 0.2); /* полупрозрачный голубой */
-  backdrop-filter: blur(6px);  
-  z-index: 50         /* опционально, лёгкий блюр */
+  background: rgba(56, 189, 248, 0.2);
+  /* полупрозрачный голубой */
+  backdrop-filter: blur(6px);
+  z-index: 50
+    /* опционально, лёгкий блюр */
 }
 
 .materials-row-wrapper {
@@ -1179,11 +1250,13 @@ img {
 
 .materials-and-reroll {
   display: flex;
-  align-items: flex-start; /* чтобы панель материалов не съезжала */
+  align-items: flex-start;
+  /* чтобы панель материалов не съезжала */
 }
 
 .reroll-panel {
-  margin-left: 16px; /* расстояние справа от материалов */
+  margin-left: 16px;
+  /* расстояние справа от материалов */
 }
 
 .reroll-button {
@@ -1203,12 +1276,15 @@ img {
 
 .materials-row {
   display: flex;
-  align-items: center;      /* материалы и кнопка на одной линии */
-  justify-content: center;  /* если нужно центрировать всю панель */
+  align-items: center;
+  /* материалы и кнопка на одной линии */
+  justify-content: center;
+  /* если нужно центрировать всю панель */
 }
 
 .reroll-circle-button {
-  margin-left: 330px;  /* было 20px */
+  margin-left: 330px;
+  /* было 20px */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1225,9 +1301,9 @@ img {
   box-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
 }
 
-.reroll-circle-button > span,
-.reroll-circle-button > svg,
-.reroll-circle-button > .icon { 
+.reroll-circle-button>span,
+.reroll-circle-button>svg,
+.reroll-circle-button>.icon {
   transform: translateY(-1px);
 }
 

@@ -2,8 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
 import { Shop } from './features/shop/Shop';
-import { BottomNavigation } from './components/BottomNavigation/BottomNavigation';
-import { generateMonsterImage } from './services/comfyUI';
 
 import {
   CharacterStats,
@@ -81,203 +79,189 @@ const startMaterials: StartMaterial[] = [
 ];
 
 const buildAdaptiveMaterials = (
-  baseMaterials: MaterialDefinition[],
-  stats: CharacterStats
-): MaterialDefinition[] => {
-  // доступные «типы» характеристик
-  const focuses = [
-    "strikePower",
-    "bioResource",
-    "defense",
-    "crit",
-    "lifesteal",
-    "dot",
-    "stun",
-  ] as const;
+    baseMaterials: MaterialDefinition[],
+    stats: CharacterStats
+  ): MaterialDefinition[] => {
+    // доступные «типы» характеристик
+    const focuses = [
+      "strikePower",
+      "bioResource",
+      "defense",
+      "crit",
+      "lifesteal",
+      "dot",
+      "stun",
+    ] as const;
 
-  type Focus = (typeof focuses)[number];
+    type Focus = (typeof focuses)[number];
 
-  const getRandomFocusPair = (): [Focus, Focus] => {
-    const f1 = focuses[Math.floor(Math.random() * focuses.length)];
-    let f2: Focus;
-    do {
-      f2 = focuses[Math.floor(Math.random() * focuses.length)];
-    } while (f2 === f1);
-    return [f1, f2];
-  };
+    const getRandomFocusPair = (): [Focus, Focus] => {
+      const f1 = focuses[Math.floor(Math.random() * focuses.length)];
+      let f2: Focus;
+      do {
+        f2 = focuses[Math.floor(Math.random() * focuses.length)];
+      } while (f2 === f1);
+      return [f1, f2];
+    };
 
-  const makePartBonus = (focus: Focus): MaterialBonus => {
-    switch (focus) {
-      case "strikePower":
-        return { strikePower: 5 + Math.floor(Math.random() * 6) }; // 5–10
-      case "bioResource":
-        return { bioResource: 10 + Math.floor(Math.random() * 21) }; // 10–30
-      case "defense": {
-        const v = 1 + Math.floor(Math.random() * 4); // 1–4
-        return {
-          defenseMatrix: {
-            kinetic: v,
-            energy: v,
-            bio: v,
-            toxic: v,
-            psionic: v,
-            tech: v,
-          },
-        };
+    const makePartBonus = (focus: Focus): MaterialBonus => {
+      switch (focus) {
+        case "strikePower":
+          return { strikePower: 5 + Math.floor(Math.random() * 6) }; // 5–10
+        case "bioResource":
+          return { bioResource: 10 + Math.floor(Math.random() * 21) }; // 10–30
+        case "defense": {
+          const v = 1 + Math.floor(Math.random() * 4); // 1–4
+          return {
+            defenseMatrix: {
+              kinetic: v,
+              energy: v,
+              bio: v,
+              toxic: v,
+              psionic: v,
+              tech: v,
+            },
+          };
+        }
+        case "crit":
+          return {
+            critPotential: {
+              critChance: 2 + Math.floor(Math.random() * 4), // 2–5
+              critMultiplier: 0.1 + Math.random() * 0.3, // 0.1–0.4
+            },
+          };
+        case "lifesteal":
+          return {
+            predatoryResonance: {
+              lifestealPercent: 2 + Math.floor(Math.random() * 4),
+              lifestealChance: 8 + Math.floor(Math.random() * 13),
+            },
+          };
+        case "dot":
+          return {
+            toxicity: {
+              dotDamage: 1 + Math.floor(Math.random() * 4),
+              dotChance: 8 + Math.floor(Math.random() * 13),
+            },
+          };
+        case "stun":
+          return {
+            neuroShock: {
+              stunChance: 2 + Math.floor(Math.random() * 5),
+              stunDuration: 0.2 + Math.random() * 0.5,
+              stunCooldown: 5,
+            },
+          };
       }
-      case "crit":
-        return {
-          critPotential: {
-            critChance: 2 + Math.floor(Math.random() * 4), // 2–5
-            critMultiplier: 0.1 + Math.random() * 0.3, // 0.1–0.4
-          },
-        };
-      case "lifesteal":
-        return {
-          predatoryResonance: {
-            lifestealPercent: 2 + Math.floor(Math.random() * 4),
-            lifestealChance: 8 + Math.floor(Math.random() * 13),
-          },
-        };
-      case "dot":
-        return {
-          toxicity: {
-            dotDamage: 1 + Math.floor(Math.random() * 4),
-            dotChance: 8 + Math.floor(Math.random() * 13),
-          },
-        };
-      case "stun":
-        return {
-          neuroShock: {
-            stunChance: 2 + Math.floor(Math.random() * 5),
-            stunDuration: 0.2 + Math.random() * 0.5,
-            stunCooldown: 5,
-          },
-        };
-    }
-  };
+    };
 
-  const mergeBonuses = (a: MaterialBonus, b: MaterialBonus): MaterialBonus => {
-    const res: MaterialBonus = { ...a };
+    const mergeBonuses = (a: MaterialBonus, b: MaterialBonus): MaterialBonus => {
+      const res: MaterialBonus = { ...a };
 
-    if (b.strikePower) {
-      res.strikePower = (res.strikePower ?? 0) + b.strikePower;
-    }
-    if (b.bioResource) {
-      res.bioResource = (res.bioResource ?? 0) + b.bioResource;
-    }
-    if (b.defenseMatrix) {
-      res.defenseMatrix = res.defenseMatrix ?? {};
-      for (const k of ["kinetic", "energy", "bio", "toxic", "psionic", "tech"] as const) {
-        const v = b.defenseMatrix[k];
-        if (v != null) {
-          res.defenseMatrix[k] = (res.defenseMatrix[k] ?? 0) + v;
+      if (b.strikePower) {
+        res.strikePower = (res.strikePower ?? 0) + b.strikePower;
+      }
+      if (b.bioResource) {
+        res.bioResource = (res.bioResource ?? 0) + b.bioResource;
+      }
+      if (b.defenseMatrix) {
+        res.defenseMatrix = res.defenseMatrix ?? {};
+        for (const k of ["kinetic","energy","bio","toxic","psionic","tech"] as const) {
+          const v = b.defenseMatrix[k];
+          if (v != null) {
+            res.defenseMatrix[k] = (res.defenseMatrix[k] ?? 0) + v;
+          }
         }
       }
-    }
-    if (b.critPotential) {
-      res.critPotential = res.critPotential ?? {};
-      if (b.critPotential.critChance != null) {
-        res.critPotential.critChance =
-          (res.critPotential.critChance ?? 0) + b.critPotential.critChance;
+      if (b.critPotential) {
+        res.critPotential = res.critPotential ?? {};
+        if (b.critPotential.critChance != null) {
+          res.critPotential.critChance =
+            (res.critPotential.critChance ?? 0) + b.critPotential.critChance;
+        }
+        if (b.critPotential.critMultiplier != null) {
+          res.critPotential.critMultiplier =
+            (res.critPotential.critMultiplier ?? 0) +
+            b.critPotential.critMultiplier;
+        }
       }
-      if (b.critPotential.critMultiplier != null) {
-        res.critPotential.critMultiplier =
-          (res.critPotential.critMultiplier ?? 0) +
-          b.critPotential.critMultiplier;
+      if (b.predatoryResonance) {
+        res.predatoryResonance = res.predatoryResonance ?? {};
+        if (b.predatoryResonance.lifestealPercent != null) {
+          res.predatoryResonance.lifestealPercent =
+            (res.predatoryResonance.lifestealPercent ?? 0) +
+            b.predatoryResonance.lifestealPercent;
+        }
+        if (b.predatoryResonance.lifestealChance != null) {
+          res.predatoryResonance.lifestealChance =
+            (res.predatoryResonance.lifestealChance ?? 0) +
+            b.predatoryResonance.lifestealChance;
+        }
       }
-    }
-    if (b.predatoryResonance) {
-      res.predatoryResonance = res.predatoryResonance ?? {};
-      if (b.predatoryResonance.lifestealPercent != null) {
-        res.predatoryResonance.lifestealPercent =
-          (res.predatoryResonance.lifestealPercent ?? 0) +
-          b.predatoryResonance.lifestealPercent;
+      if (b.toxicity) {
+        res.toxicity = res.toxicity ?? {};
+        if (b.toxicity.dotDamage != null) {
+          res.toxicity.dotDamage =
+            (res.toxicity.dotDamage ?? 0) + b.toxicity.dotDamage;
+        }
+        if (b.toxicity.dotChance != null) {
+          res.toxicity.dotChance =
+            (res.toxicity.dotChance ?? 0) + b.toxicity.dotChance;
+        }
       }
-      if (b.predatoryResonance.lifestealChance != null) {
-        res.predatoryResonance.lifestealChance =
-          (res.predatoryResonance.lifestealChance ?? 0) +
-          b.predatoryResonance.lifestealChance;
+      if (b.neuroShock) {
+        res.neuroShock = res.neuroShock ?? {};
+        if (b.neuroShock.stunChance != null) {
+          res.neuroShock.stunChance =
+            (res.neuroShock.stunChance ?? 0) + b.neuroShock.stunChance;
+        }
+        if (b.neuroShock.stunDuration != null) {
+          res.neuroShock.stunDuration =
+            (res.neuroShock.stunDuration ?? 0) + b.neuroShock.stunDuration;
+        }
+        if (b.neuroShock.stunCooldown != null) {
+          res.neuroShock.stunCooldown = b.neuroShock.stunCooldown;
+        }
       }
-    }
-    if (b.toxicity) {
-      res.toxicity = res.toxicity ?? {};
-      if (b.toxicity.dotDamage != null) {
-        res.toxicity.dotDamage =
-          (res.toxicity.dotDamage ?? 0) + b.toxicity.dotDamage;
-      }
-      if (b.toxicity.dotChance != null) {
-        res.toxicity.dotChance =
-          (res.toxicity.dotChance ?? 0) + b.toxicity.dotChance;
-      }
-    }
-    if (b.neuroShock) {
-      res.neuroShock = res.neuroShock ?? {};
-      if (b.neuroShock.stunChance != null) {
-        res.neuroShock.stunChance =
-          (res.neuroShock.stunChance ?? 0) + b.neuroShock.stunChance;
-      }
-      if (b.neuroShock.stunDuration != null) {
-        res.neuroShock.stunDuration =
-          (res.neuroShock.stunDuration ?? 0) + b.neuroShock.stunDuration;
-      }
-      if (b.neuroShock.stunCooldown != null) {
-        res.neuroShock.stunCooldown = b.neuroShock.stunCooldown;
-      }
-    }
 
-    return res;
-  };
-
-  return baseMaterials.map((mat, index) => {
-    const [f1, f2] = getRandomFocusPair();
-    const b1 = makePartBonus(f1);
-    const b2 = makePartBonus(f2);
-    const bonus = mergeBonuses(b1, b2); // ровно два типа характеристик
-
-    return {
-      ...mat,
-      bonus,
+      return res;
     };
-  });
-};
+
+    return baseMaterials.map((mat, index) => {
+      const [f1, f2] = getRandomFocusPair();
+      const b1 = makePartBonus(f1);
+      const b2 = makePartBonus(f2);
+      const bonus = mergeBonuses(b1, b2); // ровно два типа характеристик
+
+      return {
+        ...mat,
+        bonus,
+      };
+    });
+  };
 
 function App() {
   const [screen, setScreen] = useState<Screen>("start");
-  const [previousScreen, setPreviousScreen] = useState<Screen>("main");
-
-  const navigateTo = (newScreen: Screen) => {
-    if (screen === "main" || screen === "laboratory") {
-      setPreviousScreen(screen);
-    }
-    setScreen(newScreen);
-  };
-
-  const closeSecondaryScreen = () => {
-    setScreen(previousScreen);
-  };
-
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-
-  const telegramId = "dev_user_123";
-
+  
   const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");
   const [playerLevel, setPlayerLevel] = useState(0);
-  const [lastGeneratedLevel, setLastGeneratedLevel] = useState(0);
-  const [playerEP, setPlayerEP] = useState(0);
-  const [playerAvatar, setPlayerAvatar] = useState<string>("/assets/Avatar/Avatar_1.png");
 
   const [awakeningStage, setAwakeningStage] = useState<number>(1);
   const [evolutionStage, setEvolutionStage] = useState<number>(1);
   const [currentBreedingMaterials, setCurrentBreedingMaterials] =
-    useState<Material[]>([]); // Инициализируется после загрузки или генерации
+  useState<Material[]>(() =>
+    buildAdaptiveMaterials(
+      breedingMaterialsStage1,
+      baseCharacterStats["unknown_dna"]
+    )
+  );
   const [characterForm, setCharacterForm] = useState<number>(1);
   const [rerollsLeft, setRerollsLeft] = useState(3);
 
   const [draggedInitialMaterial, setDraggedInitialMaterial] = useState<Material | null>(null);
   const [isOverCenterInitial, setIsOverCenterInitial] = useState(false);
-
+  
   const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -293,7 +277,6 @@ function App() {
   const [isBreeding, setIsBreeding] = useState(false);
   const [breedingProgress, setBreedingProgress] = useState(0);
   const breedingTimerRef = useRef<number | null>(null);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   const [isAnyUpgrading, setIsAnyUpgrading] = useState(false);
   const [playerCurrency, setPlayerCurrency] = useState(5000);
@@ -302,8 +285,6 @@ function App() {
   const [currentStats, setCurrentStats] = useState<CharacterStats>(
     baseCharacterStats["unknown_dna"]
   );
-
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialDefinition | null>(null);
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
@@ -325,7 +306,7 @@ function App() {
   const closeSettings = () => setIsSettingsOpen(false);
 
   const goToScreen = (to: Screen) => {
-    navigateTo(to);
+    setScreen(to);
     setIsSettingsOpen(false);
   };
 
@@ -433,137 +414,6 @@ function App() {
     }
   });
 
-  const latestState = useRef({
-    playerLevel,
-    playerEP,
-    evolutionStage,
-    currentStats,
-    currentBreedingMaterials,
-    usedMaterials,
-    totalUsedCount,
-    lastGeneratedLevel
-  });
-
-  // Синхронизируем Ref на каждом рендере для сохранения
-  useEffect(() => {
-    latestState.current = {
-      playerLevel,
-      playerEP,
-      evolutionStage,
-      currentStats,
-      currentBreedingMaterials,
-      usedMaterials,
-      totalUsedCount,
-      lastGeneratedLevel
-    };
-  }, [playerLevel, playerEP, evolutionStage, currentStats, currentBreedingMaterials, usedMaterials, totalUsedCount, lastGeneratedLevel]);
-
-  // Загрузка первичного состояния (уровень с бэкенда, остальное из localStorage)
-  useEffect(() => {
-    const loadData = async () => {
-      // Инициализируем пул материалов, если они не заданы
-      if (currentBreedingMaterials.length === 0) {
-        setCurrentBreedingMaterials(
-          buildAdaptiveMaterials(
-            breedingMaterialsStage1,
-            baseCharacterStats["unknown_dna"]
-          )
-        );
-      }
-
-      // 2. Затем запрашиваем бэкенд (он приоритетнее для Уровня и ЭП)
-      try {
-        const response = await fetch("http://localhost:3001/api/user/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ telegramId })
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          if (userData.level !== undefined) setPlayerLevel(userData.level);
-          if (userData.lastGeneratedLevel !== undefined) setLastGeneratedLevel(userData.lastGeneratedLevel);
-          if (userData.bioImage) setFinalBioImage(userData.bioImage);
-          if (userData.ep !== undefined) setPlayerEP(userData.ep);
-          if (userData.evolutionStage !== undefined) setEvolutionStage(userData.evolutionStage);
-          if (userData.totalSynthesisCount !== undefined) setTotalUsedCount(userData.totalSynthesisCount);
-          if (userData.usedMaterials !== undefined) setUsedMaterials(new Set(userData.usedMaterials));
-          if (userData.currentMaterialPool) {
-            try {
-              const parsedPool = typeof userData.currentMaterialPool === "string"
-                ? JSON.parse(userData.currentMaterialPool)
-                : userData.currentMaterialPool;
-              setCurrentBreedingMaterials(parsedPool);
-            } catch (e) {
-              console.error("Failed to parse material pool from backend", e);
-            }
-          }
-
-          // Загрузка оборудования, если оно есть на бэкенде
-          if (userData.equipmentData) {
-            try {
-              const parsedEq = typeof userData.equipmentData === "string"
-                ? JSON.parse(userData.equipmentData)
-                : userData.equipmentData;
-              setEquipment(parsedEq);
-            } catch (e) {
-              console.error("Failed to parse equipment data from backend", e);
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Backend unreachable", e);
-      } finally {
-        setIsDataLoaded(true);
-      }
-    };
-
-    loadData();
-
-    // Инициализируем пул материалов, если они не заданы
-    if (currentBreedingMaterials.length === 0) {
-      setCurrentBreedingMaterials(
-        buildAdaptiveMaterials(
-          breedingMaterialsStage1,
-          baseCharacterStats["unknown_dna"]
-        )
-      );
-    }
-  }, []);
-
-  // Дебаунснутое сохранение только УРОВНЯ в БД при изменении стейта
-  useEffect(() => {
-    if (!isDataLoaded) return; // Не сохранять ничего, пока не загрузим данные!
-
-    const timeout = setTimeout(() => {
-      const state = latestState.current;
-      fetch("http://localhost:3001/api/user/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          telegramId,
-          level: state.playerLevel,
-          ep: state.playerEP,
-          evolutionStage: state.evolutionStage,
-          stats: state.currentStats,
-          equipmentData: JSON.stringify(equipment), // Сохраняем оборудование на бэкенд
-          currentMaterialPool: JSON.stringify(state.currentBreedingMaterials), // Сохраняем материалы на бэкенд
-          usedMaterials: Array.from(state.usedMaterials), // Преобразуем Set в массив для базы
-          totalSynthesisCount: state.totalUsedCount, // Счетчик использованных материалов
-          bioImage: finalBioImage,
-          lastGeneratedLevel: state.lastGeneratedLevel
-        })
-      }).catch(console.error);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [playerLevel, playerEP, evolutionStage, currentStats, equipment, currentBreedingMaterials, usedMaterials, totalUsedCount, isDataLoaded, finalBioImage, lastGeneratedLevel]); // Добавлены зависимости
-
-  // Аватарку всё еще можно хранить локально, так как это сугубо UI фича (или тоже можно унести на бэкенд потом)
-  useEffect(() => {
-    localStorage.setItem('playerAvatar', playerAvatar);
-  }, [playerAvatar]);
-
   const handleStart = () => setScreen("main");
 
   const getMaterialCharacterId = (materialId: string): CharacterId => {
@@ -581,7 +431,7 @@ function App() {
     if (isAnyUpgrading) return;
 
     setIsAnyUpgrading(true);
-
+    
     setEquipment(prev => ({
       ...prev,
       [equipmentId]: {
@@ -594,10 +444,10 @@ function App() {
 
   const handlePurchase = (itemId: string, price: number) => {
     setPlayerCurrency(prev => prev - price);
-
+    
     // Здесь можно добавить логику для применения купленного товара
     console.log(`Куплен товар: ${itemId} за ${price} кристаллов`);
-
+    
     // Примеры применения товаров:
     if (itemId === 'boost_breeding_speed') {
       // Активировать ускорение скрещивания
@@ -607,17 +457,6 @@ function App() {
     // и т.д.
   };
 
-  const calculateRequiredEP = (requirements: Array<{ id: EquipmentType, targetLevel: number }>) => {
-    let totalEP = 0;
-    requirements.forEach(req => {
-      // Суммируем награду в ЭП за каждый уровень улучшения от 1 до targetLevel - 1
-      for (let lvl = 1; lvl < req.targetLevel; lvl++) {
-        totalEP += Math.floor(5 * Math.pow(1.2, lvl - 1));
-      }
-    });
-    return totalEP;
-  };
-
   const canBreedToLevel5 = (): { canBreed: boolean; missingRequirements: string[] } => {
     if (playerLevel !== 4) {
       return { canBreed: true, missingRequirements: [] };
@@ -625,27 +464,14 @@ function App() {
 
     const missing: string[] = [];
 
-    const requiredEquipment: Array<{ id: EquipmentType, targetLevel: number, name: string }> = [
-      { id: 'control_panel', targetLevel: 3, name: 'Панель управления' },
-      { id: 'analyzer', targetLevel: 2, name: 'Анализатор' },
-      { id: 'thermostat', targetLevel: 3, name: 'Термостат' }
-    ];
-
-    // Проверяем уровни приборов
-    requiredEquipment.forEach(req => {
-      // Приведение типа, чтобы TS не ругался на то, что id может быть null. Мы точно знаем, что ключи совпадают
-      const equipmentKey = req.id as keyof typeof equipment;
-      const eq = equipment[equipmentKey];
-
-      if (eq && eq.level < req.targetLevel) {
-        missing.push(`${req.name}: уровень ${eq.level}/${req.targetLevel}`);
-      }
-    });
-
-    // Проверяем ЭП
-    const requiredEP = calculateRequiredEP(requiredEquipment);
-    if (playerEP < requiredEP) {
-      missing.push(`Эволюционный Потенциал: ${playerEP} / ${requiredEP}`);
+    if (equipment.control_panel.level < 3) {
+      missing.push(`Панель управления: уровень ${equipment.control_panel.level}/3`);
+    }
+    if (equipment.analyzer.level < 2) {
+      missing.push(`Анализатор: уровень ${equipment.analyzer.level}/2`);
+    }
+    if (equipment.thermostat.level < 3) {
+      missing.push(`Термостат: уровень ${equipment.thermostat.level}/3`);
     }
 
     return { canBreed: missing.length === 0, missingRequirements: missing };
@@ -675,8 +501,8 @@ function App() {
 
     if (!draggedInitialMaterial) return;
 
-    // Базовые статы Неопознанного ДНК (или текущие, если загрузились с БД)
-    const baseStats = currentStats;
+    // Базовые статы Неопознанного ДНК
+    const baseStats = baseCharacterStats["unknown_dna"];
 
     // Бонус от стартового материала
     const bonus = materialBonuses[draggedInitialMaterial.id];
@@ -686,9 +512,10 @@ function App() {
 
     setCurrentStats(updatedStats);
 
-    // Новые материалы для Stage1
-    const newPool = buildAdaptiveMaterials(breedingMaterialsStage1, updatedStats);
-    setCurrentBreedingMaterials(newPool);
+    // пересчёт списка материалов текущей стадии
+    setCurrentBreedingMaterials((prev) =>
+      buildAdaptiveMaterials(prev, updatedStats)
+    );
 
     setUsedMaterials(new Set([draggedInitialMaterial.id]));
     setTotalUsedCount(1);
@@ -736,26 +563,6 @@ function App() {
     setIsBreeding(true);
     setBreedingProgress(0);
 
-    const nextLevel = playerLevel + 1;
-    // Если следующий уровень кратен 5, запускаем генерацию заранее!
-    if (nextLevel > 0 && nextLevel % 5 === 0 && nextLevel !== lastGeneratedLevel && !isGeneratingImage) {
-      setIsGeneratingImage(true);
-      console.log(`[ComfyUI] Начат процесс генерации для уровня ${nextLevel} (заранее)`);
-      generateMonsterImage().then((imageUrl) => {
-        if (imageUrl) {
-          setFinalBioImage(imageUrl);
-          setLastGeneratedLevel(nextLevel);
-          console.log(`[ComfyUI] Картинка успешно сгенерирована для уровня ${nextLevel}`);
-        } else {
-          console.error(`[ComfyUI] Ошибка генерации: функция вернула null`);
-        }
-      }).catch(error => {
-        console.error(`[ComfyUI] Ошибка при генерации картинки:`, error);
-      }).finally(() => {
-        setIsGeneratingImage(false);
-      });
-    }
-
     const duration = 3000;
     const updateInterval = 50;
     const steps = duration / updateInterval;
@@ -793,18 +600,21 @@ function App() {
             setTotalUsedCount(newTotalCount);
             setCharacterForm((prev) => Math.min(prev + 1, 5));
 
-            setPlayerLevel((prevLevel) => {
-              const newPlayerLevel = prevLevel + 1;
+            const newPlayerLevel = playerLevel + 1;
+            setPlayerLevel(newPlayerLevel);
 
-              if (newPlayerLevel === 5) {
-                setCurrentBreedingMaterials(
-                  buildAdaptiveMaterials(breedingMaterialsStage2, updatedStats)
-                );
-                setUsedMaterials(new Set());
-              }
+            // Переход на stage2 по уровню
+            if (newPlayerLevel === 5) {
+              const materialNumber = pendingBreedSelection!.id
+                .replace("m", "")
+                .replace("_", "-");
+              setFinalBioImage(`/assets/Material/Bio${materialNumber}.jpg`);
 
-              return newPlayerLevel;
-            });
+              setCurrentBreedingMaterials(
+                buildAdaptiveMaterials(breedingMaterialsStage2, updatedStats)
+              );
+              setUsedMaterials(new Set());
+            }
 
             // Переходы по стадиям каждые 5 синтезов
             if (newTotalCount > 0 && newTotalCount % 5 === 0) {
@@ -870,13 +680,8 @@ function App() {
   };
 
   const getCharacterImage = () => {
-    // Если идет генерация прямо сейчас - показываем базовую картинку или лоадер
-    if (isGeneratingImage) {
-      return "/assets/Material/Bio.png";
-    }
-
-    // Если уровень >= 5 и есть финальное изображение
-    if (playerLevel >= 5 && finalBioImage) {
+    // Если уровень 5 и есть финальное изображение
+    if (playerLevel === 5 && finalBioImage) {
       return finalBioImage;
     }
 
@@ -884,27 +689,28 @@ function App() {
     return "/assets/Material/Bio.png";
   };
 
+  // ========== ДОБАВЬТЕ useEffect ЗДЕСЬ (ПЕРЕД return) ==========
+  useEffect(() => {
+    const saved = localStorage.getItem('equipment');
+    if (saved) {
+      setEquipment(JSON.parse(saved));
+    }
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setEquipment(prev => {
-        const isUpgradingCheck = Object.values(prev).some(e => e.isUpgrading);
-        if (!isUpgradingCheck) {
-          setIsAnyUpgrading(false);
-          return prev;
-        }
-
         const updated = { ...prev };
         let hasUpgrading = false;
 
         Object.keys(updated).forEach(key => {
           const item = updated[key];
-
+          
           if (item.isUpgrading && item.upgradeStartTime) {
             const elapsed = Date.now() - item.upgradeStartTime;
             const progress = Math.min((elapsed / item.upgradeDuration) * 100, 100);
 
             if (progress >= 100) {
-              const gainedEP = Math.floor(5 * Math.pow(1.2, item.level - 1));
               updated[key] = {
                 ...item,
                 level: item.level + 1,
@@ -912,7 +718,6 @@ function App() {
                 upgradeProgress: 0,
                 upgradeStartTime: null
               };
-              setPlayerEP(prevEP => prevEP + gainedEP);
             } else {
               updated[key] = {
                 ...item,
@@ -931,6 +736,10 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('equipment', JSON.stringify(equipment));
+  }, [equipment]); // Выполнится каждый раз когда equipment изменится
+
   return (
     <>
       {screen === "start" && (
@@ -947,32 +756,25 @@ function App() {
           <div
             className="player-info"
             onClick={() => {
-              navigateTo("info");
+              setScreen("info");
             }}
           >
-            <div
-              className="player-avatar"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsAvatarModalOpen(true);
-              }}
-            >
+            <div className="player-avatar">
               <img
-                src={playerAvatar}
+                src={getCharacterImage()}
                 alt="Player Avatar"
-                draggable={false}
+                draggable={true}
               />
             </div>
             <div className="player-details">
               <div className="player-name">{playerName}</div>
               <div className="player-level">Уровень {playerLevel}</div>
-              <div className="player-ep">ЭП: {playerEP}</div>
             </div>
           </div>
 
           <button
             className="market-button"
-            onClick={() => navigateTo("shop")}
+            onClick={() => setScreen("shop")}
           >
             <span className="market-icon" />
             <span className="market-label">Магазин</span>
@@ -980,12 +782,13 @@ function App() {
 
           {/* Центральный круг — всегда есть персонаж */}
           <div
-            className={`central-circle ${isBreeding
-              ? ""
-              : isOverCenterForBreed
+            className={`central-circle ${
+              isBreeding
+                ? ""
+                : isOverCenterForBreed
                 ? "drag-over-breed"
                 : "has-character"
-              }`}
+            }`}
             onDragOver={isBreeding ? undefined : handleDragOverCenterForBreed}
             onDragLeave={isBreeding ? undefined : handleDragLeaveCenterForBreed}
             onDrop={isBreeding ? undefined : handleDropOnCenterForBreed}
@@ -1020,8 +823,9 @@ function App() {
                 return (
                   <div
                     key={material.id}
-                    className={`small-circle breeding-material ${isUsed || isBreeding ? "is-used" : ""
-                      }`}
+                    className={`small-circle breeding-material ${
+                      isUsed || isBreeding ? "is-used" : ""
+                    }`}
                     draggable={!isUsed && !isBreeding}
                     onDragStart={(e) => {
                       if (isUsed || isBreeding) return;
@@ -1129,26 +933,63 @@ function App() {
           )}
 
           {/* нижняя навигация всегда доступна */}
-          <BottomNavigation
-            currentScreen={screen}
-            onNavigate={navigateTo}
-            openSettings={openSettings}
-          />
+          <div className="bottom-navigation">
+            <button className="nav-button" onClick={() => setScreen("laboratory")}>
+              <div className="nav-button-icon">
+                <img
+                  src="/assets/Icon_button/Lab_button.png"
+                  alt="Лаборатория"
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">Лаборатория</span>
+            </button>
+
+            <button className="nav-button" onClick={() => setScreen("premium")}>
+              <div className="nav-button-icon">
+                <img
+                  src="/assets/Icon_button/Premium_button.png"
+                  alt="Премиум"
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">Премиум</span>
+            </button>
+
+            <button className="nav-button" onClick={() => setScreen("nftShop")}>
+              <div className="nav-button-icon">
+                <img
+                  src="assets/Icon_button/Shop_button.png"
+                  alt=""
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">NFT магазин</span>
+            </button>
+
+            <button className="nav-button" onClick={openSettings}>
+              <div className="nav-button-icon">
+                <img
+                  src="/assets/Icon_button/Setting_button.png"
+                  alt=""
+                  draggable={false}
+                />
+              </div>
+              <span className="nav-button-label">Настройки</span>
+            </button>
+          </div>
         </div>
       )}
 
-      {screen === "laboratory" && (
+      {screen === 'laboratory' && (
         <Laboratory
           playerName={playerName}
           playerLevel={playerLevel}
-          playerEP={playerEP}
-          playerAvatar={playerAvatar}
-          onNavigate={(newScreen) => navigateTo(newScreen as Screen)}
+          playerAvatar={getCharacterImage()} // ← Используйте функцию getCharacterImage
+          onNavigate={(newScreen) => setScreen(newScreen as Screen)}
           equipment={equipment}
           onUpgrade={handleEquipmentUpgrade}
           isAnyUpgrading={isAnyUpgrading}
-          onAvatarClick={() => setIsAvatarModalOpen(true)}
-          openSettings={openSettings}
         />
       )}
 
@@ -1156,7 +997,7 @@ function App() {
         <div className="secondary-screen">
           <div className="secondary-header">
             <h2>Премиум</h2>
-            <button className="close-button" onClick={closeSecondaryScreen}>✕</button>
+            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
           </div>
           <div className="secondary-content">
             <p>Премиум функции будут здесь</p>
@@ -1165,8 +1006,8 @@ function App() {
       )}
 
       {screen === "shop" && (
-        <Shop
-          onClose={closeSecondaryScreen}
+        <Shop 
+          onClose={() => setScreen("main")}
           playerCurrency={playerCurrency}
           onPurchase={handlePurchase}
         />
@@ -1176,7 +1017,7 @@ function App() {
         <div className="secondary-screen">
           <div className="secondary-header">
             <h2>NFT магазин</h2>
-            <button className="close-button" onClick={closeSecondaryScreen}>✕</button>
+            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
           </div>
           <div className="secondary-content">
             {/* Здесь потом сделаем сетку NFT как в основном магазине */}
@@ -1189,7 +1030,7 @@ function App() {
         <div className="info-screen">
           <div className="info-header">
             <h2>Характеристики персонажа</h2>
-            <button className="close-button" onClick={closeSecondaryScreen}>
+            <button className="close-button" onClick={() => setScreen("main")}>
               ✕
             </button>
           </div>
@@ -1282,7 +1123,7 @@ function App() {
                               currentStats.defenseMatrix.psionic +
                               currentStats.defenseMatrix.tech) /
                               600) *
-                            100,
+                              100,
                             100
                           )}%`,
                         }}
@@ -1335,7 +1176,7 @@ function App() {
                           width: `${Math.min(
                             (currentStats.reactiveDefense.parryChance +
                               currentStats.reactiveDefense.mitigationChance) /
-                            2,
+                              2,
                             100
                           )}%`,
                         }}
@@ -1405,7 +1246,7 @@ function App() {
                           width: `${Math.min(
                             (currentStats.predatoryResonance.lifestealPercent *
                               currentStats.predatoryResonance.lifestealChance) /
-                            50,
+                              50,
                             100
                           )}%`,
                         }}
@@ -1442,7 +1283,7 @@ function App() {
                           width: `${Math.min(
                             (currentStats.toxicity.dotDamage *
                               currentStats.toxicity.dotChance) /
-                            60,
+                              60,
                             100
                           )}%`,
                         }}
@@ -1476,7 +1317,7 @@ function App() {
                           width: `${Math.min(
                             (currentStats.neuroShock.stunChance *
                               currentStats.neuroShock.stunDuration) /
-                            (currentStats.neuroShock.stunCooldown || 1),
+                              (currentStats.neuroShock.stunCooldown || 1),
                             100
                           )}%`,
                         }}
@@ -1524,49 +1365,11 @@ function App() {
       )}
 
       {screen === "id_person" && (
-        <div className="secondary-screen">
-          <div className="secondary-header">
-            <h2>ID Telegram</h2>
-            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
-          </div>
-          <div className="secondary-content">
-            <p>Ваш ID: {telegramId}</p>
-          </div>
-        </div>
+        <div>Здесь будет экран с ID Telegram</div>
       )}
 
-      {isAvatarModalOpen && (
-        <div className="settings-modal-backdrop" onClick={() => setIsAvatarModalOpen(false)}>
-          <div
-            className="settings-modal"
-            onClick={(e) => e.stopPropagation()}
-            style={{ width: '90%', maxWidth: '400px', padding: '20px' }}
-          >
-            <h2 style={{ textAlign: 'center', color: '#ffd700', marginBottom: '20px', textShadow: '0 0 10px rgba(255, 215, 0, 0.5)' }}>Выбор аватара</h2>
-            <div className="avatar-selection-grid">
-              {[1, 2, 3, 4, 5].map((num) => {
-                const avatarUrl = `/assets/Avatar/Avatar_${num}.png`;
-                return (
-                  <img
-                    key={num}
-                    src={avatarUrl}
-                    alt={`Avatar ${num}`}
-                    draggable={false}
-                    className={`avatar-option ${playerAvatar === avatarUrl ? 'selected' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPlayerAvatar(avatarUrl);
-                    }}
-                  />
-                );
-              })}
-            </div>
-
-            <button className="settings-close" onClick={() => setIsAvatarModalOpen(false)}>
-              <span>×</span>
-            </button>
-          </div>
-        </div>
+      {screen === "avatar" && (
+        <div>Экран смены аватара</div>
       )}
 
       {screen === "language" && (
@@ -1589,10 +1392,7 @@ function App() {
               ID Telegram
             </button>
 
-            <button className="settings-btn" onClick={() => {
-              closeSettings();
-              setIsAvatarModalOpen(true);
-            }}>
+            <button className="settings-btn" onClick={() => goToScreen("avatar")}>
               Смена аватара
             </button>
 
@@ -1622,8 +1422,8 @@ function App() {
             </div>
 
             {/* Блок с бонусами материала */}
-            {pendingBreedSelection.bonus && (() => {
-              const bonus = pendingBreedSelection.bonus!;
+            {materialBonuses[pendingBreedSelection.id] && (() => {
+              const bonus = materialBonuses[pendingBreedSelection.id];
 
               const lines: React.ReactNode[] = [];
 
@@ -1728,8 +1528,9 @@ function App() {
 
             <div className="breed-modal-buttons">
               <button
-                className={`breed-modal-button yes ${playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""
-                  }`}
+                className={`breed-modal-button yes ${
+                  playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""
+                }`}
                 onClick={handleConfirmBreeding}
                 disabled={playerLevel === 4 && !canBreedToLevel5().canBreed}
               >

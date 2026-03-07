@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  telegramId           String    @unique
+  username             String?
+  level                Int       @default(0)
+  ep                   Int       @default(0)
+  evolutionStage       Int       @default(1)
+  totalSynthesisCount  Int       @default(0)
+  usedMaterials        String[]  // ID использованных материалов в текущем пуле
+  currentMaterialPool  Json?     // Сохраненный список доступных материалов с характеристиками
+  equipmentData        Json?     // Сохраненное состояние всех приборов лаборатории
+  bioImage             String?   // URL сгенерированного изображения
+  lastGeneratedLevel   Int       @default(0) // Уровень последней генерации изображения
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  stats                Stats?
+}
+
+model Stats {
+  id                   Int       @id @default(autoincrement())
+  userId               Int       @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  strikePower          Float     @default(5.0)
+  bioResource          Float     @default(0.0)
+
+  // Defense Matrix
+  defKinetic           Float     @default(0)
+  defEnergy            Float     @default(0)
+  defBio               Float     @default(0)
+  defToxic             Float     @default(0)
+  defPsionic           Float     @default(0)
+  defTech              Float     @default(0)
+
+  // Reactive Defense
+  blockChance          Float     @default(0)
+  blockMitigation      Float     @default(0)
+
+  // Crit Potential
+  critChance           Float     @default(0)
+  critMultiplier       Float     @default(1.0)
+
+  // Predatory Resonance
+  lifestealPercent     Float     @default(0)
+  lifestealChance      Float     @default(0)
+
+  // Toxicity
+  dotDamage            Float     @default(0)
+  dotChance            Float     @default(0)
+
+  // Neuroshock
+  stunChance           Float     @default(0)
+  stunDuration         Float     @default(0)
+  stunCooldown         Float     @default(0)
+}
+
+

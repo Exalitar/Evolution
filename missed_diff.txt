@@ -1,0 +1,595 @@
+24a25
+> import { generateMonsterImage } from "./services/comfyUI";
+82,154c83,125
+<     baseMaterials: MaterialDefinition[],
+<     stats: CharacterStats
+<   ): MaterialDefinition[] => {
+<     // доступные «типы» характеристик
+<     const focuses = [
+<       "strikePower",
+<       "bioResource",
+<       "defense",
+<       "crit",
+<       "lifesteal",
+<       "dot",
+<       "stun",
+<     ] as const;
+< 
+<     type Focus = (typeof focuses)[number];
+< 
+<     const getRandomFocusPair = (): [Focus, Focus] => {
+<       const f1 = focuses[Math.floor(Math.random() * focuses.length)];
+<       let f2: Focus;
+<       do {
+<         f2 = focuses[Math.floor(Math.random() * focuses.length)];
+<       } while (f2 === f1);
+<       return [f1, f2];
+<     };
+< 
+<     const makePartBonus = (focus: Focus): MaterialBonus => {
+<       switch (focus) {
+<         case "strikePower":
+<           return { strikePower: 5 + Math.floor(Math.random() * 6) }; // 5–10
+<         case "bioResource":
+<           return { bioResource: 10 + Math.floor(Math.random() * 21) }; // 10–30
+<         case "defense": {
+<           const v = 1 + Math.floor(Math.random() * 4); // 1–4
+<           return {
+<             defenseMatrix: {
+<               kinetic: v,
+<               energy: v,
+<               bio: v,
+<               toxic: v,
+<               psionic: v,
+<               tech: v,
+<             },
+<           };
+<         }
+<         case "crit":
+<           return {
+<             critPotential: {
+<               critChance: 2 + Math.floor(Math.random() * 4), // 2–5
+<               critMultiplier: 0.1 + Math.random() * 0.3, // 0.1–0.4
+<             },
+<           };
+<         case "lifesteal":
+<           return {
+<             predatoryResonance: {
+<               lifestealPercent: 2 + Math.floor(Math.random() * 4),
+<               lifestealChance: 8 + Math.floor(Math.random() * 13),
+<             },
+<           };
+<         case "dot":
+<           return {
+<             toxicity: {
+<               dotDamage: 1 + Math.floor(Math.random() * 4),
+<               dotChance: 8 + Math.floor(Math.random() * 13),
+<             },
+<           };
+<         case "stun":
+<           return {
+<             neuroShock: {
+<               stunChance: 2 + Math.floor(Math.random() * 5),
+<               stunDuration: 0.2 + Math.random() * 0.5,
+<               stunCooldown: 5,
+<             },
+<           };
+---
+>   baseMaterials: MaterialDefinition[],
+>   stats: CharacterStats
+> ): MaterialDefinition[] => {
+>   // доступные «типы» характеристик
+>   const focuses = [
+>     "strikePower",
+>     "bioResource",
+>     "defense",
+>     "crit",
+>     "lifesteal",
+>     "dot",
+>     "stun",
+>   ] as const;
+> 
+>   type Focus = (typeof focuses)[number];
+> 
+>   const getRandomFocusPair = (): [Focus, Focus] => {
+>     const f1 = focuses[Math.floor(Math.random() * focuses.length)];
+>     let f2: Focus;
+>     do {
+>       f2 = focuses[Math.floor(Math.random() * focuses.length)];
+>     } while (f2 === f1);
+>     return [f1, f2];
+>   };
+> 
+>   const makePartBonus = (focus: Focus): MaterialBonus => {
+>     switch (focus) {
+>       case "strikePower":
+>         return { strikePower: 5 + Math.floor(Math.random() * 6) }; // 5–10
+>       case "bioResource":
+>         return { bioResource: 10 + Math.floor(Math.random() * 21) }; // 10–30
+>       case "defense": {
+>         const v = 1 + Math.floor(Math.random() * 4); // 1–4
+>         return {
+>           defenseMatrix: {
+>             kinetic: v,
+>             energy: v,
+>             bio: v,
+>             toxic: v,
+>             psionic: v,
+>             tech: v,
+>           },
+>         };
+156c127,157
+<     };
+---
+>       case "crit":
+>         return {
+>           critPotential: {
+>             critChance: 2 + Math.floor(Math.random() * 4), // 2–5
+>             critMultiplier: 0.1 + Math.random() * 0.3, // 0.1–0.4
+>           },
+>         };
+>       case "lifesteal":
+>         return {
+>           predatoryResonance: {
+>             lifestealPercent: 2 + Math.floor(Math.random() * 4),
+>             lifestealChance: 8 + Math.floor(Math.random() * 13),
+>           },
+>         };
+>       case "dot":
+>         return {
+>           toxicity: {
+>             dotDamage: 1 + Math.floor(Math.random() * 4),
+>             dotChance: 8 + Math.floor(Math.random() * 13),
+>           },
+>         };
+>       case "stun":
+>         return {
+>           neuroShock: {
+>             stunChance: 2 + Math.floor(Math.random() * 5),
+>             stunDuration: 0.2 + Math.random() * 0.5,
+>             stunCooldown: 5,
+>           },
+>         };
+>     }
+>   };
+158,159c159,160
+<     const mergeBonuses = (a: MaterialBonus, b: MaterialBonus): MaterialBonus => {
+<       const res: MaterialBonus = { ...a };
+---
+>   const mergeBonuses = (a: MaterialBonus, b: MaterialBonus): MaterialBonus => {
+>     const res: MaterialBonus = { ...a };
+161,162c162,174
+<       if (b.strikePower) {
+<         res.strikePower = (res.strikePower ?? 0) + b.strikePower;
+---
+>     if (b.strikePower) {
+>       res.strikePower = (res.strikePower ?? 0) + b.strikePower;
+>     }
+>     if (b.bioResource) {
+>       res.bioResource = (res.bioResource ?? 0) + b.bioResource;
+>     }
+>     if (b.defenseMatrix) {
+>       res.defenseMatrix = res.defenseMatrix ?? {};
+>       for (const k of ["kinetic", "energy", "bio", "toxic", "psionic", "tech"] as const) {
+>         const v = b.defenseMatrix[k];
+>         if (v != null) {
+>           res.defenseMatrix[k] = (res.defenseMatrix[k] ?? 0) + v;
+>         }
+164,165c176,181
+<       if (b.bioResource) {
+<         res.bioResource = (res.bioResource ?? 0) + b.bioResource;
+---
+>     }
+>     if (b.critPotential) {
+>       res.critPotential = res.critPotential ?? {};
+>       if (b.critPotential.critChance != null) {
+>         res.critPotential.critChance =
+>           (res.critPotential.critChance ?? 0) + b.critPotential.critChance;
+167,174c183,186
+<       if (b.defenseMatrix) {
+<         res.defenseMatrix = res.defenseMatrix ?? {};
+<         for (const k of ["kinetic","energy","bio","toxic","psionic","tech"] as const) {
+<           const v = b.defenseMatrix[k];
+<           if (v != null) {
+<             res.defenseMatrix[k] = (res.defenseMatrix[k] ?? 0) + v;
+<           }
+<         }
+---
+>       if (b.critPotential.critMultiplier != null) {
+>         res.critPotential.critMultiplier =
+>           (res.critPotential.critMultiplier ?? 0) +
+>           b.critPotential.critMultiplier;
+176,186c188,194
+<       if (b.critPotential) {
+<         res.critPotential = res.critPotential ?? {};
+<         if (b.critPotential.critChance != null) {
+<           res.critPotential.critChance =
+<             (res.critPotential.critChance ?? 0) + b.critPotential.critChance;
+<         }
+<         if (b.critPotential.critMultiplier != null) {
+<           res.critPotential.critMultiplier =
+<             (res.critPotential.critMultiplier ?? 0) +
+<             b.critPotential.critMultiplier;
+<         }
+---
+>     }
+>     if (b.predatoryResonance) {
+>       res.predatoryResonance = res.predatoryResonance ?? {};
+>       if (b.predatoryResonance.lifestealPercent != null) {
+>         res.predatoryResonance.lifestealPercent =
+>           (res.predatoryResonance.lifestealPercent ?? 0) +
+>           b.predatoryResonance.lifestealPercent;
+188,199c196,199
+<       if (b.predatoryResonance) {
+<         res.predatoryResonance = res.predatoryResonance ?? {};
+<         if (b.predatoryResonance.lifestealPercent != null) {
+<           res.predatoryResonance.lifestealPercent =
+<             (res.predatoryResonance.lifestealPercent ?? 0) +
+<             b.predatoryResonance.lifestealPercent;
+<         }
+<         if (b.predatoryResonance.lifestealChance != null) {
+<           res.predatoryResonance.lifestealChance =
+<             (res.predatoryResonance.lifestealChance ?? 0) +
+<             b.predatoryResonance.lifestealChance;
+<         }
+---
+>       if (b.predatoryResonance.lifestealChance != null) {
+>         res.predatoryResonance.lifestealChance =
+>           (res.predatoryResonance.lifestealChance ?? 0) +
+>           b.predatoryResonance.lifestealChance;
+201,210c201,206
+<       if (b.toxicity) {
+<         res.toxicity = res.toxicity ?? {};
+<         if (b.toxicity.dotDamage != null) {
+<           res.toxicity.dotDamage =
+<             (res.toxicity.dotDamage ?? 0) + b.toxicity.dotDamage;
+<         }
+<         if (b.toxicity.dotChance != null) {
+<           res.toxicity.dotChance =
+<             (res.toxicity.dotChance ?? 0) + b.toxicity.dotChance;
+<         }
+---
+>     }
+>     if (b.toxicity) {
+>       res.toxicity = res.toxicity ?? {};
+>       if (b.toxicity.dotDamage != null) {
+>         res.toxicity.dotDamage =
+>           (res.toxicity.dotDamage ?? 0) + b.toxicity.dotDamage;
+212,224c208,210
+<       if (b.neuroShock) {
+<         res.neuroShock = res.neuroShock ?? {};
+<         if (b.neuroShock.stunChance != null) {
+<           res.neuroShock.stunChance =
+<             (res.neuroShock.stunChance ?? 0) + b.neuroShock.stunChance;
+<         }
+<         if (b.neuroShock.stunDuration != null) {
+<           res.neuroShock.stunDuration =
+<             (res.neuroShock.stunDuration ?? 0) + b.neuroShock.stunDuration;
+<         }
+<         if (b.neuroShock.stunCooldown != null) {
+<           res.neuroShock.stunCooldown = b.neuroShock.stunCooldown;
+<         }
+---
+>       if (b.toxicity.dotChance != null) {
+>         res.toxicity.dotChance =
+>           (res.toxicity.dotChance ?? 0) + b.toxicity.dotChance;
+225a212,226
+>     }
+>     if (b.neuroShock) {
+>       res.neuroShock = res.neuroShock ?? {};
+>       if (b.neuroShock.stunChance != null) {
+>         res.neuroShock.stunChance =
+>           (res.neuroShock.stunChance ?? 0) + b.neuroShock.stunChance;
+>       }
+>       if (b.neuroShock.stunDuration != null) {
+>         res.neuroShock.stunDuration =
+>           (res.neuroShock.stunDuration ?? 0) + b.neuroShock.stunDuration;
+>       }
+>       if (b.neuroShock.stunCooldown != null) {
+>         res.neuroShock.stunCooldown = b.neuroShock.stunCooldown;
+>       }
+>     }
+227,240c228
+<       return res;
+<     };
+< 
+<     return baseMaterials.map((mat, index) => {
+<       const [f1, f2] = getRandomFocusPair();
+<       const b1 = makePartBonus(f1);
+<       const b2 = makePartBonus(f2);
+<       const bonus = mergeBonuses(b1, b2); // ровно два типа характеристик
+< 
+<       return {
+<         ...mat,
+<         bonus,
+<       };
+<     });
+---
+>     return res;
+242a231,243
+>   return baseMaterials.map((mat, index) => {
+>     const [f1, f2] = getRandomFocusPair();
+>     const b1 = makePartBonus(f1);
+>     const b2 = makePartBonus(f2);
+>     const bonus = mergeBonuses(b1, b2); // ровно два типа характеристик
+> 
+>     return {
+>       ...mat,
+>       bonus,
+>     };
+>   });
+> };
+> 
+245c246,265
+<   
+---
+>   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+> 
+>   // -- СИНХРОНИЗАЦИЯ С БЭКЕНДОМ --
+>   const telegramId = "dev_user_123";
+>   const [isSyncing, setIsSyncing] = useState<boolean>(true);
+> 
+>   const saveTimeoutRef = useRef<number | ReturnType<typeof setTimeout> | null>(null);
+> 
+>   // Свежие данные (Ref) нужны, чтобы всегда видеть актуальный стейт при сохранении
+>   const latestState = useRef({
+>     playerLevel: 0,
+>     evolutionStage: 1,
+>     totalUsedCount: 0,
+>     usedMaterials: new Set<string>(),
+>     currentStats: baseCharacterStats["unknown_dna"],
+>     currentBreedingMaterials: [] as Material[],
+>     equipment: {} as Record<string, Equipment>,
+>     playerEP: 0
+>   });
+> 
+248a269
+>   const [playerEP, setPlayerEP] = useState(0);
+253,258c274,279
+<   useState<Material[]>(() =>
+<     buildAdaptiveMaterials(
+<       breedingMaterialsStage1,
+<       baseCharacterStats["unknown_dna"]
+<     )
+<   );
+---
+>     useState<Material[]>(() =>
+>       buildAdaptiveMaterials(
+>         breedingMaterialsStage1,
+>         baseCharacterStats["unknown_dna"]
+>       )
+>     );
+264c285
+<   
+---
+> 
+416a438,542
+>   // Загрузка первичного состояния
+>   useEffect(() => {
+>     const syncWithBackend = async () => {
+>       try {
+>         const response = await fetch("http://localhost:3001/api/user/sync", {
+>           method: "POST",
+>           headers: { "Content-Type": "application/json" },
+>           body: JSON.stringify({ telegramId })
+>         });
+> 
+>         if (response.ok) {
+>           const userData = await response.json();
+>           setPlayerLevel(userData.level || 0);
+>           setEvolutionStage(userData.evolutionStage || 1);
+>           setTotalUsedCount(userData.totalSynthesisCount || 0);
+>           setUsedMaterials(new Set(userData.usedMaterials || []));
+>           setPlayerEP(userData.equipmentData?.playerEP || 0); // Можно хранить EP в stats или equipmentData
+> 
+>           if (userData.currentMaterialPool) {
+>             setCurrentBreedingMaterials(userData.currentMaterialPool);
+>           }
+> 
+>           if (userData.equipmentData) {
+>             setEquipment(userData.equipmentData);
+>           }
+> 
+>           if (userData.stats) {
+>             setCurrentStats(prev => ({
+>               ...prev,
+>               strikePower: userData.stats.strikePower,
+>               bioResource: userData.stats.bioResource,
+>               defenseMatrix: {
+>                 kinetic: userData.stats.defKinetic,
+>                 energy: userData.stats.defEnergy,
+>                 bio: userData.stats.defBio,
+>                 toxic: userData.stats.defToxic,
+>                 psionic: userData.stats.defPsionic,
+>                 tech: userData.stats.defTech
+>               },
+>               predatoryResonance: {
+>                 lifestealPercent: userData.stats.lifestealPercent,
+>                 lifestealChance: userData.stats.lifestealChance
+>               },
+>               toxicity: {
+>                 dotDamage: userData.stats.dotDamage,
+>                 dotChance: userData.stats.dotChance
+>               },
+>               neuroShock: {
+>                 stunChance: userData.stats.stunChance,
+>                 stunDuration: userData.stats.stunDuration,
+>                 stunCooldown: userData.stats.stunCooldown
+>               },
+>               critPotential: {
+>                 critChance: userData.stats.critChance,
+>                 critMultiplier: userData.stats.critMultiplier
+>               }
+>             }));
+>           }
+>         }
+>       } catch (e) {
+>         console.error("Backend unreachable", e);
+>       } finally {
+>         setIsSyncing(false);
+>       }
+>     };
+> 
+>     syncWithBackend();
+>   }, [telegramId]);
+> 
+>   // Синхронизируем Ref на каждом рендере и планируем авто-сохранение (debounce 1 сек)
+>   useEffect(() => {
+>     latestState.current = {
+>       playerLevel,
+>       evolutionStage,
+>       totalUsedCount,
+>       usedMaterials,
+>       currentStats,
+>       currentBreedingMaterials,
+>       equipment,
+>       playerEP
+>     };
+> 
+>     if (isSyncing) return;
+> 
+>     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current as number);
+>     saveTimeoutRef.current = setTimeout(() => {
+>       const state = latestState.current;
+>       fetch("http://localhost:3001/api/user/save", {
+>         method: "POST",
+>         headers: { "Content-Type": "application/json" },
+>         body: JSON.stringify({
+>           telegramId,
+>           level: state.playerLevel,
+>           evolutionStage: state.evolutionStage,
+>           totalSynthesisCount: state.totalUsedCount,
+>           usedMaterials: Array.from(state.usedMaterials),
+>           stats: state.currentStats,
+>           currentMaterialPool: state.currentBreedingMaterials,
+>           equipmentData: { ...state.equipment, playerEP: state.playerEP }
+>         })
+>       }).catch(console.error);
+>     }, 1000);
+> 
+>   }, [playerLevel, evolutionStage, totalUsedCount, usedMaterials, currentStats, currentBreedingMaterials, equipment, playerEP, isSyncing]);
+> 
+434c560
+<     
+---
+> 
+447c573
+<     
+---
+> 
+450c576
+<     
+---
+> 
+607,611c733,750
+<             if (newPlayerLevel === 5) {
+<               const materialNumber = pendingBreedSelection!.id
+<                 .replace("m", "")
+<                 .replace("_", "-");
+<               setFinalBioImage(`/assets/Material/Bio${materialNumber}.jpg`);
+---
+>             if (newPlayerLevel === 5 || (newPlayerLevel > 0 && newPlayerLevel % 5 === 0)) {
+>               setIsGeneratingImage(true);
+>               // Запрашиваем генерацию картинки у ComfyUI
+>               generateMonsterImage()
+>                 .then((imageUrl: string | null) => {
+>                   if (imageUrl) {
+>                     setFinalBioImage(imageUrl);
+>                     // Сразу сохраняем картинку
+>                   }
+>                 })
+>                 .catch((err: any) => {
+>                   console.error("Image gen error", err);
+>                   // Фолбэк картинка
+>                   setFinalBioImage("/assets/Material/Bio.png");
+>                 })
+>                 .finally(() => {
+>                   setIsGeneratingImage(false);
+>                 });
+684c823
+<     if (playerLevel === 5 && finalBioImage) {
+---
+>     if (playerLevel >= 5 && finalBioImage) {
+692,699d830
+<   // ========== ДОБАВЬТЕ useEffect ЗДЕСЬ (ПЕРЕД return) ==========
+<   useEffect(() => {
+<     const saved = localStorage.getItem('equipment');
+<     if (saved) {
+<       setEquipment(JSON.parse(saved));
+<     }
+<   }, []);
+< 
+702a834,839
+>         const isUpgradingCheck = Object.values(prev).some(e => e.isUpgrading);
+>         if (!isUpgradingCheck) {
+>           setIsAnyUpgrading(false);
+>           return prev;
+>         }
+> 
+708c845
+<           
+---
+> 
+739,742d875
+<   useEffect(() => {
+<     localStorage.setItem('equipment', JSON.stringify(equipment));
+<   }, [equipment]); // Выполнится каждый раз когда equipment изменится
+< 
+785,788c918,920
+<             className={`central-circle ${
+<               isBreeding
+<                 ? ""
+<                 : isOverCenterForBreed
+---
+>             className={`central-circle ${isBreeding
+>               ? ""
+>               : isOverCenterForBreed
+791c923
+<             }`}
+---
+>               }`}
+826,828c958,959
+<                     className={`small-circle breeding-material ${
+<                       isUsed || isBreeding ? "is-used" : ""
+<                     }`}
+---
+>                     className={`small-circle breeding-material ${isUsed || isBreeding ? "is-used" : ""
+>                       }`}
+988,989c1119,1121
+<           playerAvatar={getCharacterImage()} // ← Используйте функцию getCharacterImage
+<           onNavigate={(newScreen) => setScreen(newScreen as Screen)}
+---
+>           playerEP={playerEP}
+>           playerAvatar={getCharacterImage()}
+>           onNavigate={goToScreen}
+1009c1141
+<         <Shop 
+---
+>         <Shop
+1126c1258
+<                               100,
+---
+>                             100,
+1179c1311
+<                               2,
+---
+>                             2,
+1249c1381
+<                               50,
+---
+>                             50,
+1286c1418
+<                               60,
+---
+>                             60,
+1320c1452
+<                               (currentStats.neuroShock.stunCooldown || 1),
+---
+>                             (currentStats.neuroShock.stunCooldown || 1),
+1531,1533c1663,1664
+<                 className={`breed-modal-button yes ${
+<                   playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""
+<                 }`}
+---
+>                 className={`breed-modal-button yes ${playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""
+>                   }`}

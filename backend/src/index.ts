@@ -259,6 +259,17 @@ setInterval(checkAndRefillImagePool, 60000);
 // Первый запуск при старте бэкенда
 setTimeout(checkAndRefillImagePool, 5000);
 
+// Эндпоинт очистки пула
+app.get('/api/comfy/reset-pool', async (req, res) => {
+    try {
+        await prisma.imagePool.deleteMany();
+        res.send('Пул картинок успешно очищен! Можно закрывать эту страницу. Бэкенд начнет генерацию новых.');
+    } catch (e) {
+        console.error('Ошибка очистки пула:', e);
+        res.status(500).send('Ошибка при очистке пула');
+    }
+});
+
 // Эндпоинт выдачи Monster Image из пула
 app.post('/api/comfy/generate', async (req, res) => {
     try {

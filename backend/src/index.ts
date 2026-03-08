@@ -254,6 +254,8 @@ async function checkAndRefillImagePool() {
                 }
             }
             console.log(`[POOL] 🎉 Пул пополнен!`);
+        } else {
+            console.log(`[POOL] В пуле достаточно картинок (${unusedCount}). Генерация не требуется.`);
         }
     } catch (e) {
         console.error(`[POOL] Ошибка проверки пула:`, e);

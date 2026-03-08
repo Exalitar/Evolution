@@ -214,13 +214,15 @@ async function checkAndRefillImagePool() {
                             data: { base64: base64Image }
                         });
                         console.log(`[POOL] ✅ Картинка ${i + 1} успешно сохранена в базу! (Всего готово: ${unusedCount + i + 1})`);
+                        // Пауза 5 секунд между УСПЕШНЫМИ генерациями, чтобы не душить Cloudflare
+                        await new Promise(res => setTimeout(res, 5000));
                     }
                 } catch (e) {
-                    console.error(`[POOL] ❌ Ошибка генерации картинки:`, e);
+                    console.error(`[POOL] ❌ Ошибка генерации картинки (возможно Cloudflare сбрасывает соединение):`, (e as Error).message);
+                    // Если Cloudflare ругается или ComfyUI занят - спим 15 секунд перед следующей попыткой
+                    console.log(`[POOL] Ждем 15 секунд перед следующей попыткой...`);
+                    await new Promise(res => setTimeout(res, 15000));
                 }
-
-                // Небольшая пауза перед следующей картинкой
-                await new Promise(res => setTimeout(res, 2000));
             }
             console.log(`[POOL] 🎉 Пул пополнен!`);
         }

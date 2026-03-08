@@ -138,7 +138,10 @@ async function generateSingleImage(): Promise<string | null> {
 
     const genRes = await fetch(`${COMFY_API_URL}/prompt`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Bypass-Tunnel-Reminder": "true"
+        },
         body: JSON.stringify({ prompt, client_id: clientId }),
     });
 
@@ -157,8 +160,10 @@ async function generateSingleImage(): Promise<string | null> {
         await new Promise(resolve => setTimeout(resolve, 5000));
 
         try {
-            const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
-            if (!historyRes.ok) continue; // Игнорируем временные 502 ошибки Cloudflare
+            const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`, {
+                headers: { "Bypass-Tunnel-Reminder": "true" }
+            });
+            if (!historyRes.ok) continue; // Игнорируем временные 502 ошибки
             const history = await historyRes.json() as any;
 
             if (history[prompt_id]) {
@@ -187,7 +192,9 @@ async function generateSingleImage(): Promise<string | null> {
 
     if (!imageUrl) throw new Error('[COMFY] Timeout or image missing in history');
 
-    const imgRes = await fetch(imageUrl);
+    const imgRes = await fetch(imageUrl, {
+        headers: { "Bypass-Tunnel-Reminder": "true" }
+    });
     if (!imgRes.ok) throw new Error("Failed to download image from ComfyUI");
 
     const arrayBuffer = await imgRes.arrayBuffer();
@@ -203,7 +210,7 @@ async function checkAndRefillImagePool() {
     if (isGeneratingBackground) return;
 
     try {
-        const unusedCount = await prisma.imagePool.count({
+        let unusedCount = await prisma.imagePool.count({
             where: { isUsed: false }
         });
 
@@ -211,22 +218,29 @@ async function checkAndRefillImagePool() {
             console.log(`\n[POOL] В пуле ${unusedCount} картинок (меньше порога ${POOL_MIN_SIZE}). Начинаем генерацию до ${POOL_TARGET_SIZE}...`);
             isGeneratingBackground = true;
 
+            let successfulGenerations = 0;
             const neededCount = POOL_TARGET_SIZE - unusedCount;
-            for (let i = 0; i < neededCount; i++) {
+
+            while (successfulGenerations < neededCount) {
                 try {
-                    console.log(`[POOL] Генерация картинки ${i + 1}/${neededCount} ...`);
+                    console.log(`[POOL] Генерация картинки ${successfulGenerations + 1}/${neededCount} ...`);
                     const base64Image = await generateSingleImage();
                     if (base64Image) {
                         await prisma.imagePool.create({
                             data: { base64: base64Image }
                         });
-                        console.log(`[POOL] ✅ Картинка ${i + 1} успешно сохранена в базу! (Всего готово: ${unusedCount + i + 1})`);
-                        // Пауза 5 секунд между УСПЕШНЫМИ генерациями, чтобы не душить Cloudflare
+                        successfulGenerations++;
+                        let currentTotal = unusedCount + successfulGenerations;
+                        console.log(`[POOL] ✅ Картинка ${successfulGenerations} успешно сохранена в базу! (Всего готово: ${currentTotal})`);
+
+                        if (successfulGenerations >= neededCount) break;
+
+                        // Пауза 5 секунд между УСПЕШНЫМИ генерациями, чтобы не душить туннель
                         await new Promise(res => setTimeout(res, 5000));
                     }
                 } catch (e) {
-                    console.error(`[POOL] ❌ Ошибка генерации картинки (возможно Cloudflare сбрасывает соединение):`, (e as Error).message);
-                    // Если Cloudflare ругается или ComfyUI занят - спим 15 секунд перед следующей попыткой
+                    console.error(`[POOL] ❌ Ошибка генерации картинки (вероятно сброс туннеля):`, (e as Error).message);
+                    // Если туннель ругается или ComfyUI занят - спим 15 секунд перед следующей попыткой
                     console.log(`[POOL] Ждем 15 секунд перед следующей попыткой...`);
                     await new Promise(res => setTimeout(res, 15000));
                 }

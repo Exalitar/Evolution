@@ -213,6 +213,7 @@ async function generateSingleImage(): Promise<string | null> {
 const POOL_TARGET_SIZE = 300;
 const POOL_MIN_SIZE = 100;
 let isGeneratingBackground = false;
+let shouldAbortGeneration = false;
 
 async function checkAndRefillImagePool() {
     if (isGeneratingBackground) return;
@@ -230,16 +231,29 @@ async function checkAndRefillImagePool() {
             const neededCount = POOL_TARGET_SIZE - unusedCount;
 
             while (successfulGenerations < neededCount) {
+                if (shouldAbortGeneration) {
+                    console.log(`[POOL] 🛑 Генерация прервана по запросу очистки пула!`);
+                    shouldAbortGeneration = false;
+                    break;
+                }
+
                 try {
-                    console.log(`[POOL] Генерация картинки ${successfulGenerations + 1}/${neededCount} ...`);
+                    let currentTotal = unusedCount + successfulGenerations;
+                    console.log(`[POOL] Генерация картинки ${currentTotal + 1}/${POOL_TARGET_SIZE} ...`);
                     const base64Image = await generateSingleImage();
+
+                    if (shouldAbortGeneration) {
+                        shouldAbortGeneration = false;
+                        break;
+                    }
+
                     if (base64Image) {
                         await prisma.imagePool.create({
                             data: { base64: base64Image }
                         });
                         successfulGenerations++;
-                        let currentTotal = unusedCount + successfulGenerations;
-                        console.log(`[POOL] ✅ Картинка ${successfulGenerations} успешно сохранена в базу! (Всего готово: ${currentTotal})`);
+                        currentTotal = unusedCount + successfulGenerations;
+                        console.log(`[POOL] ✅ Картинка успешно сохранена в базу! (Всего готово: ${currentTotal}/${POOL_TARGET_SIZE})`);
 
                         if (successfulGenerations >= neededCount) break;
 
@@ -253,9 +267,11 @@ async function checkAndRefillImagePool() {
                     await new Promise(res => setTimeout(res, 15000));
                 }
             }
-            console.log(`[POOL] 🎉 Пул пополнен!`);
+            if (!shouldAbortGeneration) {
+                console.log(`[POOL] 🎉 Пул пополнен!`);
+            }
         } else {
-            console.log(`[POOL] В пуле достаточно картинок (${unusedCount}). Генерация не требуется.`);
+            console.log(`[POOL] В пуле достаточно картинок (${unusedCount}/${POOL_TARGET_SIZE}). Генерация не требуется.`);
         }
     } catch (e) {
         console.error(`[POOL] Ошибка проверки пула:`, e);
@@ -272,6 +288,7 @@ setTimeout(checkAndRefillImagePool, 5000);
 // Эндпоинт очистки пула
 app.get('/api/comfy/reset-pool', async (req, res) => {
     try {
+        shouldAbortGeneration = true; // Останавливаем текущий зацикленный процесс генерации
         await prisma.imagePool.deleteMany();
         res.send('Пул картинок успешно очищен! Можно закрывать эту страницу. Бэкенд начнет генерацию новых.');
     } catch (e) {

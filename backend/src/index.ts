@@ -213,11 +213,19 @@ async function generateSingleImage(): Promise<string | null> {
 const POOL_TARGET_SIZE = 300;
 const POOL_MIN_SIZE = 100;
 let isGeneratingBackground = false;
+let poolClearedOnce = false;
 
 async function checkAndRefillImagePool() {
     if (isGeneratingBackground) return;
 
     try {
+        if (!poolClearedOnce) {
+            console.log(`[POOL] 🧹 Выполняем принудительную очистку старой базы картинок...`);
+            await prisma.imagePool.deleteMany();
+            console.log(`[POOL] ✨ База успешно очищена! Начинаем генерацию нового пула с нуля.`);
+            poolClearedOnce = true;
+        }
+
         let unusedCount = await prisma.imagePool.count({
             where: { isUsed: false }
         });

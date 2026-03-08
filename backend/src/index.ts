@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
 
-const COMFY_API_URL = "http://127.0.0.1:8188";
+const COMFY_API_URL = process.env.COMFY_API_URL || "http://127.0.0.1:8188";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -119,87 +119,142 @@ app.post('/api/user/save', async (req, res) => {
     }
 });
 
-// Эндпоинт генерации Monster Image (прокси для ComfyUI)
-app.post('/api/comfy/generate', async (req, res) => {
-    try {
-        console.log('[COMFY] Запрос на генерацию картинки получен');
-        const workflowPath = path.join(__dirname, '..', 'Monster_generation.json');
-        const workflowContent = await fs.readFile(workflowPath, 'utf8');
-        const prompt = JSON.parse(workflowContent);
+async function generateSingleImage(): Promise<string | null> {
+    const workflowPath = path.join(__dirname, '..', 'Monster_generation.json');
+    const workflowContent = await fs.readFile(workflowPath, 'utf8');
+    const prompt = JSON.parse(workflowContent);
 
-        // Рандомизируем сиды
-        if (prompt["4"]?.inputs) prompt["4"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-        if (prompt["43"]?.inputs) prompt["43"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-        if (prompt["152"]?.inputs) prompt["152"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-        if (prompt["228"]?.inputs) prompt["228"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+    // Рандомизируем сиды
+    if (prompt["4"]?.inputs) prompt["4"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+    if (prompt["43"]?.inputs) prompt["43"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+    if (prompt["152"]?.inputs) prompt["152"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+    if (prompt["228"]?.inputs) prompt["228"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
 
-        const clientId = Math.random().toString(36).substring(2, 15);
+    const clientId = Math.random().toString(36).substring(2, 15);
 
-        // 1. Отправляем запрос на генерацию
-        const genRes = await fetch(`${COMFY_API_URL}/prompt`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, client_id: clientId }),
-        });
+    const genRes = await fetch(`${COMFY_API_URL}/prompt`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, client_id: clientId }),
+    });
 
-        if (!genRes.ok) {
-            console.error('[COMFY] Ошибка запуска генерации', await genRes.text());
-            res.status(500).json({ error: 'Failed to start generation' });
-            return;
-        }
+    if (!genRes.ok) throw new Error(`[COMFY] Failed to start generation: ${await genRes.text()}`);
 
-        const { prompt_id } = await genRes.json() as { prompt_id: string };
-        console.log(`[COMFY] Генерация начата (ID: ${prompt_id}). Ожидание...`);
+    const { prompt_id } = await genRes.json() as { prompt_id: string };
 
-        // 2. Поллинг готовности (максимум 60 секунд)
-        let isDone = false;
-        let imageUrl = null;
-        let attempts = 0;
-        const maxAttempts = 30;
+    let isDone = false;
+    let imageUrl = null;
+    let attempts = 0;
+    const maxAttempts = 60; // До 120 секунд
 
-        while (!isDone && attempts < maxAttempts) {
-            attempts++;
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Ждем 2 сек
+    while (!isDone && attempts < maxAttempts) {
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-            const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
-            const history = await historyRes.json() as any;
+        const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
+        const history = await historyRes.json() as any;
 
-            if (history[prompt_id]) {
-                isDone = true;
-                const outputs = history[prompt_id].outputs;
+        if (history[prompt_id]) {
+            isDone = true;
+            const outputs = history[prompt_id].outputs;
 
-                let outputNode = null;
-                if (outputs["235"]) outputNode = outputs["235"];
-                else if (outputs["7"]) outputNode = outputs["7"];
+            let outputNode = null;
+            if (outputs["235"]) outputNode = outputs["235"];
+            else if (outputs["7"]) outputNode = outputs["7"];
 
-                if (outputNode && outputNode.images && outputNode.images.length > 0) {
-                    const imageInfo = outputNode.images[0];
-                    const params = new URLSearchParams({
-                        filename: imageInfo.filename,
-                        subfolder: imageInfo.subfolder || "",
-                        type: imageInfo.type
-                    });
-                    imageUrl = `${COMFY_API_URL}/view?${params.toString()}`;
-                }
+            if (outputNode && outputNode.images && outputNode.images.length > 0) {
+                const imageInfo = outputNode.images[0];
+                const params = new URLSearchParams({
+                    filename: imageInfo.filename,
+                    subfolder: imageInfo.subfolder || "",
+                    type: imageInfo.type
+                });
+                imageUrl = `${COMFY_API_URL}/view?${params.toString()}`;
             }
         }
+    }
 
-        if (!imageUrl) {
-            console.error('[COMFY] Картинка не найдена в результатах или тайм-аут');
-            res.status(500).json({ error: 'Image not found or timeout' });
-            return;
+    if (!imageUrl) throw new Error('[COMFY] Timeout or image missing in history');
+
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) throw new Error("Failed to download image from ComfyUI");
+
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    return `data:image/png;base64,${buffer.toString('base64')}`;
+}
+
+const POOL_TARGET_SIZE = 300;
+const POOL_MIN_SIZE = 100;
+let isGeneratingBackground = false;
+
+async function checkAndRefillImagePool() {
+    if (isGeneratingBackground) return;
+
+    try {
+        const unusedCount = await prisma.imagePool.count({
+            where: { isUsed: false }
+        });
+
+        if (unusedCount < POOL_MIN_SIZE) {
+            console.log(`\n[POOL] В пуле ${unusedCount} картинок (меньше порога ${POOL_MIN_SIZE}). Начинаем генерацию до ${POOL_TARGET_SIZE}...`);
+            isGeneratingBackground = true;
+
+            const neededCount = POOL_TARGET_SIZE - unusedCount;
+            for (let i = 0; i < neededCount; i++) {
+                try {
+                    console.log(`[POOL] Генерация картинки ${i + 1}/${neededCount} ...`);
+                    const base64Image = await generateSingleImage();
+                    if (base64Image) {
+                        await prisma.imagePool.create({
+                            data: { base64: base64Image }
+                        });
+                        console.log(`[POOL] ✅ Картинка ${i + 1} успешно сохранена в базу! (Всего готово: ${unusedCount + i + 1})`);
+                    }
+                } catch (e) {
+                    console.error(`[POOL] ❌ Ошибка генерации картинки:`, e);
+                }
+
+                // Небольшая пауза перед следующей картинкой
+                await new Promise(res => setTimeout(res, 2000));
+            }
+            console.log(`[POOL] 🎉 Пул пополнен!`);
         }
+    } catch (e) {
+        console.error(`[POOL] Ошибка проверки пула:`, e);
+    } finally {
+        isGeneratingBackground = false;
+    }
+}
 
-        // 3. Скачиваем картинку из локального ComfyUI
-        const imgRes = await fetch(imageUrl);
-        if (!imgRes.ok) throw new Error("Failed to download image from ComfyUI");
+// Запускаем проверку каждые 60 секунд
+setInterval(checkAndRefillImagePool, 60000);
+// Первый запуск при старте бэкенда
+setTimeout(checkAndRefillImagePool, 5000);
 
-        const arrayBuffer = await imgRes.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64Image = `data:image/png;base64,${buffer.toString('base64')}`;
+// Эндпоинт выдачи Monster Image из пула
+app.post('/api/comfy/generate', async (req, res) => {
+    try {
+        console.log('[COMFY] Запрос на выдачу картинки из пула');
 
-        console.log('[COMFY] Картинка успешно сгенерирована и преобразована в Base64');
-        res.json({ success: true, base64: base64Image });
+        // 1. Ищем готовую картинку в БД
+        const availableImage = await prisma.imagePool.findFirst({
+            where: { isUsed: false }
+        });
+
+        if (availableImage) {
+            // 2. Маркируем как использованную
+            await prisma.imagePool.update({
+                where: { id: availableImage.id },
+                data: { isUsed: true }
+            });
+            console.log(`[COMFY] 🖼️ Выдана картинка ID: ${availableImage.id} из пула.`);
+            res.json({ success: true, base64: availableImage.base64 });
+        } else {
+            console.warn('[COMFY] ⚠️ В пуле нет свободных картинок! Начинаем генерацию на лету (fallback)...');
+            const base64 = await generateSingleImage();
+            res.json({ success: true, base64 });
+        }
 
     } catch (error) {
         console.error('[COMFY] Общая ошибка:', error);

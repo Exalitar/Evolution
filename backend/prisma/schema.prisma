@@ -63,4 +63,10 @@ model Stats {
   stunCooldown         Float     @default(0)
 }
 
-
+model ImagePool {
+  id        Int      @id @default(autoincrement())
+  base64    String   @db.Text // Храним картинку в формате Base64 (будет большой текст)
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

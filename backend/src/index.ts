@@ -149,32 +149,39 @@ async function generateSingleImage(): Promise<string | null> {
     let isDone = false;
     let imageUrl = null;
     let attempts = 0;
-    const maxAttempts = 60; // До 120 секунд
+    const maxAttempts = 60; // До 300 секунд
 
     while (!isDone && attempts < maxAttempts) {
         attempts++;
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Полинг раз в 5 секунд, чтобы не перегружать туннель
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
-        const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
-        const history = await historyRes.json() as any;
+        try {
+            const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
+            if (!historyRes.ok) continue; // Игнорируем временные 502 ошибки Cloudflare
+            const history = await historyRes.json() as any;
 
-        if (history[prompt_id]) {
-            isDone = true;
-            const outputs = history[prompt_id].outputs;
+            if (history[prompt_id]) {
+                isDone = true;
+                const outputs = history[prompt_id].outputs;
 
-            let outputNode = null;
-            if (outputs["235"]) outputNode = outputs["235"];
-            else if (outputs["7"]) outputNode = outputs["7"];
+                let outputNode = null;
+                if (outputs["235"]) outputNode = outputs["235"];
+                else if (outputs["7"]) outputNode = outputs["7"];
 
-            if (outputNode && outputNode.images && outputNode.images.length > 0) {
-                const imageInfo = outputNode.images[0];
-                const params = new URLSearchParams({
-                    filename: imageInfo.filename,
-                    subfolder: imageInfo.subfolder || "",
-                    type: imageInfo.type
-                });
-                imageUrl = `${COMFY_API_URL}/view?${params.toString()}`;
+                if (outputNode && outputNode.images && outputNode.images.length > 0) {
+                    const imageInfo = outputNode.images[0];
+                    const params = new URLSearchParams({
+                        filename: imageInfo.filename,
+                        subfolder: imageInfo.subfolder || "",
+                        type: imageInfo.type
+                    });
+                    imageUrl = `${COMFY_API_URL}/view?${params.toString()}`;
+                }
             }
+        } catch (pollError) {
+            // Игнорируем сетевые ошибки сброса соединения
+            continue;
         }
     }
 

@@ -128,19 +128,14 @@ async function generateSingleImage(): Promise<string | null> {
     const workflowContent = await fs.readFile(workflowPath, 'utf8');
     const prompt = JSON.parse(workflowContent);
 
-    // Удаляем сломанные ноды Florence2, которые пользователь случайно забыл удалить (они требуют картинку, которой нет)
-    delete prompt["228"];
-    delete prompt["233"];
-    delete prompt["164"];
-    delete prompt["165"];
-    delete prompt["167"];
-    delete prompt["152"]; // Он соединялся с 165
+    // Рандомизируем сиды для новой схемы
+    if (prompt["260"]?.inputs) prompt["260"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
+    if (prompt["262"]?.inputs) prompt["262"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
 
-    // Рандомизируем сиды
+    // Рандомизируем сиды для старой схемы (на случай отката)
     if (prompt["4"]?.inputs) prompt["4"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
     if (prompt["43"]?.inputs) prompt["43"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
     if (prompt["152"]?.inputs) prompt["152"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-    if (prompt["228"]?.inputs) prompt["228"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
 
     const clientId = Math.random().toString(36).substring(2, 15);
 
@@ -179,7 +174,9 @@ async function generateSingleImage(): Promise<string | null> {
                 const outputs = history[prompt_id].outputs;
 
                 let outputNode = null;
-                if (outputs["235"]) outputNode = outputs["235"];
+                if (outputs["257"]) outputNode = outputs["257"];
+                else if (outputs["258"]) outputNode = outputs["258"];
+                else if (outputs["235"]) outputNode = outputs["235"];
                 else if (outputs["7"]) outputNode = outputs["7"];
 
                 if (outputNode && outputNode.images && outputNode.images.length > 0) {

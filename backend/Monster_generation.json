@@ -1,5 +1,5 @@
 {
-  "1": {
+  "254": {
     "inputs": {
       "ckpt_name": "Realistic_Vision_V7.0.safetensors"
     },
@@ -8,14 +8,14 @@
       "title": "Load Checkpoint"
     }
   },
-  "2": {
+  "255": {
     "inputs": {
       "text": [
-        "43",
+        "260",
         0
       ],
       "clip": [
-        "1",
+        "254",
         1
       ]
     },
@@ -24,68 +24,27 @@
       "title": "CLIP Text Encode (Prompt)"
     }
   },
-  "3": {
+  "256": {
     "inputs": {
-      "text": "low quality, lowres, blurry, pixelated, noisy, text, caption, watermark, logo, ui, background clutter, extra characters, cropped, out of frame, human, humanoid, human-like body, realistic person, female body, anime girl, cute character, disney style, big cute eyes, cat face, feline head, same body shape every time, identical proportions every time, blue-purple color scheme, dominant purple, magenta glow, neon violet, shadows on creature, shadows on body, dark shadows on creature, shadowed limbs, darkened body parts, shadow overlay on creature, uneven lighting on creature, underlit creature, harsh lighting on creature",
-      "clip": [
-        "1",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "4": {
-    "inputs": {
-      "seed": 572181203854815,
-      "steps": 5,
-      "cfg": 3.5,
-      "sampler_name": "euler",
-      "scheduler": "normal",
-      "denoise": 1,
-      "model": [
-        "1",
-        0
-      ],
-      "positive": [
-        "2",
-        0
-      ],
-      "negative": [
-        "3",
-        0
-      ],
-      "latent_image": [
-        "5",
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "257",
         0
       ]
     },
-    "class_type": "KSampler",
+    "class_type": "SaveImage",
     "_meta": {
-      "title": "KSampler"
+      "title": "Save Image"
     }
   },
-  "5": {
-    "inputs": {
-      "width": 512,
-      "height": 512,
-      "batch_size": 1
-    },
-    "class_type": "EmptyLatentImage",
-    "_meta": {
-      "title": "Empty Latent Image"
-    }
-  },
-  "6": {
+  "257": {
     "inputs": {
       "samples": [
-        "4",
+        "262",
         0
       ],
       "vae": [
-        "1",
+        "254",
         2
       ]
     },
@@ -94,10 +53,10 @@
       "title": "VAE Decode"
     }
   },
-  "7": {
+  "258": {
     "inputs": {
       "images": [
-        "6",
+        "257",
         0
       ]
     },
@@ -106,10 +65,23 @@
       "title": "Preview Image"
     }
   },
-  "43": {
+  "259": {
     "inputs": {
-      "text": "A single small 3D creature for a genetics game, experimental lifeform grown from fused chemical elements and mixed molecules,\nfull body, centered, no other characters, shown on a simple neutral lab pedestal,\nnon-humanoid creature, not human, not bipedal, no human face,\n\n{land-based predator with powerful legs and claws, xenomorph-like biomechanical anatomy|\ncthulhu-inspired eldritch creature with tentacles and irregular mass|\nreptilian or dinosaur-like creature with thick tail and claws|\ninsectoid creature with segmented body, chitin and multiple legs|\nstone or crystal golem-like creature with jagged rock plates|\nmetallic biomechanical creature made of armor plates and cables|\namorphous slime creature with pseudopods and dripping goo|\norganic alien creature with strange muscles and exposed organs|\nfloating otherworldly creature with tendrils and bioluminescent sacs},\n\n{two|four|six|eight} limbs or limb-like appendages,\n{bulky and heavy|long and thin|multi-segmented insect-like|crustacean-like exoskeleton|jellyfish-like translucent body},\n\nvaried and unpredictable color palette, different dominant color each time, no dominant blue or purple,\n{earthy browns and greens|toxic greens and yellows|fiery reds and oranges|cold cyans and teals|muted grays with glowing accents},\nmixed materials and textures (slime, crystals, stone, metal, fur, scales, chitin, translucent gel, glowing veins),\n\nstrange eyes or sensory organs (eye clusters, stalked eyes, bioluminescent spots, single huge eye, or no visible face),\nmenacing and unsettling but still stylized for a game (not cute humanoid character),\nsoft studio lighting, high-detail creature concept render, clean gradient lab background\n",
-      "seed": 1746,
+      "text": "low quality, lowres, blurry, pixelated, noisy, text, caption, watermark, logo, ui, background clutter, extra characters, cropped, out of frame,\nhuman, humanoid, human-like body, realistic person, female body, anime girl, cute character, disney style, big cute eyes, cat face, feline head,\nsame body shape every time, identical proportions every time,\nblue-purple color scheme, dominant purple, magenta glow, neon violet,\nshadows on creature, shadow on body, dark shadows on creature, shaded surface, self-shadow, contact shadow on body, ambient occlusion on creature, darkened areas on creature, uneven shading, directional shading, side shadow, rim shadow, shadow overlay on creature, shadowed limbs, darkened body parts,\nblurry ball, spherical creature, orb shape, round blob, amorphous blob, floating ball, perfect sphere, bubble creature, gelatinous ball, cute ball character, blurry, lowres, cute, cartoonish, disney, spherical, orb, ball-shaped, bubble, smooth surfaces, perfect symmetry, floating blob,\nbreasts, nipples, vagina, penis, testicles, pubic hair, human genitals, female anatomy, male anatomy, cleavage, nude, naked body, erotic pose, sexual features, curvaceous body, hourglass figure, wide hips,\n**top lighting, overhead light, top-down illumination, light from above, overhead shadows, top light source, downward lighting, ceiling light, skylight**",
+      "clip": [
+        "254",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "260": {
+    "inputs": {
+      "text": "score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, source_furry, rating_safe,\nA single small 3D creature for a genetics game, experimental lifeform grown from fused chemical elements and mixed molecules,\nfull body, centered, no other characters, shown on a simple neutral lab pedestal,\nnon-humanoid creature, not human, not bipedal, no human face, highly detailed anatomy, complex body structure, articulated limbs, segmented exoskeleton, irregular asymmetrical body, sharp angles and protrusions, biomechanical details, organic textures, no smooth spherical forms,\n\n{land-based predator with powerful legs and claws, xenomorph-like biomechanical anatomy|\ncthulhu-inspired eldritch creature with tentacles and irregular mass|\nreptilian or dinosaur-like creature with thick tail and claws|\ninsectoid creature with segmented body, chitin and multiple legs|\nstone or crystal golem-like creature with jagged rock plates|\nmetallic biomechanical creature made of armor plates and cables|\namorphous slime creature with pseudopods and dripping goo|\norganic alien creature with strange muscles and exposed organs|\nfloating otherworldly creature with tendrils and bioluminescent sacs},\n\n{two|four|six|eight} limbs or limb-like appendages,\n{bulky and heavy|long and thin|multi-segmented insect-like|crustacean-like exoskeleton|jellyfish-like translucent body},\n\nvaried and unpredictable color palette, different dominant color each time, no dominant blue or purple,\n{earthy browns and greens|toxic greens and yellows|fiery reds and oranges|cold cyans and teals|muted grays with glowing accents},\nmixed materials and textures (slime, crystals, stone, metal, fur, scales, chitin, translucent gel, glowing veins),\n\nstrange eyes or sensory organs (eye clusters, stalked eyes, bioluminescent spots, single huge eye, or no visible face),\nmenacing and unsettling but still stylized for a game (not cute humanoid character),\n\nmasterpiece, best quality, ultra detailed, sharp focus,\n**frontal lighting, front-facing key light, even frontal illumination, soft front light, face-on lighting, direct frontal studio light**,\nsoft studio lighting, ground shadow only, clean gradient lab background",
+      "seed": 1107,
       "autorefresh": "Yes"
     },
     "class_type": "DPRandomGenerator",
@@ -117,17 +89,45 @@
       "title": "Random Prompts"
     }
   },
-  "235": {
+  "261": {
     "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
-        "6",
+      "width": 768,
+      "height": 768,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "262": {
+    "inputs": {
+      "seed": 827954711061796,
+      "steps": 10,
+      "cfg": 4,
+      "sampler_name": "euler",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "254",
+        0
+      ],
+      "positive": [
+        "255",
+        0
+      ],
+      "negative": [
+        "259",
+        0
+      ],
+      "latent_image": [
+        "261",
         0
       ]
     },
-    "class_type": "SaveImage",
+    "class_type": "KSampler",
     "_meta": {
-      "title": "Save Image"
+      "title": "KSampler"
     }
   }
 }

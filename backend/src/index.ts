@@ -299,18 +299,20 @@ app.post('/api/comfy/generate', async (req, res) => {
     try {
         console.log('[COMFY] Запрос на выдачу картинки из пула');
 
-        // 1. Ищем готовую картинку в БД
+        // 1. Ищем готовую свободную картинку в БД (самую старую)
         const availableImage = await prisma.imagePool.findFirst({
-            where: { isUsed: false }
+            where: { isUsed: false },
+            orderBy: { createdAt: 'asc' } // Берем по очереди самую старую из пула
         });
 
         if (availableImage) {
-            // 2. Маркируем как использованную
-            await prisma.imagePool.update({
-                where: { id: availableImage.id },
-                data: { isUsed: true }
+            // 2. Отдаем картинку игроку и СРАЗУ УДАЛЯЕМ её из пула (банку),
+            // потому что теперь она будет храниться у самого игрока в его профиле (User.bioImage).
+            // Таким образом мы не засоряем базу использованными картинками!
+            await prisma.imagePool.delete({
+                where: { id: availableImage.id }
             });
-            console.log(`[COMFY] 🖼️ Выдана картинка ID: ${availableImage.id} из пула.`);
+            console.log(`[COMFY] 🖼️ Выдана картинка ID: ${availableImage.id} из пула, оригинал удален для экономии места.`);
             res.json({ success: true, base64: availableImage.base64 });
         } else {
             console.warn('[COMFY] ⚠️ В пуле нет свободных картинок! Начинаем генерацию на лету (fallback)...');

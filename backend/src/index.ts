@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const COMFY_API_URL = process.env.COMFY_API_URL || "http://127.0.0.1:8188";
+const COMFY_API_URL = (process.env.COMFY_API_URL || "http://127.0.0.1:8188").trim().replace(/\/$/, "");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);

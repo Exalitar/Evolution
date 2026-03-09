@@ -253,7 +253,8 @@ async function checkAndRefillImagePool() {
 
                 try {
                     const status = await getComfyUIStatus();
-                    console.log(`[COMFY] Статус API: Очередь = ${status.queueSize}, В истории = ${status.historySize}`);
+                    let currentTotal = unusedCount + successfulGenerations;
+                    console.log(`[COMFY] В истории ComfyUI всего сгенерировано: ${status.historySize} картинок. В базе свободно: ${currentTotal}. Очередь ${status.queueSize > 0 ? `занята (${status.queueSize})` : 'пуста'}.`);
 
                     if (status.queueSize > 0) {
                         console.log(`[POOL] ComfyUI занят (в очереди ${status.queueSize} задач). Ждем 15 секунд...`);
@@ -261,7 +262,6 @@ async function checkAndRefillImagePool() {
                         continue;
                     }
 
-                    let currentTotal = unusedCount + successfulGenerations;
                     console.log(`[POOL] Генерация картинки ${currentTotal + 1}/${POOL_TARGET_SIZE} ...`);
                     const base64Image = await generateSingleImage();
 

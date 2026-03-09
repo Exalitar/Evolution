@@ -5,16 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx tsx src/index.ts",
-    "start": "npx prisma generate && npx prisma db push --accept-data-loss && npx tsx src/index.ts"
+    "dev": "npx tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
-  "engines": {
-    "node": ">=20.19.0"
-  },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",

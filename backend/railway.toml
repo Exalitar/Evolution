@@ -1,9 +1,0 @@
-[phases.setup]
-nixPkgs = ["...", "nodejs_20"]
-
-[build]
-builder = "nixpacks"
-buildCommand = "npm install && npx prisma generate"
-
-[deploy]
-startCommand = "npm start"

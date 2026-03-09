@@ -244,9 +244,11 @@ async function checkAndRefillImagePool() {
             let successfulGenerations = 0;
             const neededCount = POOL_TARGET_SIZE - unusedCount;
 
+            let aborted = false;
             while (successfulGenerations < neededCount) {
                 if (shouldAbortGeneration) {
                     console.log(`[POOL] 🛑 Генерация прервана по запросу очистки пула!`);
+                    aborted = true;
                     shouldAbortGeneration = false;
                     break;
                 }
@@ -266,6 +268,7 @@ async function checkAndRefillImagePool() {
                     const base64Image = await generateSingleImage();
 
                     if (shouldAbortGeneration) {
+                        aborted = true;
                         shouldAbortGeneration = false;
                         break;
                     }
@@ -290,7 +293,7 @@ async function checkAndRefillImagePool() {
                     await new Promise(res => setTimeout(res, 15000));
                 }
             }
-            if (!shouldAbortGeneration) {
+            if (!aborted) {
                 console.log(`[POOL] 🎉 Пул пополнен!`);
             }
         } else {
@@ -312,7 +315,19 @@ setTimeout(checkAndRefillImagePool, 5000);
 app.get('/api/comfy/reset-pool', async (req, res) => {
     try {
         shouldAbortGeneration = true; // Останавливаем текущий зацикленный процесс генерации
-        await prisma.imagePool.deleteMany();
+
+        let retries = 3;
+        while (retries > 0) {
+            try {
+                await prisma.imagePool.deleteMany();
+                break;
+            } catch (err) {
+                retries--;
+                if (retries === 0) throw err;
+                console.warn(`[POOL] Сбой соединения при очистке (осталось попыток: ${retries}). Пробуем снова...`);
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
         res.send('Пул картинок успешно очищен! Можно закрывать эту страницу. Бэкенд начнет генерацию новых.');
     } catch (e) {
         console.error('Ошибка очистки пула:', e);

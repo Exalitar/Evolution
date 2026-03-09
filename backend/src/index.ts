@@ -155,7 +155,7 @@ async function generateSingleImage(): Promise<string | null> {
     let isDone = false;
     let imageUrl = null;
     let attempts = 0;
-    const maxAttempts = 60; // До 300 секунд
+    const maxAttempts = 120; // До 600 секунд (10 минут)
 
     while (!isDone && attempts < maxAttempts) {
         attempts++;
@@ -207,8 +207,25 @@ async function generateSingleImage(): Promise<string | null> {
     return `data:image/png;base64,${buffer.toString('base64')}`;
 }
 
+async function getComfyUIStatus(): Promise<{ queueSize: number, historySize: number }> {
+    try {
+        const queueRes = await fetch(`${COMFY_API_URL}/queue`, { headers: { "Bypass-Tunnel-Reminder": "true" } });
+        const queueData = await queueRes.json() as any;
+        const queueSize = (queueData.queue_running?.length || 0) + (queueData.queue_pending?.length || 0);
+
+        const historyRes = await fetch(`${COMFY_API_URL}/history`, { headers: { "Bypass-Tunnel-Reminder": "true" } });
+        const historyData = await historyRes.json() as any;
+        const historySize = Object.keys(historyData).length;
+
+        return { queueSize, historySize };
+    } catch (e) {
+        console.error("[COMFY] Error checking status:", e);
+        return { queueSize: 0, historySize: 0 };
+    }
+}
+
 const POOL_TARGET_SIZE = 300;
-const POOL_MIN_SIZE = 100;
+const POOL_MIN_SIZE = 250; // Увеличили порог до 250
 let isGeneratingBackground = false;
 let shouldAbortGeneration = false;
 
@@ -235,6 +252,15 @@ async function checkAndRefillImagePool() {
                 }
 
                 try {
+                    const status = await getComfyUIStatus();
+                    console.log(`[COMFY] Статус API: Очередь = ${status.queueSize}, В истории = ${status.historySize}`);
+
+                    if (status.queueSize > 0) {
+                        console.log(`[POOL] ComfyUI занят (в очереди ${status.queueSize} задач). Ждем 15 секунд...`);
+                        await new Promise(res => setTimeout(res, 15000));
+                        continue;
+                    }
+
                     let currentTotal = unusedCount + successfulGenerations;
                     console.log(`[POOL] Генерация картинки ${currentTotal + 1}/${POOL_TARGET_SIZE} ...`);
                     const base64Image = await generateSingleImage();

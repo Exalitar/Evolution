@@ -206,7 +206,9 @@ app.post('/api/comfy/generate', async (req, res) => {
         // Берем случайную (или первую)
         const randomIndex = Math.floor(Math.random() * imageFiles.length);
         const selectedImage = imageFiles[randomIndex];
-        const oldPath = path.join(readyImagesDir, selectedImage);
+        // Добавляем fallback (|| ''), чтобы TypeScript не жаловался на possibility of 'undefined'
+        const safeSelectedImage = selectedImage || '';
+        const oldPath = path.join(readyImagesDir, safeSelectedImage);
 
         // Читаем в буфер, чтобы перенести
         const buffer = await fs.readFile(oldPath);
@@ -216,7 +218,7 @@ app.post('/api/comfy/generate', async (req, res) => {
         try { await fs.mkdir(activeImagesDir, { recursive: true }); } catch (err) { }
 
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}${path.extname(selectedImage)}`;
+        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}${path.extname(safeSelectedImage)}`;
         const newPath = path.join(activeImagesDir, newFilename);
 
         await fs.writeFile(newPath, buffer);

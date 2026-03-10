@@ -800,7 +800,7 @@ function App() {
         .then(res => res.json())
         .then(data => {
           if (data.success && data.imageUrl) {
-            setFinalBioImage(`${API}${data.imageUrl}`);
+            setFinalBioImage(data.imageUrl);
             setLastGeneratedLevel(nextLevel);
             console.log(`[FILE] Картинка успешно получена с бэкенда для уровня ${nextLevel}`);
           } else {

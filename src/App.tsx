@@ -541,7 +541,7 @@ function App() {
     }
   }, []);
 
-  // Дебаунснутое сохранение только УРОВНЯ в БД при изменении стейта
+  // Сохранение в БД при изменении стейта (с минимальной задержкой)
   useEffect(() => {
     if (!isDataLoaded) return; // Не сохранять ничего, пока не загрузим данные!
 
@@ -564,7 +564,7 @@ function App() {
           lastGeneratedLevel: state.lastGeneratedLevel
         })
       }).catch(console.error);
-    }, 500);
+    }, 50);
 
     return () => clearTimeout(timeout);
   }, [playerLevel, playerEP, evolutionStage, currentStats, equipment, currentBreedingMaterials, usedMaterials, totalUsedCount, isDataLoaded, finalBioImage, lastGeneratedLevel]); // Добавлены зависимости

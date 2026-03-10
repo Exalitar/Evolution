@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import WebApp from '@twa-dev/sdk';
 import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
 import { Shop } from './features/shop/Shop';
@@ -262,14 +263,11 @@ function App() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   // Получаем реальный Telegram ID
-  const WebApp = (window as any).Telegram?.WebApp;
-  const telegramId = WebApp?.initDataUnsafe?.user?.id?.toString() || "dev_user_123";
+  const telegramId = WebApp.initDataUnsafe?.user?.id?.toString() || "dev_user_123";
 
   useEffect(() => {
-    if (WebApp) {
-      WebApp.ready();
-    }
-  }, [WebApp]);
+    WebApp.ready();
+  }, []);
 
   const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("Игрок");

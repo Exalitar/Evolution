@@ -7,6 +7,11 @@ import { PrismaClient } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
+
+// Storage settings for uploaded images
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -124,6 +129,32 @@ app.post('/api/user/save', async (req, res) => {
     }
 });
 
+// === ЭНДПОИНТ ДЛЯ ПРИЕМА КАРТИНОК С КОМПЬЮТЕРА (PUSH API) ===
+app.post('/api/comfy/upload', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Файл не найден в запросе (поле "image")' });
+        }
+
+        const readyImagesDir = path.join(__dirname, '..', 'uploads', 'ready_images');
+
+        // Создаем папку, если вдруг её нет на Railway
+        try { await fs.mkdir(readyImagesDir, { recursive: true }); } catch (err) { }
+
+        const originalName = req.file?.originalname || `uploaded_${Date.now()}.png`;
+        const newPath = path.join(readyImagesDir, originalName);
+
+        // Сохраняем переданный файл в папку ready_images
+        await fs.writeFile(newPath, req.file.buffer);
+        console.log(`[UPLOAD] Успешно получен файл с ПК: ${originalName}`);
+
+        res.json({ success: true, message: 'Image received and buffered on server' });
+    } catch (error) {
+        console.error('[UPLOAD] Ошибка при загрузке картинки с ПК:', error);
+        res.status(500).json({ error: 'Internal server error while buffering image' });
+    }
+});
+
 // Эндпоинт получения сгенерированной картинки для новых уровней
 app.post('/api/comfy/generate', async (req, res) => {
     try {
@@ -160,43 +191,38 @@ app.post('/api/comfy/generate', async (req, res) => {
             }
         }
 
-        // 2. Делаем запрос к домашнему компьютеру (Localtunnel) за сгенерированной картинкой
-        const HOME_SERVER_URL = process.env.HOME_SERVER_URL || "https://comfy-images-lex.loca.lt";
-        console.log(`[FILE] Запрашиваем картинку с компьютера: ${HOME_SERVER_URL}/api/take-image`);
+        // 2. Ищем готовую картинку, которую ранее загрузил наш домашний ПК
+        const readyImagesDir = path.join(__dirname, '..', 'uploads', 'ready_images');
+        try { await fs.mkdir(readyImagesDir, { recursive: true }); } catch (err) { }
 
-        // Localtunnel требует специальный заголовок для bypass экрана с предупреждением (иначе вернет HTML)
-        // Также добавляем User-Agent, чтобы притвориться браузером
-        const response = await fetch(`${HOME_SERVER_URL}/api/take-image`, {
-            headers: {
-                "Bypass-Tunnel-Reminder": "true",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            }
-        });
+        const files = await fs.readdir(readyImagesDir);
+        const imageFiles = files.filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg'));
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[FILE] Ошибка от сервера ПК. Статус: ${response.status} ${response.statusText}`);
-            console.error(`[FILE] Текст ошибки (первые 200 символов):`, errorText.substring(0, 200));
-            return res.status(500).json({ error: `ПК сервер отклонил запрос. Статус: ${response.status}` });
+        if (imageFiles.length === 0) {
+            console.error('[FILE] Нет готовых картинок в буфере Railway. ПК еще не загрузил новые.');
+            return res.status(503).json({ error: 'Images are still generating...', code: 'NO_IMAGES_READY' });
         }
 
-        // Получаем файл в виде Buffer
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        // Берем случайную (или первую)
+        const randomIndex = Math.floor(Math.random() * imageFiles.length);
+        const selectedImage = imageFiles[randomIndex];
+        const oldPath = path.join(readyImagesDir, selectedImage);
 
-        // Переносим в активные изображения на Railway
+        // Читаем в буфер, чтобы перенести
+        const buffer = await fs.readFile(oldPath);
+
+        // Переносим в активные
         const activeImagesDir = path.join(__dirname, '..', 'uploads', 'active_images');
-
-        // На Railway папка может не существовать
-        try {
-            await fs.mkdir(activeImagesDir, { recursive: true });
-        } catch (err) { }
+        try { await fs.mkdir(activeImagesDir, { recursive: true }); } catch (err) { }
 
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}.png`; // Всегда сохраняем как .png
+        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}${path.extname(selectedImage)}`;
         const newPath = path.join(activeImagesDir, newFilename);
 
         await fs.writeFile(newPath, buffer);
+
+        // Удаляем из буфера "ready_images"
+        await fs.unlink(oldPath);
 
         const imageUrl = `/uploads/active_images/${newFilename}`;
 

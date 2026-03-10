@@ -129,6 +129,32 @@ app.post('/api/user/save', async (req, res) => {
     }
 });
 
+// СЕКРЕТНЫЙ ЭНДПОИНТ ДЛЯ ПОЛНОЙ ОЧИСТКИ ВСЕХ КАРТИНОК НА СЕРВЕРЕ (РАЗОВО)
+app.get('/api/debug/wipe-images', async (req, res) => {
+    try {
+        const readyImagesDir = path.join(__dirname, '..', 'uploads', 'ready_images');
+        const activeImagesDir = path.join(__dirname, '..', 'uploads', 'active_images');
+
+        const wipeDir = async (dirPath: string) => {
+            try {
+                const files = await fs.readdir(dirPath);
+                for (const file of files) {
+                    await fs.unlink(path.join(dirPath, file));
+                }
+            } catch (e) {
+                // Игнорируем ошибки (папка может не существовать)
+            }
+        };
+
+        await wipeDir(readyImagesDir);
+        await wipeDir(activeImagesDir);
+
+        res.json({ success: true, message: 'All images on Railway wiped clean!' });
+    } catch (error) {
+        res.status(500).json({ error: String(error) });
+    }
+});
+
 // === ЭНДПОИНТ ДЛЯ ПРИЕМА КАРТИНОК С КОМПЬЮТЕРА (PUSH API) ===
 app.post('/api/comfy/upload', upload.single('image'), async (req, res) => {
     try {
@@ -140,6 +166,15 @@ app.post('/api/comfy/upload', upload.single('image'), async (req, res) => {
 
         // Создаем папку, если вдруг её нет на Railway
         try { await fs.mkdir(readyImagesDir, { recursive: true }); } catch (err) { }
+
+        // ПРОВЕРКА ЛИМИТА (МАКСИМУМ 10 КАРТИНОК)
+        const files = await fs.readdir(readyImagesDir);
+        const imageFiles = files.filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg'));
+
+        if (imageFiles.length >= 10) {
+            console.warn('[UPLOAD] БУФЕР ПЕРЕПОЛНЕН! На сервере уже 10 картинок. Отклоняем загрузку.');
+            return res.status(429).json({ error: 'Buffer full', limitReached: true });
+        }
 
         const originalName = req.file?.originalname || `uploaded_${Date.now()}.png`;
         const newPath = path.join(readyImagesDir, originalName);

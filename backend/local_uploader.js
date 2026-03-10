@@ -70,6 +70,9 @@ async function checkAndUpload() {
             } catch (unlinkErr) {
                 console.error("[LOCAL] Ошибка удаления файла после отправки: ", unlinkErr);
             }
+        } else if (response.status === 429) {
+            console.log(`[LOCAL - ОЖИДАНИЕ] Буфер на Railway заполнен (10/10). Жду освобождения места... 😴`);
+            // Мы НЕ удаляем файл локально, он отправится в следующий раз
         } else {
             const errText = await response.text();
             console.error(`[LOCAL - ОШИБКА] Railway не принял файл. Статус: ${response.status}`, errText);

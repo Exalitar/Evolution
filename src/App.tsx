@@ -12,6 +12,7 @@ import {
   materialBonuses,
   applyMaterialToStats,
   detectCurrentFocus,
+  getBaseAttackTempoFromStrike,
   MaterialBonus,
   MainFocus,
 } from "./features/balance/hooks/characterStats";
@@ -517,6 +518,47 @@ function App() {
             } catch (e) {
               console.error("Failed to parse equipment data from backend", e);
             }
+          }
+
+          // Загрузка сохраненных характеристик персонажа (Stats)
+          if (userData.stats) {
+            const returnedStrike = userData.stats.strikePower || 0;
+            setCurrentStats({
+              strikePower: returnedStrike,
+              attackTempo: getBaseAttackTempoFromStrike(returnedStrike),
+              bioResource: userData.stats.bioResource || 0,
+              defenseMatrix: {
+                kinetic: userData.stats.defKinetic || 0,
+                energy: userData.stats.defEnergy || 0,
+                bio: userData.stats.defBio || 0,
+                toxic: userData.stats.defToxic || 0,
+                psionic: userData.stats.defPsionic || 0,
+                tech: userData.stats.defTech || 0,
+              },
+              reactiveDefense: {
+                triggerChance: 0,
+                parryChance: 0,
+                mitigationChance: userData.stats.blockChance || 0,
+                mitigationValue: userData.stats.blockMitigation || 0,
+              },
+              critPotential: {
+                critChance: userData.stats.critChance || 0,
+                critMultiplier: userData.stats.critMultiplier || 1.0,
+              },
+              predatoryResonance: {
+                lifestealPercent: userData.stats.lifestealPercent || 0,
+                lifestealChance: userData.stats.lifestealChance || 0,
+              },
+              toxicity: {
+                dotDamage: userData.stats.dotDamage || 0,
+                dotChance: userData.stats.dotChance || 0,
+              },
+              neuroShock: {
+                stunChance: userData.stats.stunChance || 0,
+                stunDuration: userData.stats.stunDuration || 0,
+                stunCooldown: userData.stats.stunCooldown || 0,
+              }
+            });
           }
         }
       } catch (e) {

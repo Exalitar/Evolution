@@ -752,19 +752,23 @@ function App() {
       setIsGeneratingImage(true);
       console.log(`[ComfyUI] Начат процесс генерации через бэкенд для уровня ${nextLevel} (заранее)`);
 
-      fetch(`${API}/api/comfy/generate`, { method: 'POST' })
+      fetch(`${API}/api/comfy/generate`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegramId, level: nextLevel })
+      })
         .then(res => res.json())
         .then(data => {
-          if (data.success && data.base64) {
-            setFinalBioImage(data.base64);
+          if (data.success && data.imageUrl) {
+            setFinalBioImage(`${API}${data.imageUrl}`);
             setLastGeneratedLevel(nextLevel);
-            console.log(`[ComfyUI] Картинка успешно скачана с бэкенда для уровня ${nextLevel}`);
+            console.log(`[FILE] Картинка успешно получена с бэкенда для уровня ${nextLevel}`);
           } else {
-            console.error(`[ComfyUI] Ошибка генерации:`, data.error);
+            console.error(`[FILE] Ошибка получения картинки:`, data.error);
           }
         })
         .catch(error => {
-          console.error(`[ComfyUI] Ошибка сети при запросе к бэкенду:`, error);
+          console.error(`[FILE] Ошибка сети при запросе к бэкенду:`, error);
         })
         .finally(() => {
           setIsGeneratingImage(false);

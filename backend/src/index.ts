@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 3001;
 // Настройки CORS для связи с фронтендом (React обычно крутится на локалхосте)
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Главный маршрут (Эндпоинт) для входа в игру или обновления после перезагрузки
 app.post('/api/user/sync', async (req, res) => {
@@ -119,90 +120,83 @@ app.post('/api/user/save', async (req, res) => {
     }
 });
 
-// Эндпоинт генерации Monster Image (прокси для ComfyUI)
+// Эндпоинт получения сгенерированной картинки для новых уровней
 app.post('/api/comfy/generate', async (req, res) => {
     try {
-        console.log('[COMFY] Запрос на генерацию картинки получен');
-        const workflowPath = path.join(__dirname, '..', 'Monster_generation.json');
-        const workflowContent = await fs.readFile(workflowPath, 'utf8');
-        const prompt = JSON.parse(workflowContent);
+        const { telegramId, level } = req.body;
+        console.log(`[FILE] Запрос на получение картинки для уровня ${level} от ${telegramId}`);
 
-        // Рандомизируем сиды
-        if (prompt["4"]?.inputs) prompt["4"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-        if (prompt["43"]?.inputs) prompt["43"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-        if (prompt["152"]?.inputs) prompt["152"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-        if (prompt["228"]?.inputs) prompt["228"].inputs.seed = Math.floor(Math.random() * 1000000000000000);
-
-        const clientId = Math.random().toString(36).substring(2, 15);
-
-        // 1. Отправляем запрос на генерацию
-        const genRes = await fetch(`${COMFY_API_URL}/prompt`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, client_id: clientId }),
-        });
-
-        if (!genRes.ok) {
-            console.error('[COMFY] Ошибка запуска генерации', await genRes.text());
-            res.status(500).json({ error: 'Failed to start generation' });
+        if (!telegramId || !level) {
+            res.status(400).json({ error: 'В запросе отсутствует Telegram ID или level!' });
             return;
         }
 
-        const { prompt_id } = await genRes.json() as { prompt_id: string };
-        console.log(`[COMFY] Генерация начата (ID: ${prompt_id}). Ожидание...`);
+        const user = await prisma.user.findUnique({ where: { telegramId } });
+        if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
 
-        // 2. Поллинг готовности (максимум 60 секунд)
-        let isDone = false;
-        let imageUrl = null;
-        let attempts = 0;
-        const maxAttempts = 30;
+        // 1. Удаляем старую картинку из активной папки, если она есть
+        if (user.bioImage && user.bioImage.startsWith('/uploads/active_images/')) {
+            try {
+                // convert '/uploads/active_images/filename.png' to absolute path
+                const relativePath = user.bioImage.replace(/^\/uploads\//, '');
+                const oldImagePath = path.join(__dirname, '..', 'uploads', relativePath);
 
-        while (!isDone && attempts < maxAttempts) {
-            attempts++;
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Ждем 2 сек
-
-            const historyRes = await fetch(`${COMFY_API_URL}/history/${prompt_id}`);
-            const history = await historyRes.json() as any;
-
-            if (history[prompt_id]) {
-                isDone = true;
-                const outputs = history[prompt_id].outputs;
-
-                let outputNode = null;
-                if (outputs["235"]) outputNode = outputs["235"];
-                else if (outputs["7"]) outputNode = outputs["7"];
-
-                if (outputNode && outputNode.images && outputNode.images.length > 0) {
-                    const imageInfo = outputNode.images[0];
-                    const params = new URLSearchParams({
-                        filename: imageInfo.filename,
-                        subfolder: imageInfo.subfolder || "",
-                        type: imageInfo.type
-                    });
-                    imageUrl = `${COMFY_API_URL}/view?${params.toString()}`;
+                try {
+                    await fs.access(oldImagePath);
+                    await fs.unlink(oldImagePath);
+                    console.log(`[FILE] Старое изображение удалено: ${oldImagePath}`);
+                } catch {
+                    // Файл мог быть уже удален
                 }
+            } catch (err) {
+                console.log(`[FILE] Ошибка при удалении старого изображения:`, err);
             }
         }
 
-        if (!imageUrl) {
-            console.error('[COMFY] Картинка не найдена в результатах или тайм-аут');
-            res.status(500).json({ error: 'Image not found or timeout' });
+        // 2. Берем картинку из сгенерированных
+        const generatedImagesDir = path.join(__dirname, '..', 'uploads', 'generated_images');
+        const activeImagesDir = path.join(__dirname, '..', 'uploads', 'active_images');
+
+        const files = await fs.readdir(generatedImagesDir);
+        const imageFiles = files.filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg'));
+
+        if (imageFiles.length === 0) {
+            console.error('[FILE] Нет доступных сгенерированных изображений');
+            res.status(500).json({ error: 'No generated images available' });
             return;
         }
 
-        // 3. Скачиваем картинку из локального ComfyUI
-        const imgRes = await fetch(imageUrl);
-        if (!imgRes.ok) throw new Error("Failed to download image from ComfyUI");
+        // Берем случайное изображение из списка (или можно брать первое)
+        const randomIndex = Math.floor(Math.random() * imageFiles.length);
+        const selectedImage = imageFiles[randomIndex] as string;
+        const oldPath = path.join(generatedImagesDir, selectedImage);
 
-        const arrayBuffer = await imgRes.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64Image = `data:image/png;base64,${buffer.toString('base64')}`;
+        // Переносим в активные
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}${path.extname(selectedImage)}`;
+        const newPath = path.join(activeImagesDir, newFilename);
 
-        console.log('[COMFY] Картинка успешно сгенерирована и преобразована в Base64');
-        res.json({ success: true, base64: base64Image });
+        await fs.rename(oldPath, newPath);
+
+        const imageUrl = `/uploads/active_images/${newFilename}`;
+
+        // Обновляем БД (на всякий случай, хотя /api/user/save потом тоже сохранит)
+        await prisma.user.update({
+            where: { telegramId },
+            data: {
+                bioImage: imageUrl,
+                lastGeneratedLevel: level
+            }
+        });
+
+        console.log(`[FILE] Новое изображение присвоено и перенесено в: ${imageUrl}`);
+        res.json({ success: true, imageUrl });
 
     } catch (error) {
-        console.error('[COMFY] Общая ошибка:', error);
+        console.error('[FILE] Общая ошибка:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -218,6 +212,8 @@ app.get('/api/user/wipe', async (req, res) => {
         res.status(500).json({ error: 'Database Wipe Error' });
     }
 });
+
+
 
 app.listen(PORT, () => {
     console.log(`=========================================`);

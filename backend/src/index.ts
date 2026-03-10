@@ -160,34 +160,39 @@ app.post('/api/comfy/generate', async (req, res) => {
             }
         }
 
-        // 2. Берем картинку из сгенерированных
-        const generatedImagesDir = path.join(__dirname, '..', 'uploads', 'generated_images');
-        const activeImagesDir = path.join(__dirname, '..', 'uploads', 'active_images');
+        // 2. Делаем запрос к домашнему компьютеру (Localtunnel) за сгенерированной картинкой
+        const HOME_SERVER_URL = process.env.HOME_SERVER_URL || "https://pink-tables-fly.loca.lt";
+        console.log(`[FILE] Запрашиваем картинку с компьютера: ${HOME_SERVER_URL}/api/take-image`);
 
-        const files = await fs.readdir(generatedImagesDir);
-        const imageFiles = files.filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg'));
+        const response = await fetch(`${HOME_SERVER_URL}/api/take-image`);
 
-        if (imageFiles.length === 0) {
-            console.error('[FILE] Нет доступных сгенерированных изображений');
-            res.status(500).json({ error: 'No generated images available' });
-            return;
+        if (!response.ok) {
+            const error = await response.text();
+            console.error(`[FILE] Ошибка от домашнего ПК:`, error);
+            return res.status(500).json({ error: 'ComfyUI ПК не отдал картинку. Возможно они закончились.' });
         }
 
-        // Берем случайное изображение из списка (или можно брать первое)
-        const randomIndex = Math.floor(Math.random() * imageFiles.length);
-        const selectedImage = imageFiles[randomIndex] as string;
-        const oldPath = path.join(generatedImagesDir, selectedImage);
+        // Получаем файл в виде Buffer
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
 
-        // Переносим в активные
+        // Переносим в активные изображения на Railway
+        const activeImagesDir = path.join(__dirname, '..', 'uploads', 'active_images');
+
+        // На Railway папка может не существовать
+        try {
+            await fs.mkdir(activeImagesDir, { recursive: true });
+        } catch (err) { }
+
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}${path.extname(selectedImage)}`;
+        const newFilename = `${telegramId}_lvl_${level}_${uniqueSuffix}.png`; // Всегда сохраняем как .png
         const newPath = path.join(activeImagesDir, newFilename);
 
-        await fs.rename(oldPath, newPath);
+        await fs.writeFile(newPath, buffer);
 
         const imageUrl = `/uploads/active_images/${newFilename}`;
 
-        // Обновляем БД (на всякий случай, хотя /api/user/save потом тоже сохранит)
+        // Обновляем БД
         await prisma.user.update({
             where: { telegramId },
             data: {
@@ -196,7 +201,7 @@ app.post('/api/comfy/generate', async (req, res) => {
             }
         });
 
-        console.log(`[FILE] Новое изображение присвоено и перенесено в: ${imageUrl}`);
+        console.log(`[FILE] Новое изображение присвоено и скачано с ПК на Railway в: ${imageUrl}`);
         res.json({ success: true, imageUrl });
 
     } catch (error) {

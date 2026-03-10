@@ -10,6 +10,8 @@ const RAILWAY_UPLOAD_URL = "https://evolution-production-4313.up.railway.app/api
 const CHECK_INTERVAL_MS = 10000; // Проверять каждые 10 секунд
 const generatedImagesDir = path.join(__dirname, 'uploads', 'generated_images');
 
+let isWaitingForSpace = false;
+
 console.log(`====================================================`);
 console.log(`🚀 ЗАПУЩЕН ЛОКАЛЬНЫЙ ОТПРАВИТЕЛЬ КАРТИНОК COMFYUI`);
 console.log(`📁 Папка мониторинга: ${generatedImagesDir}`);
@@ -39,11 +41,13 @@ async function checkAndUpload() {
             return;
         }
 
-        console.log(`[LOCAL] Найдено готовых картинок: ${imageFiles.length}. Начинаю отправку первой...`);
-
         // Берем первую картинку в очереди
         const selectedImage = imageFiles[0];
         const imagePath = path.join(generatedImagesDir, selectedImage);
+
+        if (!isWaitingForSpace) {
+            console.log(`[LOCAL] Найдено готовых картинок: ${imageFiles.length}. Начинаю отправку первой: ${selectedImage}...`);
+        }
 
         // Читаем файл
         const fileBuffer = await fs.readFile(imagePath);
@@ -54,13 +58,13 @@ async function checkAndUpload() {
         formData.append('image', blob, selectedImage);
 
         // Отправляем на Railway
-        console.log(`[LOCAL] Загружаю ${selectedImage} на Railway...`);
         const response = await fetch(RAILWAY_UPLOAD_URL, {
             method: 'POST',
             body: formData
         });
 
         if (response.ok) {
+            isWaitingForSpace = false; // Сбрасываем флаг, место появилось!
             console.log(`[LOCAL - УСПЕХ] Картинка ${selectedImage} успешно загружена на Railway!`);
 
             // Удаляем ее у себя, чтобы ComfyUI сделал новую
@@ -71,9 +75,13 @@ async function checkAndUpload() {
                 console.error("[LOCAL] Ошибка удаления файла после отправки: ", unlinkErr);
             }
         } else if (response.status === 429) {
-            console.log(`[LOCAL - ОЖИДАНИЕ] Буфер на Railway заполнен (10/10). Жду освобождения места... 😴`);
+            if (!isWaitingForSpace) {
+                console.log(`[LOCAL - ОЖИДАНИЕ] Буфер на Railway заполнен (10/10). Жду освобождения места... 😴`);
+                isWaitingForSpace = true; // Устанавливаем флаг, чтобы больше не спамить
+            }
             // Мы НЕ удаляем файл локально, он отправится в следующий раз
         } else {
+            isWaitingForSpace = false;
             const errText = await response.text();
             console.error(`[LOCAL - ОШИБКА] Railway не принял файл. Статус: ${response.status}`, errText);
         }

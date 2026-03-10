@@ -161,10 +161,15 @@ app.post('/api/comfy/generate', async (req, res) => {
         }
 
         // 2. Делаем запрос к домашнему компьютеру (Localtunnel) за сгенерированной картинкой
-        const HOME_SERVER_URL = process.env.HOME_SERVER_URL || "https://pink-tables-fly.loca.lt";
+        const HOME_SERVER_URL = process.env.HOME_SERVER_URL || "https://comfy-images-lex.loca.lt";
         console.log(`[FILE] Запрашиваем картинку с компьютера: ${HOME_SERVER_URL}/api/take-image`);
 
-        const response = await fetch(`${HOME_SERVER_URL}/api/take-image`);
+        // Localtunnel требует специальный заголовок для bypass экрана с предупреждением (иначе вернет HTML)
+        const response = await fetch(`${HOME_SERVER_URL}/api/take-image`, {
+            headers: {
+                "Bypass-Tunnel-Reminder": "true"
+            }
+        });
 
         if (!response.ok) {
             const error = await response.text();

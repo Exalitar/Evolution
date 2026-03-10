@@ -165,16 +165,19 @@ app.post('/api/comfy/generate', async (req, res) => {
         console.log(`[FILE] Запрашиваем картинку с компьютера: ${HOME_SERVER_URL}/api/take-image`);
 
         // Localtunnel требует специальный заголовок для bypass экрана с предупреждением (иначе вернет HTML)
+        // Также добавляем User-Agent, чтобы притвориться браузером
         const response = await fetch(`${HOME_SERVER_URL}/api/take-image`, {
             headers: {
-                "Bypass-Tunnel-Reminder": "true"
+                "Bypass-Tunnel-Reminder": "true",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
         });
 
         if (!response.ok) {
-            const error = await response.text();
-            console.error(`[FILE] Ошибка от домашнего ПК:`, error);
-            return res.status(500).json({ error: 'ComfyUI ПК не отдал картинку. Возможно они закончились.' });
+            const errorText = await response.text();
+            console.error(`[FILE] Ошибка от сервера ПК. Статус: ${response.status} ${response.statusText}`);
+            console.error(`[FILE] Текст ошибки (первые 200 символов):`, errorText.substring(0, 200));
+            return res.status(500).json({ error: `ПК сервер отклонил запрос. Статус: ${response.status}` });
         }
 
         // Получаем файл в виде Buffer

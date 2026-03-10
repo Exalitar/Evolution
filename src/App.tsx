@@ -936,6 +936,9 @@ function App() {
 
     // Если уровень >= 5 и есть финальное изображение
     if (playerLevel >= 5 && finalBioImage) {
+      if (finalBioImage.startsWith('/uploads')) {
+        return `${API}${finalBioImage}`;
+      }
       return finalBioImage;
     }
 

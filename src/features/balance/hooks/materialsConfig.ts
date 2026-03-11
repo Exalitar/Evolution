@@ -4,6 +4,7 @@ import { MaterialBonus } from "./characterStats";
 export interface MaterialDefinition {
   id: string;
   name: string;
+  shortName?: string;
   image: string;
   description: string;
   bonus: MaterialBonus;
@@ -14,6 +15,7 @@ export const materialDefinitions: MaterialDefinition[] = [
   {
     id: "m1_1",
     name: "Водород",
+    shortName: "H",
     image: "/assets/Material/Malecula1.jpg",
     description: "Базовый усилитель урона и темпа атаки.",
     bonus: {
@@ -22,7 +24,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m1_2",
-    name: "Литий",
+    name: "Гелий",
+    shortName: "He",
     image: "/assets/Material/Malecula2.jpg",
     description: "Укрепляет биоресурс и защиту.",
     bonus: {
@@ -35,7 +38,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m1_3",
-    name: "Бериллий",
+    name: "Литий",
+    shortName: "Li",
     image: "/assets/Material/Malecula3.jpg",
     description: "Даёт крит и вампиризм.",
     bonus: {
@@ -51,7 +55,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m1_4",
-    name: "Бор",
+    name: "Бериллий",
+    shortName: "Be",
     image: "/assets/Material/Malecula4.jpg",
     description: "Усиливает токсичность.",
     bonus: {
@@ -63,7 +68,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m1_5",
-    name: "Углерод",
+    name: "Бор",
+    shortName: "B",
     image: "/assets/Material/Malecula5.jpg",
     description: "Баланс урона и защиты.",
     bonus: {
@@ -79,7 +85,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   // ===== Стадия 2 =====
   {
     id: "m2_1",
-    name: "Материал 2‑1",
+    name: "Углерод",
+    shortName: "C",
     image: "/assets/Material/Malecula6.jpg",
     description: "Продвинутый усилитель урона.",
     bonus: {
@@ -88,7 +95,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m2_2",
-    name: "Материал 2‑2",
+    name: "Азот",
+    shortName: "N",
     image: "/assets/Material/Malecula7.jpg",
     description: "Ускоряет атаки.",
     bonus: {
@@ -101,7 +109,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m2_3",
-    name: "Материал 2‑3",
+    name: "Кислород",
+    shortName: "O",
     image: "/assets/Material/Malecula8.jpg",
     description: "Дает много биоресурса.",
     bonus: {
@@ -110,7 +119,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m2_4",
-    name: "Материал 2‑4",
+    name: "Фтор",
+    shortName: "F",
     image: "/assets/Material/Malecula9.jpg",
     description: "Укрепляет защитную матрицу.",
     bonus: {
@@ -123,7 +133,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m2_5",
-    name: "Материал 2‑5",
+    name: "Неон",
+    shortName: "Ne",
     image: "/assets/Material/Malecula10.jpg",
     description: "Дополнительный критический потенциал.",
     bonus: {
@@ -137,7 +148,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   // ===== Стадия 3 =====
   {
     id: "m3_1",
-    name: "Материал 3‑1",
+    name: "Натрий",
+    shortName: "Na",
     image: "/assets/Material/Malecula11.jpg",
     description: "Сильный прирост урона и крита.",
     bonus: {
@@ -149,7 +161,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m3_2",
-    name: "Материал 3‑2",
+    name: "Магний",
+    shortName: "Mg",
     image: "/assets/Material/Malecula12.jpg",
     description: "Биоресурс + защита.",
     bonus: {
@@ -162,7 +175,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m3_3",
-    name: "Материал 3‑3",
+    name: "Алюминий",
+    shortName: "Al",
     image: "/assets/Material/Malecula13.jpg",
     description: "Усиливает вампиризм.",
     bonus: {
@@ -174,7 +188,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m3_4",
-    name: "Материал 3‑4",
+    name: "Кремний",
+    shortName: "Si",
     image: "/assets/Material/Malecula14.jpg",
     description: "Усиливает DOT‑эффекты.",
     bonus: {
@@ -186,7 +201,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m3_5",
-    name: "Материал 3‑5",
+    name: "Фосфор",
+    shortName: "P",
     image: "/assets/Material/Malecula15.jpg",
     description: "Добавляет нейрошок‑контроль.",
     bonus: {
@@ -200,7 +216,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   // ===== Стадия 4 =====
   {
     id: "m4_1",
-    name: "Материал 4‑1",
+    name: "Сера",
+    shortName: "S",
     image: "/assets/Material/Malecula16.jpg",
     description: "Большой буст урона.",
     bonus: {
@@ -209,7 +226,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m4_2",
-    name: "Материал 4‑2",
+    name: "Хлор",
+    shortName: "Cl",
     image: "/assets/Material/Malecula17.jpg",
     description: "Сильное ускорение атак.",
     bonus: {
@@ -222,7 +240,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m4_3",
-    name: "Материал 4‑3",
+    name: "Аргон",
+    shortName: "Ar",
     image: "/assets/Material/Malecula18.jpg",
     description: "Сильный защитный коктейль.",
     bonus: {
@@ -235,7 +254,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m4_4",
-    name: "Материал 4‑4",
+    name: "Калий",
+    shortName: "K",
     image: "/assets/Material/Malecula19.jpg",
     description: "Реактивная защита.",
     bonus: {
@@ -248,7 +268,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m4_5",
-    name: "Материал 4‑5",
+    name: "Кальций",
+    shortName: "Ca",
     image: "/assets/Material/Malecula20.jpg",
     description: "Крит + вампиризм.",
     bonus: {
@@ -265,7 +286,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   // ===== Стадия 5 =====
   {
     id: "m5_1",
-    name: "Материал 5‑1",
+    name: "Скандий",
+    shortName: "Sc",
     image: "/assets/Material/Malecula21.jpg",
     description: "Максимальный буст урона.",
     bonus: {
@@ -274,7 +296,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m5_2",
-    name: "Материал 5‑2",
+    name: "Титан",
+    shortName: "Ti",
     image: "/assets/Material/Malecula22.jpg",
     description: "Максимальный буст биоресурса.",
     bonus: {
@@ -283,7 +306,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m5_3",
-    name: "Материал 5‑3",
+    name: "Ванадий",
+    shortName: "V",
     image: "/assets/Material/Malecula23.jpg",
     description: "Топовая защита.",
     bonus: {
@@ -298,7 +322,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m5_4",
-    name: "Материал 5‑4",
+    name: "Хром",
+    shortName: "Cr",
     image: "/assets/Material/Malecula24.jpg",
     description: "Топовый крит и контроль.",
     bonus: {
@@ -313,7 +338,8 @@ export const materialDefinitions: MaterialDefinition[] = [
   },
   {
     id: "m5_5",
-    name: "Материал 5‑5",
+    name: "Марганец",
+    shortName: "Mn",
     image: "/assets/Material/Malecula25.jpg",
     description: "Сильный гибридный буст.",
     bonus: {

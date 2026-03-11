@@ -64,6 +64,8 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const upgradeTimerRef = useRef<number | null>(null);
+  const dragStartClientX = useRef(0);
+  const hasDragged = useRef(false);
 
   const backgrounds = {
     center: '/assets/Laboratory/Center_lab.png',
@@ -113,10 +115,11 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.equipment-hotspot') ||
-      (e.target as HTMLElement).closest('.lab-ui-element') ||
+    if ((e.target as HTMLElement).closest('.lab-ui-element') ||
       (e.target as HTMLElement).closest('.dna-zoom-button')) return;
     setIsDragging(true);
+    hasDragged.current = false;
+    dragStartClientX.current = e.clientX;
     setDragStart({
       x: e.clientX - position.x
     });
@@ -124,6 +127,9 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
+    if (Math.abs(e.clientX - dragStartClientX.current) > 5) {
+      hasDragged.current = true;
+    }
     const newX = e.clientX - dragStart.x;
     const { min, max } = getMaxOffset();
     setPosition({
@@ -136,11 +142,12 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.equipment-hotspot') ||
-      (e.target as HTMLElement).closest('.lab-ui-element') ||
+    if ((e.target as HTMLElement).closest('.lab-ui-element') ||
       (e.target as HTMLElement).closest('.dna-zoom-button')) return;
     const touch = e.touches[0];
     setIsDragging(true);
+    hasDragged.current = false;
+    dragStartClientX.current = touch.clientX;
     setDragStart({
       x: touch.clientX - position.x
     });
@@ -149,6 +156,9 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     const touch = e.touches[0];
+    if (Math.abs(touch.clientX - dragStartClientX.current) > 5) {
+      hasDragged.current = true;
+    }
     const newX = touch.clientX - dragStart.x;
     const { min, max } = getMaxOffset();
     setPosition({
@@ -161,6 +171,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
   };
 
   const handleEquipmentClick = (equipmentId: EquipmentType) => {
+    if (hasDragged.current) return; // Prevent click action if user was dragging
     setSelectedEquipment(equipmentId);
   };
 
@@ -201,14 +212,6 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
           {/* Интерактивные зоны Block A (Center) */}
           {currentSection === 'center' && (
             <>
-              {/* Кнопка возврата на главную на ДНК */}
-              <button
-                className="dna-zoom-button"
-                onClick={() => onNavigate('main')}
-              >
-                <div className="zoom-arrow">↑</div>
-                <span className="zoom-label">Вернуться</span>
-              </button>
 
               <div
                 className="equipment-hotspot microscope-hotspot"
@@ -348,6 +351,15 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
       </div>
 
       {/* UI элементы ФИКСИРОВАННЫЕ к экрану */}
+      {/* Кнопка возврата на главную на ДНК (видна во всех блоках) */}
+      <button
+        className="dna-zoom-button"
+        onClick={() => onNavigate('main')}
+      >
+        <img src="/assets/Icon_button/BackDNK_button.png" alt="ДНК" draggable={false} />
+        <span className="zoom-label">ДНК</span>
+      </button>
+
       <div
         className="player-info"
         onClick={() => onNavigate("info")}
@@ -369,8 +381,7 @@ export const Laboratory: React.FC<LaboratoryProps> = ({
       </div>
 
       <button className="market-button" onClick={() => onNavigate("shop")}>
-        <span className="market-icon" />
-        <span className="market-label">Магазин</span>
+        <img src="/assets/Icon_button/Shop_button.png" alt="Магазин" draggable={false} />
       </button>
 
       <BottomNavigation

@@ -29,14 +29,17 @@
 /* ===== стартовый экран с фоном ===== */
 
 .start-screen {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  max-width: 768px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
   background-image: url("/public/assets/Background_menu.avif");
-  background-repeat: repeat-x;
-  background-size: auto 100vh;
-  background-position: 0 0;
+  background-repeat: repeat;
+  background-size: cover;
+  background-position: center;
   animation: move-bg 20s linear infinite;
 }
 
@@ -73,20 +76,24 @@
 .main-screen {
   height: 100vh;
   width: 100vw;
+  max-width: 768px;
+  margin: 0 auto;
   background-image: url("/assets/Background_main_window.png");
   background-repeat: repeat;
   background-size: auto 100vh;
   background-position: 0 0;
   animation: move-bg-loop 40s ease-in-out infinite;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
   overflow: hidden;
   padding-bottom: 75px;
-  /* Изменено с 90px на 75px */
   padding-top: 80px;
+}
+
+body {
+  background-color: #000;
+  margin: 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* ===== центральный прямоугольник для персонажа ===== */
@@ -97,7 +104,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 280px;
-  height: 350px;
+  height: 280px;
   border-radius: 20px;
   background: linear-gradient(135deg, rgba(0, 50, 100, 0.4), rgba(0, 100, 200, 0.4));
   border: 3px solid rgba(0, 255, 255, 0.6);
@@ -152,8 +159,8 @@
 /* ===== контейнер для материалов вверху ===== */
 
 .materials-container {
-  position: fixed;
-  top: 74px;
+  position: absolute;
+  top: 89px;
   /* Изменено с 60px на 70px - опущено ниже на 10px */
   left: 50%;
   transform: translateX(-50%);
@@ -302,7 +309,7 @@ img {
 /* ===== информация игрока (верхний левый угол) ===== */
 
 .player-info {
-  position: fixed;
+  position: absolute;
   top: 8px;
   left: 8px;
   display: flex;
@@ -343,6 +350,8 @@ img {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 140px;
+  /* Вмещает до 16 символов включительно */
 }
 
 .player-name {
@@ -350,6 +359,8 @@ img {
   font-weight: 600;
   color: #ffffff;
   text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  white-space: nowrap;
+  /* Не дает длинным именам переноситься на новую строку */
 }
 
 .player-level {
@@ -367,39 +378,42 @@ img {
 /* ===== кнопка магазина (верхний правый угол) ===== */
 
 .market-button {
-  position: fixed;
+  position: absolute;
   top: 8px;
   right: 8px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, rgba(255, 200, 0, 0.2), rgba(255, 150, 0, 0.2));
-  border: 2px solid rgba(255, 200, 0, 0.6);
-  border-radius: 50px;
-  padding: 6px 14px;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 100;
-  box-shadow: 0 0 20px rgba(255, 200, 0, 0.3);
-  backdrop-filter: blur(10px);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.market-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.4));
+  transition: all 0.3s ease;
 }
 
 .market-button:hover {
-  background: linear-gradient(135deg, rgba(255, 200, 0, 0.3), rgba(255, 150, 0, 0.3));
-  border-color: rgba(255, 200, 0, 0.9);
-  box-shadow: 0 0 30px rgba(255, 200, 0, 0.5);
   transform: translateY(-2px);
+}
+
+.market-button:hover img {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.7)) brightness(1.2);
 }
 
 .market-button:active {
   transform: translateY(0);
-}
-
-.market-icon {
-  font-size: 18px;
 }
 
 /* ===== нижняя навигация ===== */
@@ -409,6 +423,8 @@ img {
   bottom: 0;
   left: 0;
   right: 0;
+  max-width: 768px;
+  margin: 0 auto;
   height: auto;
   /* Изменено с 85px на auto */
   background: linear-gradient(180deg, rgba(10, 15, 30, 0.5) 0%, rgba(10, 15, 30, 0.7) 100%);
@@ -422,9 +438,23 @@ img {
   z-index: 100;
 }
 
-.nav-button {
+.nav-item {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  gap: 2px;
+  flex: 1;
+}
+
+.nav-item:nth-child(even) {
+  flex-direction: column-reverse;
+  /* Чередование: кнопки 2 и 4 будут иметь текст сверху */
+}
+
+.nav-button {
+  display: flex;
   align-items: center;
   justify-content: center;
   background: none;
@@ -432,28 +462,31 @@ img {
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
-  /* Изменено с 4px на 0 */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
 }
 
+/* При наведении прыгает только сама кнопка (иконка), а не весь блок с текстом */
 .nav-button:hover {
   transform: translateY(-3px);
 }
+
+/* Если кнопка "вниз головой" (даёт текст сверху), то иконка тоже должна прыгать логично. Оставим стандартный эффект */
 
 .nav-button:active {
   transform: translateY(-1px);
 }
 
 .nav-button-icon {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: transparent;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2px;
-  /* Изменено с 4px на 2px */
   transition: all 0.3s ease;
 }
 
@@ -469,20 +502,47 @@ img {
   filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.4));
 }
 
+.nav-button-icon img.scaled-icon {
+  width: 80%;
+  height: 80%;
+}
+
 .nav-button:hover .nav-button-icon img {
   filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.7));
 }
 
+/* Активная кнопка */
+.nav-item.active .nav-button {
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 100, 200, 0.3));
+  border: 2px solid rgba(0, 255, 255, 0.7);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.nav-item.active .nav-button-icon img {
+  filter: drop-shadow(0 0 25px rgba(0, 255, 255, 1)) brightness(1.3);
+}
+
+.nav-item.active .nav-button-label {
+  color: #00ffff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 1);
+  font-weight: 700;
+}
+
 .nav-button-label {
-  font-size: 10px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
   text-align: center;
   transition: color 0.3s ease;
   text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  pointer-events: none;
+  /* Чтобы нельзя было кликнуть по тексту, только по кнопке */
 }
 
-.nav-button:hover .nav-button-label {
+/* Эффект свечения текста при наведении на кнопку (иконку) */
+.nav-button:hover+.nav-button-label,
+.nav-button-label:hover {
+  /* На случай если вдруг hover попадет на текст */
   color: rgba(0, 255, 255, 1);
   text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
 }
@@ -1283,8 +1343,12 @@ img {
 }
 
 .reroll-circle-button {
-  margin-left: 330px;
-  /* было 20px */
+  position: absolute;
+  top: 45px;
+  /* Выравниваем почти вровень с магазином (top 8px) */
+  right: 55px;
+  /* Смещаем правее, левее кнопки магазина, которая занимает до 58px */
+  z-index: 50;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1294,7 +1358,6 @@ img {
   font-size: 26px;
   font-weight: bold;
   cursor: pointer;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;

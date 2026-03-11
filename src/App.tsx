@@ -29,6 +29,9 @@ import {
 
 const API = import.meta.env.VITE_API_URL || "";
 
+// NFT Marketplace backend (для привязки кошелька и минта NFT)
+const NFT_BACKEND_API = "https://nft-market-backend-production.up.railway.app";
+
 type CharacterId =
   | "species_1"
   | "species_2"
@@ -268,6 +271,29 @@ function App() {
 
   useEffect(() => {
     WebApp.ready();
+
+    // === Привязка кошелька с NFT-маркетплейса ===
+    const startParam = WebApp.initDataUnsafe?.start_param;
+    if (startParam) {
+      fetch(`${NFT_BACKEND_API}/api/telegram/link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          initData: WebApp.initData,
+          startParam: startParam
+        })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            WebApp.showAlert('✅ Кошелёк привязан: ' + data.walletAddress);
+            setTimeout(() => WebApp.close(), 2500);
+          } else {
+            WebApp.showAlert('Ошибка привязки: ' + data.error);
+          }
+        })
+        .catch(() => WebApp.showAlert('Ошибка сети при привязке кошелька'));
+    }
   }, []);
 
   const [finalBioImage, setFinalBioImage] = useState<string | null>(null);
@@ -294,6 +320,8 @@ function App() {
   const [isOverCenterForBreed, setIsOverCenterForBreed] = useState(false);
   const [pendingBreedSelection, setPendingBreedSelection] = useState<Material | null>(null);
   const [isBreedConfirmOpen, setIsBreedConfirmOpen] = useState(false);
+  const [touchDragMaterial, setTouchDragMaterial] = useState<Material | null>(null);
+  const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
 
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
@@ -499,9 +527,21 @@ function App() {
           if (userData.usedMaterials !== undefined) setUsedMaterials(new Set(userData.usedMaterials));
           if (userData.currentMaterialPool) {
             try {
-              const parsedPool = typeof userData.currentMaterialPool === "string"
+              let parsedPool = typeof userData.currentMaterialPool === "string"
                 ? JSON.parse(userData.currentMaterialPool)
                 : userData.currentMaterialPool;
+
+              // Синхронизация старых сохраненных названий со свежими названиями элементов из конфига
+              if (Array.isArray(parsedPool)) {
+                parsedPool = parsedPool.map((savedMat: any) => {
+                  const baseDef = materialDefinitions.find(m => m.id === savedMat.id);
+                  if (baseDef) {
+                    return { ...savedMat, name: baseDef.name, shortName: baseDef.shortName };
+                  }
+                  return savedMat;
+                });
+              }
+
               setCurrentBreedingMaterials(parsedPool);
             } catch (e) {
               console.error("Failed to parse material pool from backend", e);
@@ -769,6 +809,41 @@ function App() {
     setIsOverCenterForBreed(false);
   };
 
+  const handleTouchStartBreed = (material: Material, e: React.TouchEvent) => {
+    if (isBreeding) return;
+    const touch = e.touches[0];
+    setTouchDragMaterial(material);
+    setTouchPosition({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMoveBreed = (e: React.TouchEvent) => {
+    if (!touchDragMaterial || isBreeding) return;
+    // e.preventDefault(); // Prevent scrolling while dragging material
+    const touch = e.touches[0];
+    setTouchPosition({ x: touch.clientX, y: touch.clientY });
+
+    const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+    const isOverCenter = elem?.closest('.central-circle') !== null;
+    setIsOverCenterForBreed(isOverCenter);
+  };
+
+  const handleTouchEndBreed = (e: React.TouchEvent) => {
+    if (!touchDragMaterial || isBreeding) return;
+
+    // Check if dropped over central circle using last known position
+    if (touchPosition) {
+      const elem = document.elementFromPoint(touchPosition.x, touchPosition.y);
+      if (elem?.closest('.central-circle')) {
+        setPendingBreedSelection(touchDragMaterial);
+        setIsBreedConfirmOpen(true);
+      }
+    }
+
+    setTouchDragMaterial(null);
+    setTouchPosition(null);
+    setIsOverCenterForBreed(false);
+  };
+
   const handleDropOnCenterForBreed = (e: React.DragEvent) => {
     e.preventDefault();
     setIsOverCenterForBreed(false);
@@ -946,6 +1021,60 @@ function App() {
     return "/assets/Material/Bio.png";
   };
 
+  // === Отправка изображения на минт NFT в маркетплейс ===
+  const [isMinting, setIsMinting] = useState(false);
+  const [mintStatus, setMintStatus] = useState<string | null>(null);
+
+  const sendToMint = async () => {
+    const imageUrl = getCharacterImage();
+    if (!imageUrl || imageUrl === "/assets/Material/Bio.png") {
+      WebApp.showAlert("Сначала создайте био-организм (уровень 5+)");
+      return;
+    }
+
+    setIsMinting(true);
+    setMintStatus("Подготовка...");
+
+    try {
+      // Скачиваем картинку и конвертируем в base64
+      const fullUrl = imageUrl.startsWith("http") ? imageUrl : `${API}${imageUrl}`;
+      const imgResponse = await fetch(fullUrl);
+      const blob = await imgResponse.blob();
+
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      setMintStatus("Отправка на минт...");
+
+      // Отправляем на NFT-бэкенд
+      const res = await fetch(`${NFT_BACKEND_API}/api/telegram/create-nft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          initData: WebApp.initData,
+          base64Image: base64,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMintStatus("✅ NFT создаётся!");
+        WebApp.showAlert("🎉 NFT отправлен на минт! ID: " + data.nftId);
+      } else {
+        setMintStatus(null);
+        WebApp.showAlert("Ошибка: " + data.error);
+      }
+    } catch (err) {
+      setMintStatus(null);
+      WebApp.showAlert("Ошибка сети при создании NFT");
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setEquipment(prev => {
@@ -1036,8 +1165,7 @@ function App() {
             className="market-button"
             onClick={() => navigateTo("shop")}
           >
-            <span className="market-icon" />
-            <span className="market-label">Магазин</span>
+            <img src="/assets/Icon_button/Shop_button.png" alt="Магазин" draggable={false} />
           </button>
 
           {/* Центральный круг — всегда есть персонаж */}
@@ -1084,12 +1212,19 @@ function App() {
                     key={material.id}
                     className={`small-circle breeding-material ${isUsed || isBreeding ? "is-used" : ""
                       }`}
+                    style={{ touchAction: 'none' }} // Ensure browser doesn't try to scroll/pan
                     draggable={!isUsed && !isBreeding}
                     onDragStart={(e) => {
                       if (isUsed || isBreeding) return;
                       handleDragStartBreed(material, e);
                     }}
                     onDragEnd={handleDragEndBreed}
+                    onTouchStart={(e) => {
+                      if (isUsed || isBreeding) return;
+                      handleTouchStartBreed(material, e);
+                    }}
+                    onTouchMove={handleTouchMoveBreed}
+                    onTouchEnd={handleTouchEndBreed}
                     onClick={() => {
                       setHoveredMaterial(prev =>
                         prev && prev.id === material.id
@@ -1104,7 +1239,7 @@ function App() {
                       className="small-circle-image"
                       draggable={false}
                     />
-                    <div className="small-circle-name">{material.name}</div>
+                    <div className="small-circle-name">{material.shortName || material.name}</div>
                   </div>
                 );
               })}
@@ -1672,14 +1807,36 @@ function App() {
             <button className="settings-btn" onClick={() => goToScreen("referal")}>
               Реферальная ссылка
             </button>
-
-            <button className="settings-close" onClick={closeSettings}>
-              <span>×</span>
-            </button>
           </div>
         </div>
       )}
 
+      {/* Placed ghost element for drag/touch outside main screen */}
+      {touchDragMaterial && touchPosition && (
+        <div
+          style={{
+            position: 'fixed',
+            left: touchPosition.x - 30, // center the 60x60 circle
+            top: touchPosition.y - 30,
+            width: '60px',
+            height: '60px',
+            pointerEvents: 'none',
+            zIndex: 9999,
+            opacity: 0.8,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            boxShadow: '0 0 15px rgba(0, 255, 255, 0.8)'
+          }}
+        >
+          <img
+            src={touchDragMaterial.image}
+            alt="Dragging"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </div>
+      )}
+
+      {/* Окно подтверждения объединения ДНК */}
       {isBreedConfirmOpen && pendingBreedSelection && (
         <div className="breed-modal-backdrop">
           <div className="breed-modal">
@@ -1797,8 +1954,7 @@ function App() {
 
             <div className="breed-modal-buttons">
               <button
-                className={`breed-modal-button yes ${playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""
-                  }`}
+                className={`breed-modal-button yes ${playerLevel === 4 && !canBreedToLevel5().canBreed ? "disabled" : ""}`}
                 onClick={handleConfirmBreeding}
                 disabled={playerLevel === 4 && !canBreedToLevel5().canBreed}
               >

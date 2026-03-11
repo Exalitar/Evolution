@@ -1,10 +1,12 @@
 /* ===== Страница лаборатории ===== */
 .laboratory-page {
   width: 100vw;
+  max-width: 768px;
   height: 100vh;
   position: fixed;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   overflow: hidden;
   background: #000;
   z-index: 2000;
@@ -28,7 +30,7 @@
 /* ===== Перемещаемый фон ===== */
 .laboratory-background {
   height: 100vh;
-  width: 150vw;
+  width: 150%;
   min-width: calc(100vh * 1.5);
   position: relative;
   background-size: contain;
@@ -166,83 +168,84 @@
 }
 
 /* ===== Интерактивные зоны оборудования ===== */
-.equipment-hotspot {
-  position: absolute;
-  cursor: pointer;
-  border: 2px solid rgba(0, 255, 255, 0.8);
-  background: rgba(0, 255, 255, 0.1);
+
+/* Названия оборудования (теперь они визуальная часть кнопки) */
+.equipment-label {
+  font-size: 24px;
+  font-weight: 600;
+  color: #00ffff;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 255, 0.6);
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+  white-space: nowrap;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
   transition: all 0.3s ease;
-  z-index: 10;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 5px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
-.equipment-hotspot:hover {
+/* Действия при наведении перенесены на саму табличку */
+.equipment-hotspot:hover .equipment-label {
   background: rgba(0, 255, 255, 0.2);
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
   transform: scale(1.02);
 }
 
-.equipment-hotspot:active {
+.equipment-hotspot:active .equipment-label {
   background: rgba(0, 255, 255, 0.3);
   transform: scale(0.98);
 }
 
-/* Названия оборудования */
-.equipment-label {
-  font-size: 24px; /* Было 12px, увеличено в 2 раза */
-  font-weight: 600;
-  color: #00ffff;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 8px 20px; /* Увеличен padding для большего текста */
-  border-radius: 6px;
-  border: 1px solid rgba(0, 255, 255, 0.6);
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+/* Позиционирование зон согласно изображению */
+/* Поскольку мы убрали огромные невидимые коробки, мы просто привязываем табличку 
+   к центральной точке (поверх оборудования) через transform: translate(-50%, -50%) */
+
+.equipment-hotspot {
+  position: absolute;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  transform: translate(-50%, -50%);
 }
 
-/* Позиционирование зон согласно изображению */
 /* Микроскоп - левая зона */
 .microscope-hotspot {
-  left: 3.5%;
-  top: 57%;
-  width: 15%;
-  height: 19%;
+  left: 11%;
+  top: 56%;
 }
 
 /* Панель управления - центральная зона */
 .control-panel-hotspot {
-  left: 32%;
-  top: 62%;
-  width: 36%;
-  height: 22%;
+  left: 50%;
+  top: 56%;
 }
 
-/* Анализатор - правая зона */
+/* Анализатор - правая зона (блок C) */
 .analyzer-hotspot {
-  right: 1.5%;
-  top: 57%;
-  width: 19%;
-  height: 19%;
+  left: 84%;
+  top: 58%;
 }
 
 /* Адаптивные размеры для мобильных устройств */
 @media (max-width: 768px) {
   .equipment-label {
-    font-size: 20px; /* Было 10px, увеличено в 2 раза */
+    font-size: 20px;
+    /* Было 10px, увеличено в 2 раза */
     padding: 6px 16px;
   }
 }
 
 @media (max-width: 480px) {
   .equipment-label {
-    font-size: 18px; /* Было 9px, увеличено в 2 раза */
+    font-size: 18px;
+    /* Было 9px, увеличено в 2 раза */
     padding: 4px 12px;
   }
 }
@@ -449,59 +452,45 @@
 /* ===== Позиции для Block B (Left) - 3 объекта ===== */
 /* Робот-манипулятор - левый верхний */
 .robot-manipulator-hotspot {
-  left: 0%;
+  left: 12%;
   top: 34%;
-  width: 19%;
-  height: 35%;
 }
 
 /* Панель управления - центр нижний */
 .control-panel-left-hotspot {
-  left: 39%;
-  top: 30%;
-  width: 14%;
-  height: 35%;
+  left: 26%;
+  top: 42%;
 }
 
 /* Анализирующий модуль - правый */
 .analyzing-module-hotspot {
-  right: 30%;
-  top: 68%;
-  width: 19%;
-  height: 17%;
+  right: 12%;
+  top: 64%;
 }
 
 /* ===== Позиции для Block C (Right) - 4 объекта ===== */
 /* Синтезатор - левый верхний */
 .synthesizer-hotspot {
-  left: 23%;
-  top: 27%;
-  width: 24%;
-  height: 29%;
+  left: 38%;
+  top: 26%;
 }
 
 /* Секвенатор - правый верхний */
 .sequencer-hotspot {
-  right: 33%;
-  top: 26%;
-  width: 14%;
-  height: 28%;
+  left: 60%;
+  top: 30%;
 }
 
 /* Термостат - центр нижний */
 .thermostat-hotspot {
-  left: 38%;
-  top: 59%;
-  width: 17%;
-  height: 18%;
+  left: 47%;
+  top: 61%;
 }
 
 /* Культиватор - правый нижний */
 .cultivator-hotspot {
-  right: 2%;
-  top: 52%;
-  width: 21%;
-  height: 30%;
+  left: 87%;
+  top: 51%;
 }
 
 /* ===== UI элементы привязанные к экрану ===== */
@@ -612,79 +601,7 @@
 }
 
 /* ===== Навигационная панель внизу (используем стили из App.css) ===== */
-.lab-nav-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 15px 20px;
-  background: linear-gradient(to top, rgba(0, 20, 60, 0.95), rgba(0, 30, 80, 0.9));
-  border-top: 2px solid rgba(0, 200, 255, 0.5);
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(15px);
-  z-index: 200;
-}
-
-.lab-nav-bar .nav-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 10px 15px;
-  border-radius: 15px;
-  flex: 1;
-  max-width: 120px;
-}
-
-.lab-nav-bar .nav-button:hover {
-  background: rgba(0, 200, 255, 0.1);
-  transform: translateY(-3px);
-}
-
-.lab-nav-bar .nav-button.active {
-  background: rgba(0, 200, 255, 0.2);
-  border: 1px solid rgba(0, 200, 255, 0.5);
-}
-
-.lab-nav-bar .nav-button-icon {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lab-nav-bar .nav-button-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0, 200, 255, 0.3));
-}
-
-.lab-nav-bar .nav-button:hover .nav-button-icon img,
-.lab-nav-bar .nav-button.active .nav-button-icon img {
-  filter: drop-shadow(0 4px 15px rgba(0, 200, 255, 0.6));
-}
-
-.lab-nav-bar .nav-button-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-}
-
-.lab-nav-bar .nav-button:hover .nav-button-label,
-.lab-nav-bar .nav-button.active .nav-button-label {
-  color: #00ffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
-}
+/* Все стили перенесены в App.css для идентичного отображения по всему приложению */
 
 /* ===== Модальное окно оборудования ===== */
 .equipment-modal-backdrop {
@@ -916,24 +833,6 @@
     right: 15px;
   }
 
-  .lab-nav-bar {
-    padding: 12px 15px;
-  }
-
-  .lab-nav-bar .nav-button {
-    padding: 8px 12px;
-    gap: 6px;
-  }
-
-  .lab-nav-bar .nav-button-icon {
-    width: 45px;
-    height: 45px;
-  }
-
-  .lab-nav-bar .nav-button-label {
-    font-size: 11px;
-  }
-
   .equipment-modal {
     padding: 20px;
   }
@@ -1009,44 +908,9 @@
     top: 10px;
     right: 10px;
   }
-
-  .lab-nav-bar {
-    padding: 10px 10px;
-  }
-
-  .lab-nav-bar .nav-button {
-    padding: 6px 8px;
-    gap: 4px;
-  }
-
-  .lab-nav-bar .nav-button-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .lab-nav-bar .nav-button-label {
-    font-size: 10px;
-  }
 }
 
-/* Активная кнопка навигации */
-.nav-button.active {
-  background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 100, 200, 0.3));
-  border: 2px solid rgba(0, 255, 255, 0.7);
-  border-radius: 15px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-  transform: translateY(-3px);
-}
-
-.nav-button.active .nav-button-icon img {
-  filter: drop-shadow(0 0 25px rgba(0, 255, 255, 1)) brightness(1.3);
-}
-
-.nav-button.active .nav-button-label {
-  color: #00ffff;
-  text-shadow: 0 0 15px rgba(0, 255, 255, 1);
-  font-weight: 700;
-}
+/* Активная кнопка навигации стилизуется глобально через App.css */
 
 /* Прогресс-бар улучшения */
 .upgrade-progress-container {
@@ -1096,60 +960,57 @@
 /* Кнопка возврата на ДНК */
 .dna-zoom-button {
   position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 66px;
+  /* Под кнопкой магазин (8px top + 50px height + 8px gap) */
+  right: 8px;
+  /* В правом верхнем углу */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 150, 255, 0.3));
-  border: 3px solid rgba(0, 255, 255, 0.8);
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  width: 50px;
+  height: auto;
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 50;
-  box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
+  padding: 0;
 }
 
 .dna-zoom-button:hover {
-  transform: translateX(-50%) scale(1.15);
-  box-shadow: 0 0 60px rgba(0, 255, 255, 0.9);
-  border-color: rgba(0, 255, 255, 1);
+  transform: translateY(-3px);
 }
 
 .dna-zoom-button:active {
-  transform: translateX(-50%) scale(1.05);
+  transform: translateY(-1px);
 }
 
-.zoom-arrow {
-  font-size: 36px;
-  color: #00ffff;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 1);
-  font-weight: bold;
-  animation: pulse-arrow 1.5s ease-in-out infinite;
+.dna-zoom-button img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.4));
+  transition: all 0.3s ease;
 }
 
-@keyframes pulse-arrow {
-  0%, 100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-5px);
-    opacity: 0.7;
-  }
+.dna-zoom-button:hover img {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.7)) brightness(1.2);
 }
 
 .zoom-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #ffffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.dna-zoom-button:hover .zoom-label {
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
 }
 
 /* Адаптивность */
@@ -1158,38 +1019,12 @@
     font-size: 20px;
     padding: 6px 16px;
   }
-  
-  .dna-zoom-button {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .zoom-arrow {
-    font-size: 28px;
-  }
-  
-  .zoom-label {
-    font-size: 10px;
-  }
 }
 
 @media (max-width: 480px) {
   .equipment-label {
     font-size: 18px;
     padding: 4px 12px;
-  }
-  
-  .dna-zoom-button {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .zoom-arrow {
-    font-size: 24px;
-  }
-  
-  .zoom-label {
-    font-size: 9px;
   }
 }
 

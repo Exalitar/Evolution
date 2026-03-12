@@ -316,12 +316,8 @@ function App() {
   const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const [draggedBreedMaterial, setDraggedBreedMaterial] = useState<Material | null>(null);
-  const [isOverCenterForBreed, setIsOverCenterForBreed] = useState(false);
   const [pendingBreedSelection, setPendingBreedSelection] = useState<Material | null>(null);
   const [isBreedConfirmOpen, setIsBreedConfirmOpen] = useState(false);
-  const [touchDragMaterial, setTouchDragMaterial] = useState<Material | null>(null);
-  const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
 
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
@@ -342,20 +338,10 @@ function App() {
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialDefinition | null>(null);
-  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
-  const [hoveredMaterial, setHoveredMaterial] = useState<MaterialDefinition | null>(null);
-  const [adaptiveMaterials, setAdaptiveMaterials] = useState<MaterialDefinition[]>(currentBreedingMaterials);
-
-  const openMaterialModal = (materialId: string) => {
-    const material = materialDefinitions.find((m) => m.id === materialId) || null;
-    setSelectedMaterial(material);
-    setIsMaterialModalOpen(!!material);
-  };
-
-  const closeMaterialModal = () => {
-    setIsMaterialModalOpen(false);
-    setSelectedMaterial(null);
+  const openUnifiedMaterialModal = (material: Material) => {
+    if (isBreeding) return;
+    setPendingBreedSelection(material);
+    setIsBreedConfirmOpen(true);
   };
 
   const openSettings = () => setIsSettingsOpen(true);
@@ -791,69 +777,6 @@ function App() {
     setDraggedInitialMaterial(null);
   }
 
-  const handleDragStartBreed = (material: Material, e: React.DragEvent) => {
-    setDraggedBreedMaterial(material);
-  };
-
-  const handleDragEndBreed = () => {
-    setDraggedBreedMaterial(null);
-    setIsOverCenterForBreed(false);
-  };
-
-  const handleDragOverCenterForBreed = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsOverCenterForBreed(true);
-  };
-
-  const handleDragLeaveCenterForBreed = () => {
-    setIsOverCenterForBreed(false);
-  };
-
-  const handleTouchStartBreed = (material: Material, e: React.TouchEvent) => {
-    if (isBreeding) return;
-    const touch = e.touches[0];
-    setTouchDragMaterial(material);
-    setTouchPosition({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMoveBreed = (e: React.TouchEvent) => {
-    if (!touchDragMaterial || isBreeding) return;
-    // e.preventDefault(); // Prevent scrolling while dragging material
-    const touch = e.touches[0];
-    setTouchPosition({ x: touch.clientX, y: touch.clientY });
-
-    const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-    const isOverCenter = elem?.closest('.central-circle') !== null;
-    setIsOverCenterForBreed(isOverCenter);
-  };
-
-  const handleTouchEndBreed = (e: React.TouchEvent) => {
-    if (!touchDragMaterial || isBreeding) return;
-
-    // Check if dropped over central circle using last known position
-    if (touchPosition) {
-      const elem = document.elementFromPoint(touchPosition.x, touchPosition.y);
-      if (elem?.closest('.central-circle')) {
-        setPendingBreedSelection(touchDragMaterial);
-        setIsBreedConfirmOpen(true);
-      }
-    }
-
-    setTouchDragMaterial(null);
-    setTouchPosition(null);
-    setIsOverCenterForBreed(false);
-  };
-
-  const handleDropOnCenterForBreed = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsOverCenterForBreed(false);
-
-    if (draggedBreedMaterial && !isBreeding) {
-      setPendingBreedSelection(draggedBreedMaterial);
-      setIsBreedConfirmOpen(true);
-    }
-  };
-
   const handleConfirmBreeding = () => {
     if (!pendingBreedSelection || isBreeding) return;
 
@@ -1170,15 +1093,7 @@ function App() {
 
           {/* Центральный круг — всегда есть персонаж */}
           <div
-            className={`central-circle ${isBreeding
-              ? ""
-              : isOverCenterForBreed
-                ? "drag-over-breed"
-                : "has-character"
-              }`}
-            onDragOver={isBreeding ? undefined : handleDragOverCenterForBreed}
-            onDragLeave={isBreeding ? undefined : handleDragLeaveCenterForBreed}
-            onDrop={isBreeding ? undefined : handleDropOnCenterForBreed}
+            className={`central-circle ${isBreeding ? "" : "has-character"}`}
             onClick={handleCentralCircleClick}
           >
             <img
@@ -1210,27 +1125,10 @@ function App() {
                 return (
                   <div
                     key={material.id}
-                    className={`small-circle breeding-material ${isUsed || isBreeding ? "is-used" : ""
-                      }`}
-                    style={{ touchAction: 'none' }} // Ensure browser doesn't try to scroll/pan
-                    draggable={!isUsed && !isBreeding}
-                    onDragStart={(e) => {
-                      if (isUsed || isBreeding) return;
-                      handleDragStartBreed(material, e);
-                    }}
-                    onDragEnd={handleDragEndBreed}
-                    onTouchStart={(e) => {
-                      if (isUsed || isBreeding) return;
-                      handleTouchStartBreed(material, e);
-                    }}
-                    onTouchMove={handleTouchMoveBreed}
-                    onTouchEnd={handleTouchEndBreed}
+                    className={`small-circle breeding-material ${isUsed || isBreeding ? "is-used" : ""}`}
                     onClick={() => {
-                      setHoveredMaterial(prev =>
-                        prev && prev.id === material.id
-                          ? null
-                          : materialDefinitions.find(m => m.id === material.id) || null
-                      );
+                      if (isUsed || isBreeding) return;
+                      openUnifiedMaterialModal(material);
                     }}
                   >
                     <img
@@ -1254,76 +1152,6 @@ function App() {
               <span className="reroll-counter">{rerollsLeft}</span>
             </button>
           </div>
-
-          {hoveredMaterial && (
-            <div className="material-tooltip">
-              <div className="material-tooltip-title">{hoveredMaterial.name}</div>
-              {(() => {
-                const bonus =
-                  currentBreedingMaterials.find(m => m.id === hoveredMaterial.id)?.bonus;
-                if (!bonus) return null;
-
-                const lines: React.ReactNode[] = [];
-
-                if (bonus.strikePower) {
-                  lines.push(<div key="sp">Сила удара: +{bonus.strikePower}</div>);
-                }
-
-                if (bonus.bioResource) {
-                  lines.push(<div key="br">Биоресурс: +{bonus.bioResource}</div>);
-                }
-
-                if (bonus.defenseMatrix) {
-                  const sum =
-                    (bonus.defenseMatrix.kinetic ?? 0) +
-                    (bonus.defenseMatrix.energy ?? 0) +
-                    (bonus.defenseMatrix.bio ?? 0) +
-                    (bonus.defenseMatrix.toxic ?? 0) +
-                    (bonus.defenseMatrix.psionic ?? 0) +
-                    (bonus.defenseMatrix.tech ?? 0);
-                  lines.push(<div key="def">Защита суммарно: +{sum}</div>);
-                }
-
-                if (bonus.critPotential) {
-                  lines.push(
-                    <div key="crit">
-                      Крит: шанс +{bonus.critPotential.critChance ?? 0}%, множитель +
-                      {(bonus.critPotential.critMultiplier ?? 0).toFixed(2)}
-                    </div>
-                  );
-                }
-
-                if (bonus.predatoryResonance) {
-                  lines.push(
-                    <div key="lifesteal">
-                      Вампиризм: +{bonus.predatoryResonance.lifestealPercent ?? 0}%,
-                      шанс {bonus.predatoryResonance.lifestealChance ?? 0}%
-                    </div>
-                  );
-                }
-
-                if (bonus.toxicity) {
-                  lines.push(
-                    <div key="dot">
-                      Токсичность: урон {bonus.toxicity.dotDamage ?? 0},
-                      шанс {bonus.toxicity.dotChance ?? 0}%
-                    </div>
-                  );
-                }
-
-                if (bonus.neuroShock) {
-                  lines.push(
-                    <div key="stun">
-                      Нейрошок: шанс {bonus.neuroShock.stunChance ?? 0}%,
-                      длительность {(bonus.neuroShock.stunDuration ?? 0).toFixed(1)} c
-                    </div>
-                  );
-                }
-
-                return lines.length ? lines : <div>Нет бонусов</div>;
-              })()}
-            </div>
-          )}
 
           {/* нижняя навигация всегда доступна */}
           <BottomNavigation
@@ -1808,31 +1636,6 @@ function App() {
               Реферальная ссылка
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Placed ghost element for drag/touch outside main screen */}
-      {touchDragMaterial && touchPosition && (
-        <div
-          style={{
-            position: 'fixed',
-            left: touchPosition.x - 30, // center the 60x60 circle
-            top: touchPosition.y - 30,
-            width: '60px',
-            height: '60px',
-            pointerEvents: 'none',
-            zIndex: 9999,
-            opacity: 0.8,
-            borderRadius: '50%',
-            overflow: 'hidden',
-            boxShadow: '0 0 15px rgba(0, 255, 255, 0.8)'
-          }}
-        >
-          <img
-            src={touchDragMaterial.image}
-            alt="Dragging"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
         </div>
       )}
 

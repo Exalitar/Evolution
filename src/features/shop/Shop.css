@@ -8,9 +8,11 @@
   position: fixed;
   inset: 0;
   display: flex;
-  justify-content: center;  /* центрируем содержимое */
+  justify-content: center;
+  /* центрируем содержимое */
   z-index: 1000;
-  background: rgba(0, 0, 0, 1); /* чёрные полосы по бокам */
+  background: rgba(0, 0, 0, 1);
+  /* чёрные полосы по бокам */
 }
 
 .shop-screen-inner {
@@ -109,7 +111,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  align-items: center;         /* центр по горизонтали */
+  align-items: center;
+  /* центр по горизонтали */
 }
 
 .shop-section-title {
@@ -117,38 +120,53 @@
   font-size: 16px;
   color: #00ffff;
   text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-  text-align: center;          /* центрируем текст */
+  text-align: center;
+  /* центрируем текст */
 }
 
 .shop-section-divider {
   width: 100%;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 255, 255, 0.2),
-    rgba(0, 255, 255, 0.8),
-    rgba(0, 255, 255, 0.2)
-  );
+  background: linear-gradient(90deg,
+      rgba(0, 255, 255, 0.2),
+      rgba(0, 255, 255, 0.8),
+      rgba(0, 255, 255, 0.2));
 }
 
 
-/* Сетка товаров в секции (3 колонки) */
+/* Сетка товаров — равные колонки на всю ширину */
 .shop-items-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
+/* 2 колонки: экран < 396px */
+@media (max-width: 395px) {
+  .shop-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
-/* Карточка товара — фиксированный размер, чуть больше снизу */
+/* 1 колонка: экран < 268px */
+@media (max-width: 267px) {
+  .shop-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* Карточка товара — ширина от колонки, высота строго 190px */
 .shop-item-card {
   position: relative;
-  background: linear-gradient(
-    135deg,
-    rgba(20, 30, 60, 0.9),
-    rgba(40, 50, 80, 0.95)
-  );
+  width: 100%;
+  height: 190px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg,
+      rgba(20, 30, 60, 0.9),
+      rgba(40, 50, 80, 0.95));
   border: 1px solid rgba(0, 200, 255, 0.6);
   border-radius: 10px;
   padding: 6px;
@@ -157,8 +175,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 180px; /* чуть увеличено снизу */
-  max-height: 180px;
   box-sizing: border-box;
 }
 
@@ -179,8 +195,10 @@
 /* На товарах запрещаем long‑press‑меню и выделение текста */
 .shop-item-card,
 .shop-item-card * {
-  -webkit-touch-callout: none; /* контекстное меню iOS */
-  user-select: none;           /* запрет выделения текста */
+  -webkit-touch-callout: none;
+  /* контекстное меню iOS */
+  user-select: none;
+  /* запрет выделения текста */
 }
 
 
@@ -214,7 +232,8 @@
 
 .shop-item-name {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 13px; /* увеличено на 3px */
+  font-size: 13px;
+  /* увеличено на 3px */
   font-weight: 500;
   text-align: center;
 }
@@ -257,8 +276,10 @@
 
 .shop-modal {
   position: relative;
-  width: 70%;           /* было 88% */
-  max-width: 300px;     /* было 400px */
+  width: 70%;
+  /* было 88% */
+  max-width: 300px;
+  /* было 400px */
   background: linear-gradient(135deg, #0b1028 0%, #1a1f3e 100%);
   border: 3px solid rgba(0, 255, 255, 0.6);
   border-radius: 18px;
@@ -268,6 +289,22 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.shop-content-vertical {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 10px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.shop-content-vertical::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari */
 }
 
 .shop-modal-close {
@@ -300,7 +337,8 @@
 .shop-modal-image {
   position: relative;
   width: 100%;
-  max-height: 280px;         /* ограничим высоту */
+  max-height: 280px;
+  /* ограничим высоту */
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
@@ -326,7 +364,8 @@
 
 .shop-modal-title {
   color: #00ffff;
-  font-size: 18px;           /* было 22px */
+  font-size: 18px;
+  /* было 22px */
   font-weight: 600;
   text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
   margin: 0;
@@ -335,7 +374,8 @@
 
 .shop-modal-description {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;           /* было 14px */
+  font-size: 13px;
+  /* было 14px */
   line-height: 1.5;
   margin: 0;
   text-align: center;
@@ -353,7 +393,8 @@
 
 .shop-modal-current-price {
   color: #00ff88;
-  font-size: 22px;           /* было 26px */
+  font-size: 22px;
+  /* было 26px */
   font-weight: 700;
   text-shadow: 0 0 12px rgba(0, 255, 136, 0.6);
 }
@@ -364,11 +405,9 @@
   padding: 14px 30px;
   border-radius: 12px;
   border: 2px solid rgba(0, 255, 100, 0.6);
-  background: linear-gradient(
-    135deg,
-    rgba(0, 200, 100, 0.6),
-    rgba(0, 150, 80, 0.6)
-  );
+  background: linear-gradient(135deg,
+      rgba(0, 200, 100, 0.6),
+      rgba(0, 150, 80, 0.6));
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -377,11 +416,9 @@
 }
 
 .shop-modal-buy-button:hover:not(:disabled) {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 220, 110, 0.8),
-    rgba(0, 170, 90, 0.8)
-  );
+  background: linear-gradient(135deg,
+      rgba(0, 220, 110, 0.8),
+      rgba(0, 170, 90, 0.8));
   box-shadow: 0 0 25px rgba(0, 255, 100, 0.5);
   transform: translateY(-2px);
 }

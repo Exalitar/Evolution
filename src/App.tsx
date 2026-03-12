@@ -4,6 +4,8 @@ import "./styles/App.css";
 import { Laboratory } from './features/laboratory/Laboratory';
 import { Shop } from './features/shop/Shop';
 import { BottomNavigation } from './components/BottomNavigation/BottomNavigation';
+import { Museum } from './features/museum/Museum';
+import type { Specimen } from './features/museum/Museum';
 
 
 import {
@@ -52,7 +54,9 @@ type Screen =
   | "id_person"
   | "avatar"
   | "language"
-  | "referal";
+  | "referal"
+  | "museum"
+  | "arena";
 
 interface StartMaterial {
   id: CharacterId;
@@ -313,15 +317,11 @@ function App() {
   const [draggedInitialMaterial, setDraggedInitialMaterial] = useState<Material | null>(null);
   const [isOverCenterInitial, setIsOverCenterInitial] = useState(false);
 
-  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-
   const [pendingBreedSelection, setPendingBreedSelection] = useState<Material | null>(null);
   const [isBreedConfirmOpen, setIsBreedConfirmOpen] = useState(false);
 
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set());
   const [totalUsedCount, setTotalUsedCount] = useState(0);
-  const [showInfoScreen, setShowInfoScreen] = useState(false);
 
   const [isBreeding, setIsBreeding] = useState(false);
   const [breedingProgress, setBreedingProgress] = useState(0);
@@ -337,6 +337,16 @@ function App() {
   );
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // === Экспонаты (замороженные персонажи) ===
+  const [specimens, setSpecimens] = useState<Specimen[]>(() => {
+    try {
+      const saved = localStorage.getItem('specimens');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const openUnifiedMaterialModal = (material: Material) => {
     if (isBreeding) return;
@@ -635,10 +645,42 @@ function App() {
     return () => clearTimeout(timeout);
   }, [playerLevel, playerEP, evolutionStage, currentStats, equipment, currentBreedingMaterials, usedMaterials, totalUsedCount, isDataLoaded, finalBioImage, lastGeneratedLevel]); // Добавлены зависимости
 
-  // Аватарку всё еще можно хранить локально, так как это сугубо UI фича (или тоже можно унести на бэкенд потом)
+  // Аватарку всё еще можно хранить локально, так как это сугубо UI фича
   useEffect(() => {
     localStorage.setItem('playerAvatar', playerAvatar);
   }, [playerAvatar]);
+
+  // Сохраняем экспонаты в localStorage при каждом изменении
+  useEffect(() => {
+    localStorage.setItem('specimens', JSON.stringify(specimens));
+  }, [specimens]);
+
+  // === Заморозка персонажа ===
+  const handleFreeze = (name: string) => {
+    const newSpecimen: Specimen = {
+      id: `specimen_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      name,
+      level: playerLevel,
+      image: finalBioImage,
+      stats: currentStats,
+      frozenAt: Date.now(),
+    };
+
+    setSpecimens(prev => [newSpecimen, ...prev]);
+
+    // Сброс прогресса (ЭП сохраняется)
+    setPlayerLevel(0);
+    setCurrentStats(baseCharacterStats["unknown_dna"]);
+    setFinalBioImage(null);
+    setEvolutionStage(1);
+    setAwakeningStage(1);
+    setTotalUsedCount(0);
+    setUsedMaterials(new Set());
+    setLastGeneratedLevel(0);
+    setCurrentBreedingMaterials(
+      buildAdaptiveMaterials(breedingMaterialsStage1, baseCharacterStats["unknown_dna"])
+    );
+  };
 
   const handleStart = () => setScreen("main");
 
@@ -1212,336 +1254,337 @@ function App() {
 
       {screen === "info" && (
         <div className="info-screen">
-          <div className="info-header">
-            <h2>Характеристики персонажа</h2>
-            <button className="close-button" onClick={closeSecondaryScreen}>
-              ✕
-            </button>
-          </div>
+          <div className="info-screen-inner">
+            <div className="info-header">
+              <h2>Характеристики персонажа</h2>
+              <button className="close-button" onClick={closeSecondaryScreen}>
+                ✕
+              </button>
+            </div>
 
-          <div className="info-content">
-            <div className="info-character-preview">
-              <img
-                src={getCharacterImage()}
-                alt="Неопознанный ДНК"
-                className="info-character-image"
-                draggable={false}
-              />
-              <div className="character-description">
-                Неопознанный ДНК — базовое нестабильное существо с минимальными
-                характеристиками. Его потенциал раскрывается через синтез материалов.
+            <div className="info-content">
+              <div className="info-character-preview">
+                <img
+                  src={getCharacterImage()}
+                  alt="Неопознанный ДНК"
+                  className="info-character-image"
+                  draggable={false}
+                />
+                <div className="character-description">
+                  Неопознанный ДНК — базовое нестабильное существо с минимальными
+                  характеристиками. Его потенциал раскрывается через синтез материалов.
+                </div>
               </div>
-            </div>
 
-            <div className="info-stats-list">
-              {currentStats && (
-                <>
-                  {/* 1. Сила удара */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">⚔️</span>
-                      <span className="stat-name">Сила удара</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar attack"
-                        style={{
-                          width: `${Math.min(
-                            (currentStats.strikePower / 300) * 100,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Базовый урон и частота атак.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>Урон: {currentStats.strikePower}</div>
-                      <div>
-                        Скорость атаки: {currentStats.attackTempo.toFixed(2)}
+              <div className="info-stats-list">
+                {currentStats && (
+                  <>
+                    {/* 1. Сила удара */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">⚔️</span>
+                        <span className="stat-name">Сила удара</span>
+                      </div>
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar attack"
+                          style={{
+                            width: `${Math.min(
+                              (currentStats.strikePower / 300) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="stat-description">
+                        Базовый урон и частота атак.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>Урон: {currentStats.strikePower.toFixed(1)}</div>
+                        <div>
+                          Скорость атаки: {currentStats.attackTempo.toFixed(1)}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 2. Биоресурс */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">💚</span>
-                      <span className="stat-name">Биоресурс</span>
+                    {/* 2. Биоресурс */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">💚</span>
+                        <span className="stat-name">Биоресурс</span>
+                      </div>
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar health"
+                          style={{
+                            width: `${Math.min(
+                              (currentStats.bioResource / 400) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="stat-description">
+                        Запас жизни и устойчивость к фокусу.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>ХП: {currentStats.bioResource.toFixed(1)}</div>
+                      </div>
                     </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar health"
-                        style={{
-                          width: `${Math.min(
-                            (currentStats.bioResource / 400) * 100,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Запас жизни и устойчивость к фокусу.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>ХП: {currentStats.bioResource}</div>
-                    </div>
-                  </div>
 
-                  {/* 3. Матрица защиты */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">🛡️</span>
-                      <span className="stat-name">Матрица защиты</span>
+                    {/* 3. Матрица защиты */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">🛡️</span>
+                        <span className="stat-name">Матрица защиты</span>
+                      </div>
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar defense"
+                          style={{
+                            width: `${Math.min(
+                              ((currentStats.defenseMatrix.kinetic +
+                                currentStats.defenseMatrix.energy +
+                                currentStats.defenseMatrix.bio +
+                                currentStats.defenseMatrix.toxic +
+                                currentStats.defenseMatrix.psionic +
+                                currentStats.defenseMatrix.tech) /
+                                600) *
+                              100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="stat-description">
+                        Уменьшение входящего урона по разным типам.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>
+                          Защита:{" "}
+                          {(
+                            currentStats.defenseMatrix.kinetic +
+                            currentStats.defenseMatrix.energy +
+                            currentStats.defenseMatrix.bio +
+                            currentStats.defenseMatrix.toxic +
+                            currentStats.defenseMatrix.psionic +
+                            currentStats.defenseMatrix.tech
+                          ).toFixed(1)}
+                        </div>
+                        <div>
+                          Кинетическая: {currentStats.defenseMatrix.kinetic.toFixed(1)}
+                        </div>
+                        <div>
+                          Энергетическая: {currentStats.defenseMatrix.energy.toFixed(1)}
+                        </div>
+                        <div>
+                          Биологическая: {currentStats.defenseMatrix.bio.toFixed(1)}
+                        </div>
+                        <div>
+                          Токсическая: {currentStats.defenseMatrix.toxic.toFixed(1)}
+                        </div>
+                        <div>
+                          Псионическая: {currentStats.defenseMatrix.psionic.toFixed(1)}
+                        </div>
+                        <div>
+                          Технологическая: {currentStats.defenseMatrix.tech.toFixed(1)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar defense"
-                        style={{
-                          width: `${Math.min(
-                            ((currentStats.defenseMatrix.kinetic +
-                              currentStats.defenseMatrix.energy +
-                              currentStats.defenseMatrix.bio +
-                              currentStats.defenseMatrix.toxic +
-                              currentStats.defenseMatrix.psionic +
-                              currentStats.defenseMatrix.tech) /
-                              600) *
-                            100,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Уменьшение входящего урона по разным типам.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>
-                        Защита:{" "}
-                        {currentStats.defenseMatrix.kinetic +
-                          currentStats.defenseMatrix.energy +
-                          currentStats.defenseMatrix.bio +
-                          currentStats.defenseMatrix.toxic +
-                          currentStats.defenseMatrix.psionic +
-                          currentStats.defenseMatrix.tech}
-                      </div>
-                      <div>
-                        Кинетическая: {currentStats.defenseMatrix.kinetic}
-                      </div>
-                      <div>
-                        Энергетическая: {currentStats.defenseMatrix.energy}
-                      </div>
-                      <div>
-                        Биологическая: {currentStats.defenseMatrix.bio}
-                      </div>
-                      <div>
-                        Токсическая: {currentStats.defenseMatrix.toxic}
-                      </div>
-                      <div>
-                        Псионическая: {currentStats.defenseMatrix.psionic}
-                      </div>
-                      <div>
-                        Технологическая: {currentStats.defenseMatrix.tech}
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* 4. Реактивная защита */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">🌀</span>
-                      <span className="stat-name">Реактивная защита</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar defense"
-                        style={{
-                          width: `${Math.min(
-                            (currentStats.reactiveDefense.parryChance +
-                              currentStats.reactiveDefense.mitigationChance) /
-                            2,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Шанс среагировать на входящий урон.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>
-                        Шанс уклонения:{" "}
-                        {currentStats.reactiveDefense.parryChance.toFixed(2)}%
+                    {/* 4. Реактивная защита */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">🌀</span>
+                        <span className="stat-name">Реактивная защита</span>
                       </div>
-                      <div>
-                        Шанс блокировки:{" "}
-                        {currentStats.reactiveDefense.mitigationChance.toFixed(2)}%
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar defense"
+                          style={{
+                            width: `${Math.min(
+                              (currentStats.reactiveDefense.parryChance +
+                                currentStats.reactiveDefense.mitigationChance) /
+                              2,
+                              100
+                            )}%`,
+                          }}
+                        />
                       </div>
-                      <div>
-                        Поглощение:{" "}
-                        {currentStats.reactiveDefense.mitigationValue.toFixed(2)}%
+                      <div className="stat-description">
+                        Шанс среагировать на входящий урон.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>
+                          Шанс уклонения:{" "}
+                          {currentStats.reactiveDefense.parryChance.toFixed(1)}%
+                        </div>
+                        <div>
+                          Шанс блокировки:{" "}
+                          {currentStats.reactiveDefense.mitigationChance.toFixed(1)}%
+                        </div>
+                        <div>
+                          Поглощение:{" "}
+                          {currentStats.reactiveDefense.mitigationValue.toFixed(1)}%
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 5. Критический потенциал */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">💥</span>
-                      <span className="stat-name">Критический потенциал</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar attack"
-                        style={{
-                          width: `${Math.min(
-                            currentStats.critPotential.critChance,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Отвечает за взрывной урон.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>
-                        Шанс крита:{" "}
-                        {currentStats.critPotential.critChance.toFixed(2)}%
+                    {/* 5. Критический потенциал */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">💥</span>
+                        <span className="stat-name">Критический потенциал</span>
                       </div>
-                      <div>
-                        Увеличение крита: ×
-                        {currentStats.critPotential.critMultiplier.toFixed(2)}
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar attack"
+                          style={{
+                            width: `${Math.min(
+                              currentStats.critPotential.critChance,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="stat-description">
+                        Отвечает за взрывной урон.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>
+                          Шанс крита:{" "}
+                          {currentStats.critPotential.critChance.toFixed(1)}%
+                        </div>
+                        <div>
+                          Увеличение крита: ×
+                          {currentStats.critPotential.critMultiplier.toFixed(1)}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 6. Хищный резонанс */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">🩸</span>
-                      <span className="stat-name">Хищный резонанс</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar health"
-                        style={{
-                          width: `${Math.min(
-                            (currentStats.predatoryResonance.lifestealPercent *
-                              currentStats.predatoryResonance.lifestealChance) /
-                            50,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Откачивает жизнь у цели.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>
-                        Кража здоровья:{" "}
-                        {currentStats.predatoryResonance.lifestealPercent.toFixed(
-                          2
-                        )}
-                        %
+                    {/* 6. Хищный резонанс */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">🩸</span>
+                        <span className="stat-name">Хищный резонанс</span>
                       </div>
-                      <div>
-                        Шанс успеха:{" "}
-                        {currentStats.predatoryResonance.lifestealChance.toFixed(2)}%
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar health"
+                          style={{
+                            width: `${Math.min(
+                              (currentStats.predatoryResonance.lifestealPercent *
+                                currentStats.predatoryResonance.lifestealChance) /
+                              50,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="stat-description">
+                        Откачивает жизнь у цели.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>
+                          Кража здоровья:{" "}
+                          {currentStats.predatoryResonance.lifestealPercent.toFixed(1)}%
+                        </div>
+                        <div>
+                          Шанс успеха:{" "}
+                          {currentStats.predatoryResonance.lifestealChance.toFixed(1)}%
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 7. Токсичность */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">☣️</span>
-                      <span className="stat-name">Токсичность</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar attack"
-                        style={{
-                          width: `${Math.min(
-                            (currentStats.toxicity.dotDamage *
-                              currentStats.toxicity.dotChance) /
-                            60,
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Наносит урон ядом.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>
-                        Шанс успеха:{" "}
-                        {currentStats.toxicity.dotChance.toFixed(2)}%
+                    {/* 7. Токсичность */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">☣️</span>
+                        <span className="stat-name">Токсичность</span>
                       </div>
-                      <div>
-                        Урон в секунду:{" "}
-                        {currentStats.toxicity.dotDamage.toFixed(2)}
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar attack"
+                          style={{
+                            width: `${Math.min(
+                              (currentStats.toxicity.dotDamage *
+                                currentStats.toxicity.dotChance) /
+                              60,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="stat-description">
+                        Наносит урон ядом.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>
+                          Шанс успеха:{" "}
+                          {currentStats.toxicity.dotChance.toFixed(1)}%
+                        </div>
+                        <div>
+                          Урон в секунду:{" "}
+                          {currentStats.toxicity.dotDamage.toFixed(1)}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 8. Нейрошок */}
-                  <div className="stat-item">
-                    <div className="stat-header">
-                      <span className="stat-icon">🧠</span>
-                      <span className="stat-name">Нейрошок</span>
-                    </div>
-                    <div className="stat-bar-container">
-                      <div
-                        className="stat-bar control"
-                        style={{
-                          width: `${Math.min(
-                            (currentStats.neuroShock.stunChance *
-                              currentStats.neuroShock.stunDuration) /
-                            (currentStats.neuroShock.stunCooldown || 1),
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="stat-description">
-                      Контролирует действия противника.
-                    </div>
-                    <div className="stat-subgrid">
-                      <div>
-                        Шанс успеха:{" "}
-                        {currentStats.neuroShock.stunChance.toFixed(2)}%
+                    {/* 8. Нейрошок */}
+                    <div className="stat-item">
+                      <div className="stat-header">
+                        <span className="stat-icon">🧠</span>
+                        <span className="stat-name">Нейрошок</span>
                       </div>
-                      <div>
-                        Длительность:{" "}
-                        {currentStats.neuroShock.stunDuration.toFixed(2)} c
+                      <div className="stat-bar-container">
+                        <div
+                          className="stat-bar control"
+                          style={{
+                            width: `${Math.min(
+                              (currentStats.neuroShock.stunChance *
+                                currentStats.neuroShock.stunDuration) /
+                              (currentStats.neuroShock.stunCooldown || 1),
+                              100
+                            )}%`,
+                          }}
+                        />
                       </div>
-                      <div>
-                        Кулдаун:{" "}
-                        {currentStats.neuroShock.stunCooldown.toFixed(2)} c
+                      <div className="stat-description">
+                        Контролирует действия противника.
+                      </div>
+                      <div className="stat-subgrid">
+                        <div>
+                          Шанс успеха:{" "}
+                          {currentStats.neuroShock.stunChance.toFixed(1)}%
+                        </div>
+                        <div>
+                          Длительность:{" "}
+                          {currentStats.neuroShock.stunDuration.toFixed(1)} c
+                        </div>
+                        <div>
+                          Кулдаун:{" "}
+                          {currentStats.neuroShock.stunCooldown.toFixed(1)} c
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </div>
+                  </>
+                )}
+              </div>
 
-            <div className="info-description">
-              <h3>Особенности</h3>
-              <p>
-                Неопознанный ДНК начинает как слабое существо, но с каждым синтезом
-                материалов его характеристики могут развиваться в разные стороны:
-                от мощного танка до быстрого хищника.
-              </p>
-            </div>
+              <div className="info-description">
+                <h3>Особенности</h3>
+                <p>
+                  Неопознанный ДНК начинает как слабое существо, но с каждым синтезом
+                  материалов его характеристики могут развиваться в разные стороны:
+                  от мощного танка до быстрого хищника.
+                </p>
+              </div>
 
-            <div className="info-stage-display">
-              <div className="stage-badge">
-                <span className="stage-label">Стадия эволюции</span>
-                <span className="stage-number">{evolutionStage}/5</span>
+              <div className="info-stage-display">
+                <div className="stage-badge">
+                  <span className="stage-label">Стадия эволюции</span>
+                  <span className="stage-number">{evolutionStage}/5</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1607,6 +1650,34 @@ function App() {
 
       {screen === "referal" && (
         <div>Экран с реферальной ссылкой</div>
+      )}
+
+      {screen === "museum" && (
+        <Museum
+          playerName={playerName}
+          playerLevel={playerLevel}
+          playerEP={playerEP}
+          playerAvatar={playerAvatar}
+          specimens={specimens}
+          currentImage={getCharacterImage()}
+          onFreeze={handleFreeze}
+          onNavigate={(newScreen) => navigateTo(newScreen as Screen)}
+          openSettings={openSettings}
+          onAvatarClick={() => setIsAvatarModalOpen(true)}
+        />
+      )}
+
+      {screen === "arena" && (
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', gap: 16
+        }}>
+          <BottomNavigation currentScreen="arena" onNavigate={(s) => navigateTo(s as Screen)} openSettings={openSettings} />
+          <span style={{ color: '#00e5ff', fontSize: 22, fontWeight: 700 }}>⚔️ Арена</span>
+          <span style={{ color: 'rgba(180,200,255,0.5)', fontSize: 15 }}>Скоро...</span>
+        </div>
       )}
 
       {isSettingsOpen && (

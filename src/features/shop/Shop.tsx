@@ -165,135 +165,116 @@ export const Shop: React.FC<ShopProps> = ({
 
   return (
     <div className="shop-screen">
-      <div className="shop-header">
-        <h2>Игровой магазин</h2>
+      <div className="shop-screen-inner">
+        <div className="shop-header">
+          <h2>Игровой магазин</h2>
 
-        <div className="shop-currency">
-          <span className="currency-icon">💎</span>
-          <span className="currency-amount">{playerCurrency}</span>
+          <div className="shop-currency">
+            <span className="currency-icon">💎</span>
+            <span className="currency-amount">{playerCurrency}</span>
+          </div>
+
+          <button className="shop-close-button" onClick={onClose}>
+            ✕
+          </button>
         </div>
 
-        <button className="shop-close-button" onClick={onClose}>
-          ✕
-        </button>
-      </div>
+        <div className="shop-content-vertical">
+          {sections.map((category) => {
+            const items = shopItems.filter(
+              (item) => item.category === category
+            );
 
-      <div className="shop-content-vertical">
-        {sections.map((category) => {
-          const items = shopItems.filter(
-            (item) => item.category === category
-          );
+            if (items.length === 0) return null;
 
-          if (items.length === 0) return null;
+            return (
+              <section key={category} className="shop-section">
+                <div className="shop-section-header">
+                  <h3 className="shop-section-title">
+                    {categoryTitles[category]}
+                  </h3>
+                  <div className="shop-section-divider" />
+                </div>
 
-          return (
-            <section
-              key={category}
-              className="shop-section"
-            >
-              <div className="shop-section-header">
-                <h3 className="shop-section-title">
-                  {categoryTitles[category]}
-                </h3>
-                <div className="shop-section-divider" />
-              </div>
-
-              <div className="shop-items-grid">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="shop-item-card"
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    <div className="shop-item-image">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        draggable={false}
-                      />
-                    </div>
-
-                    <div className="shop-item-info">
-                      <div className="shop-item-name">
-                        {item.name}
+                <div className="shop-items-grid">
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="shop-item-card"
+                      onClick={() => setSelectedItem(item)}
+                    >
+                      <div className="shop-item-image">
+                        <img src={item.image} alt={item.name} draggable={false} />
                       </div>
-                      <div className="shop-item-price">
-                        <span className="shop-item-current-price">
-                          {item.price} 💎
-                        </span>
+
+                      <div className="shop-item-info">
+                        <div className="shop-item-name">{item.name}</div>
+                        <div className="shop-item-price">
+                          <span className="shop-item-current-price">
+                            {item.price} 💎
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          );
-        })}
-      </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
 
-      {/* Модальное окно товара */}
-      {selectedItem && (
-        <div
-          className="shop-modal-backdrop"
-          onClick={() => setSelectedItem(null)}
-        >
+        {/* Модальное окно товара */}
+        {selectedItem && (
           <div
-            className="shop-modal"
-            onClick={(e) => e.stopPropagation()}
+            className="shop-modal-backdrop"
+            onClick={() => setSelectedItem(null)}
           >
-            <button
-              className="shop-modal-close"
-              onClick={() => setSelectedItem(null)}
-            >
-              ✕
-            </button>
-
-            <div className="shop-modal-image">
-              <img
-                src={selectedItem.image}
-                alt={selectedItem.name}
-                draggable={false}
-              />
-            </div>
-
-            <div className="shop-modal-content">
-              <h3 className="shop-modal-title">
-                {selectedItem.name}
-              </h3>
-
-              <p className="shop-modal-description">
-                {selectedItem.description}
-              </p>
-
-              <div className="shop-modal-price">
-                <span className="shop-modal-current-price">
-                  {selectedItem.price} 💎
-                </span>
-              </div>
-
+            <div className="shop-modal" onClick={(e) => e.stopPropagation()}>
               <button
-                className={
-                  'shop-modal-buy-button ' + purchaseStatus
-                }
-                onClick={handlePurchaseClick}
-                disabled={purchaseStatus !== 'idle'}
+                className="shop-modal-close"
+                onClick={() => setSelectedItem(null)}
               >
-                {purchaseStatus === 'idle' && 'Купить'}
-                {purchaseStatus === 'success' && '✓ Куплено!'}
-                {purchaseStatus === 'error' && 'Недостаточно средств'}
+                ✕
               </button>
 
-              {playerCurrency < selectedItem.price &&
-                purchaseStatus === 'idle' && (
-                  <div className="shop-modal-warning">
-                    Не хватает:{' '}
-                    {selectedItem.price - playerCurrency} 💎
-                  </div>
-                )}
+              <div className="shop-modal-image">
+                <img src={selectedItem.image} alt={selectedItem.name} draggable={false} />
+              </div>
+
+              <div className="shop-modal-content">
+                <h3 className="shop-modal-title">{selectedItem.name}</h3>
+
+                <p className="shop-modal-description">
+                  {selectedItem.description}
+                </p>
+
+                <div className="shop-modal-price">
+                  <span className="shop-modal-current-price">
+                    {selectedItem.price} 💎
+                  </span>
+                </div>
+
+                <button
+                  className={'shop-modal-buy-button ' + purchaseStatus}
+                  onClick={handlePurchaseClick}
+                  disabled={purchaseStatus !== 'idle'}
+                >
+                  {purchaseStatus === 'idle' && 'Купить'}
+                  {purchaseStatus === 'success' && '✓ Куплено!'}
+                  {purchaseStatus === 'error' && 'Недостаточно средств'}
+                </button>
+
+                {playerCurrency < selectedItem.price &&
+                  purchaseStatus === 'idle' && (
+                    <div className="shop-modal-warning">
+                      Не хватает: {selectedItem.price - playerCurrency} 💎
+                    </div>
+                  )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>  {/* конец shop-screen-inner */}
     </div>
   );
 };

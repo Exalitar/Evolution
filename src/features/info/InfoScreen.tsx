@@ -64,8 +64,8 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Базовый урон и частота атак.</div>
                                 <div className="stat-subgrid">
-                                    <div>Урон: {currentStats.strikePower}</div>
-                                    <div>Скорость атаки: {currentStats.attackTempo.toFixed(2)}</div>
+                                    <div>Урон: {currentStats.strikePower.toFixed(1)}</div>
+                                    <div>Скорость атаки: {currentStats.attackTempo.toFixed(1)}</div>
                                 </div>
                             </div>
 
@@ -85,7 +85,7 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Запас жизни и устойчивость к фокусу.</div>
                                 <div className="stat-subgrid">
-                                    <div>ХП: {currentStats.bioResource}</div>
+                                    <div>ХП: {currentStats.bioResource.toFixed(1)}</div>
                                 </div>
                             </div>
 
@@ -116,20 +116,21 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 <div className="stat-description">Уменьшение входящего урона по разным типам.</div>
                                 <div className="stat-subgrid">
                                     <div>
-                                        Защита:{" "}
-                                        {currentStats.defenseMatrix.kinetic +
+                                        Защита: {(
+                                            currentStats.defenseMatrix.kinetic +
                                             currentStats.defenseMatrix.energy +
                                             currentStats.defenseMatrix.bio +
                                             currentStats.defenseMatrix.toxic +
                                             currentStats.defenseMatrix.psionic +
-                                            currentStats.defenseMatrix.tech}
+                                            currentStats.defenseMatrix.tech
+                                        ).toFixed(1)}
                                     </div>
-                                    <div>Кинетическая: {currentStats.defenseMatrix.kinetic}</div>
-                                    <div>Энергетическая: {currentStats.defenseMatrix.energy}</div>
-                                    <div>Биологическая: {currentStats.defenseMatrix.bio}</div>
-                                    <div>Токсическая: {currentStats.defenseMatrix.toxic}</div>
-                                    <div>Псионическая: {currentStats.defenseMatrix.psionic}</div>
-                                    <div>Технологическая: {currentStats.defenseMatrix.tech}</div>
+                                    <div>Кинетическая: {currentStats.defenseMatrix.kinetic.toFixed(1)}</div>
+                                    <div>Энергетическая: {currentStats.defenseMatrix.energy.toFixed(1)}</div>
+                                    <div>Биологическая: {currentStats.defenseMatrix.bio.toFixed(1)}</div>
+                                    <div>Токсическая: {currentStats.defenseMatrix.toxic.toFixed(1)}</div>
+                                    <div>Псионическая: {currentStats.defenseMatrix.psionic.toFixed(1)}</div>
+                                    <div>Технологическая: {currentStats.defenseMatrix.tech.toFixed(1)}</div>
                                 </div>
                             </div>
 
@@ -154,9 +155,9 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Шанс среагировать на входящий урон.</div>
                                 <div className="stat-subgrid">
-                                    <div>Шанс уклонения: {currentStats.reactiveDefense.parryChance.toFixed(2)}%</div>
-                                    <div>Шанс блокировки: {currentStats.reactiveDefense.mitigationChance.toFixed(2)}%</div>
-                                    <div>Поглощение: {currentStats.reactiveDefense.mitigationValue.toFixed(2)}%</div>
+                                    <div>Шанс уклонения: {currentStats.reactiveDefense.parryChance.toFixed(1)}%</div>
+                                    <div>Шанс блокировки: {currentStats.reactiveDefense.mitigationChance.toFixed(1)}%</div>
+                                    <div>Поглощение: {currentStats.reactiveDefense.mitigationValue.toFixed(1)}%</div>
                                 </div>
                             </div>
 
@@ -176,8 +177,8 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Отвечает за взрывной урон.</div>
                                 <div className="stat-subgrid">
-                                    <div>Шанс крита: {currentStats.critPotential.critChance.toFixed(2)}%</div>
-                                    <div>Увеличение крита: ×{currentStats.critPotential.critMultiplier.toFixed(2)}</div>
+                                    <div>Шанс крита: {currentStats.critPotential.critChance.toFixed(1)}%</div>
+                                    <div>Увеличение крита: ×{currentStats.critPotential.critMultiplier.toFixed(1)}</div>
                                 </div>
                             </div>
 
@@ -202,8 +203,8 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Откачивает жизнь у цели.</div>
                                 <div className="stat-subgrid">
-                                    <div>Кража здоровья: {currentStats.predatoryResonance.lifestealPercent.toFixed(2)}%</div>
-                                    <div>Шанс успеха: {currentStats.predatoryResonance.lifestealChance.toFixed(2)}%</div>
+                                    <div>Кража здоровья: {currentStats.predatoryResonance.lifestealPercent.toFixed(1)}%</div>
+                                    <div>Шанс успеха: {currentStats.predatoryResonance.lifestealChance.toFixed(1)}%</div>
                                 </div>
                             </div>
 
@@ -226,8 +227,8 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Наносит урон ядом.</div>
                                 <div className="stat-subgrid">
-                                    <div>Шанс успеха: {currentStats.toxicity.dotChance.toFixed(2)}%</div>
-                                    <div>Урон в секунду: {currentStats.toxicity.dotDamage.toFixed(2)}</div>
+                                    <div>Шанс успеха: {currentStats.toxicity.dotChance.toFixed(1)}%</div>
+                                    <div>Урон в секунду: {currentStats.toxicity.dotDamage.toFixed(1)}</div>
                                 </div>
                             </div>
 
@@ -251,9 +252,9 @@ export const InfoScreen: React.FC<InfoScreenProps> = ({
                                 </div>
                                 <div className="stat-description">Контролирует действия противника.</div>
                                 <div className="stat-subgrid">
-                                    <div>Шанс успеха: {currentStats.neuroShock.stunChance.toFixed(2)}%</div>
-                                    <div>Длительность: {currentStats.neuroShock.stunDuration.toFixed(2)} c</div>
-                                    <div>Кулдаун: {currentStats.neuroShock.stunCooldown.toFixed(2)} c</div>
+                                    <div>Шанс успеха: {currentStats.neuroShock.stunChance.toFixed(1)}%</div>
+                                    <div>Длительность: {currentStats.neuroShock.stunDuration.toFixed(1)} c</div>
+                                    <div>Кулдаун: {currentStats.neuroShock.stunCooldown.toFixed(1)} c</div>
                                 </div>
                             </div>
                         </>

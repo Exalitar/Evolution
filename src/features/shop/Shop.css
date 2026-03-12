@@ -7,12 +7,21 @@
 .shop-screen {
   position: fixed;
   inset: 0;
-  background: linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%);
-  z-index: 1000;
   display: flex;
-  flex-direction: column;
+  justify-content: center;  /* центрируем содержимое */
+  z-index: 1000;
+  background: rgba(0, 0, 0, 1); /* чёрные полосы по бокам */
 }
 
+.shop-screen-inner {
+  width: 100%;
+  max-width: 425px;
+  height: 100%;
+  background: linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
 /* Шапка магазина */
 .shop-header {
@@ -248,12 +257,12 @@
 
 .shop-modal {
   position: relative;
-  width: 88%;
-  max-width: 400px;          /* было 450px */
+  width: 70%;           /* было 88% */
+  max-width: 300px;     /* было 400px */
   background: linear-gradient(135deg, #0b1028 0%, #1a1f3e 100%);
   border: 3px solid rgba(0, 255, 255, 0.6);
-  border-radius: 18px;       /* чуть меньше */
-  padding: 18px 16px;        /* было 25px */
+  border-radius: 18px;
+  padding: 18px 16px 25px;
   box-shadow: 0 8px 35px rgba(0, 0, 0, 0.9);
   color: white;
   display: flex;

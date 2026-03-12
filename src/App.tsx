@@ -1653,20 +1653,13 @@ function App() {
             {/* Блок с бонусами материала */}
             {pendingBreedSelection.bonus && (() => {
               const bonus = pendingBreedSelection.bonus!;
-
               const lines: React.ReactNode[] = [];
 
-              if (bonus.strikePower) {
-                lines.push(
-                  <div key="sp">⚔ Сила удара: +{bonus.strikePower}</div>
-                );
-              }
+              if (bonus.strikePower)
+                lines.push(<div key="sp">⚔️ Сила удара: 5–10</div>);
 
-              if (bonus.bioResource) {
-                lines.push(
-                  <div key="br">💚 Биоресурс: +{bonus.bioResource}</div>
-                );
-              }
+              if (bonus.bioResource)
+                lines.push(<div key="br">💚 Био-ресурс: 10–30</div>);
 
               if (bonus.defenseMatrix) {
                 const sum =
@@ -1676,53 +1669,25 @@ function App() {
                   (bonus.defenseMatrix.toxic ?? 0) +
                   (bonus.defenseMatrix.psionic ?? 0) +
                   (bonus.defenseMatrix.tech ?? 0);
-
-                lines.push(
-                  <div key="def">🛡 Матрица защиты: +{sum}</div>
-                );
+                // 6 типов × диапазон 1–4 каждый = суммарно 6–24
+                lines.push(<div key="def">🛡️ Защита: 6–24 (все типы)</div>);
               }
 
-              if (bonus.critPotential) {
-                lines.push(
-                  <div key="crit">
-                    🎯 Крит: шанс +{bonus.critPotential.critChance ?? 0}%,
-                    множитель +{(bonus.critPotential.critMultiplier ?? 0).toFixed(2)}
-                  </div>
-                );
-              }
+              if (bonus.critPotential)
+                lines.push(<div key="crit">🎯 Крит: шанс 2–5%, множитель ×1.10–1.40</div>);
 
-              if (bonus.predatoryResonance) {
-                lines.push(
-                  <div key="lifesteal">
-                    🩸 Вампиризм: +{bonus.predatoryResonance.lifestealPercent ?? 0}%,
-                    шанс {bonus.predatoryResonance.lifestealChance ?? 0}%
-                  </div>
-                );
-              }
+              if (bonus.predatoryResonance)
+                lines.push(<div key="lifesteal">🩸 Вампиризм: 2–5%, шанс 8–20%</div>);
 
-              if (bonus.toxicity) {
-                lines.push(
-                  <div key="dot">
-                    ☣️ Токсичность: урон {bonus.toxicity.dotDamage ?? 0},
-                    шанс {bonus.toxicity.dotChance ?? 0}%
-                  </div>
-                );
-              }
+              if (bonus.toxicity)
+                lines.push(<div key="dot">☠️ Токсичность: урон 1–4, шанс 8–20%</div>);
 
-              if (bonus.neuroShock) {
-                lines.push(
-                  <div key="stun">
-                    ⚡ Нейрошок: шанс {bonus.neuroShock.stunChance ?? 0}%,
-                    длительность {(bonus.neuroShock.stunDuration ?? 0).toFixed(1)} c
-                  </div>
-                );
-              }
+              if (bonus.neuroShock)
+                lines.push(<div key="stun">⚡ Оглушение: шанс 2–6%, длит. 0.2–0.7с</div>);
 
-              return (
-                <div className="breed-bonus-list">
-                  {lines.length ? lines : <div>Без явных бонусов</div>}
-                </div>
-              );
+              return lines.length ? (
+                <div className="breed-bonus-list">{lines}</div>
+              ) : null;
             })()}
 
             {/* Требования для скрещивания 4→5 */}

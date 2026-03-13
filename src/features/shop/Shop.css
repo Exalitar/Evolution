@@ -142,15 +142,15 @@
   gap: 8px;
 }
 
-/* 2 колонки: экран < 396px */
-@media (max-width: 395px) {
+/* 2 колонки: только очень узкие экраны <280px */
+@media (max-width: 279px) {
   .shop-items-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* 1 колонка: экран < 268px */
-@media (max-width: 267px) {
+/* 1 колонка: <180px */
+@media (max-width: 179px) {
   .shop-items-grid {
     grid-template-columns: 1fr;
   }
@@ -158,11 +158,12 @@
 
 
 
-/* Карточка товара — ширина от колонки, высота строго 190px */
+/* Карточка товара — ширина от колонки, минимальная высота 190px */
 .shop-item-card {
   position: relative;
   width: 100%;
-  height: 190px;
+  min-height: 190px;
+  height: auto;
   flex-shrink: 0;
   background: linear-gradient(135deg,
       rgba(20, 30, 60, 0.9),

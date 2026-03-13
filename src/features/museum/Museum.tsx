@@ -19,6 +19,7 @@ interface MuseumProps {
     specimens: Specimen[];
     currentImage: string;
     onFreeze: (name: string) => void;
+    onDelete: (id: string) => void | Promise<void>;
     onNavigate: (screen: any) => void;
     openSettings: () => void;
     onAvatarClick: () => void;
@@ -32,6 +33,7 @@ export const Museum: React.FC<MuseumProps> = ({
     specimens,
     currentImage,
     onFreeze,
+    onDelete,
     onNavigate,
     openSettings,
     onAvatarClick,
@@ -161,7 +163,7 @@ export const Museum: React.FC<MuseumProps> = ({
                             onClick={() => setSelectedSpecimen(specimen)}
                         >
                             <div className="specimen-card-name">{specimen.name}</div>
-                            <div className="specimen-card-img-wrapper">
+                            <div className="specimen-card-img-square">
                                 <img
                                     src={specimen.image || '/assets/Material/Bio.png'}
                                     alt={specimen.name}
@@ -266,6 +268,18 @@ export const Museum: React.FC<MuseumProps> = ({
                         </div>
 
                         {renderStats(selectedSpecimen.stats)}
+
+                        <button
+                            className="specimen-modal-delete-btn"
+                            onClick={() => {
+                                if (selectedSpecimen) {
+                                    onDelete(selectedSpecimen.id);
+                                    setSelectedSpecimen(null);
+                                }
+                            }}
+                        >
+                            🗑️ Удалить
+                        </button>
                     </div>
                 </div>
             )}

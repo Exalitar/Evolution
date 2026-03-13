@@ -294,6 +294,67 @@ app.get('/api/user/wipe', async (req, res) => {
 });
 
 
+// === ЗАМОРОЗКА: копируем active_images → specimen_images ===
+app.post('/api/specimen/protect', async (req, res) => {
+    try {
+        const { imageUrl } = req.body;
+
+        if (!imageUrl || !imageUrl.startsWith('/uploads/active_images/')) {
+            // Картинка уже в specimen_images или невалидная — просто возвращаем как есть
+            return res.json({ success: true, imageUrl: imageUrl || null });
+        }
+
+        const specimenDir = path.join(__dirname, '..', 'uploads', 'specimen_images');
+        try { await fs.mkdir(specimenDir, { recursive: true }); } catch (_) { }
+
+        const filename = path.basename(imageUrl);
+        const srcPath = path.join(__dirname, '..', 'uploads', 'active_images', filename);
+        const destPath = path.join(specimenDir, filename);
+
+        try {
+            await fs.access(srcPath);
+            await fs.copyFile(srcPath, destPath);
+            console.log(`[SPECIMEN] Скопировано в specimen_images: ${filename}`);
+        } catch {
+            console.warn(`[SPECIMEN] Файл не найден в active_images (возможно уже удалён): ${filename}`);
+        }
+
+        const newUrl = `/uploads/specimen_images/${filename}`;
+        res.json({ success: true, imageUrl: newUrl });
+
+    } catch (error) {
+        console.error('[SPECIMEN] Ошибка protect:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// === УДАЛЕНИЕ ЭКСПОНАТА: удаляем файл из specimen_images ===
+app.post('/api/specimen/delete', async (req, res) => {
+    try {
+        const { imageUrl } = req.body;
+
+        if (!imageUrl || !imageUrl.startsWith('/uploads/specimen_images/')) {
+            return res.json({ success: true, message: 'Nothing to delete' });
+        }
+
+        const filename = path.basename(imageUrl);
+        const filePath = path.join(__dirname, '..', 'uploads', 'specimen_images', filename);
+
+        try {
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+            console.log(`[SPECIMEN] Удалён файл экспоната: ${filename}`);
+        } catch {
+            console.warn(`[SPECIMEN] Файл не найден, возможно уже удалён: ${filename}`);
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[SPECIMEN] Ошибка delete:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 app.listen(PORT, () => {
     console.log(`=========================================`);

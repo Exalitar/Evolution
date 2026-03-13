@@ -655,20 +655,39 @@ function App() {
     localStorage.setItem('specimens', JSON.stringify(specimens));
   }, [specimens]);
 
-  // === Заморозка персонажа ===
-  const handleFreeze = (name: string) => {
+  // === Заморозка персонажа — копируем изображение в specimen_images до сохранения ===
+  const handleFreeze = async (name: string) => {
+    // 1. Защитить изображение на сервере: копируем active_images → specimen_images
+    let protectedImageUrl: string | null = finalBioImage;
+    if (finalBioImage && finalBioImage.startsWith('/uploads/active_images/')) {
+      try {
+        const resp = await fetch(`${API}/api/specimen/protect`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageUrl: finalBioImage }),
+        });
+        const data = await resp.json();
+        if (data.success && data.imageUrl) {
+          protectedImageUrl = data.imageUrl; // /uploads/specimen_images/...
+        }
+      } catch (e) {
+        console.error('[FREEZE] Ошибка protect:', e);
+      }
+    }
+
+    // 2. Сохраняем экспонат с защищённым URL
     const newSpecimen: Specimen = {
       id: `specimen_${Date.now()}_${Math.random().toString(36).slice(2)}`,
       name,
       level: playerLevel,
-      image: finalBioImage,
+      image: protectedImageUrl,
       stats: currentStats,
       frozenAt: Date.now(),
     };
 
     setSpecimens(prev => [newSpecimen, ...prev]);
 
-    // Сброс прогресса (ЭП сохраняется)
+    // 3. Сброс прогресса (ЭП сохраняется)
     setPlayerLevel(0);
     setCurrentStats(baseCharacterStats["unknown_dna"]);
     setFinalBioImage(null);
@@ -1661,6 +1680,22 @@ function App() {
           specimens={specimens}
           currentImage={getCharacterImage()}
           onFreeze={handleFreeze}
+          onDelete={async (id) => {
+            const spec = specimens.find(s => s.id === id);
+            // Удаляем файл с Railway если он в specimen_images
+            if (spec?.image && spec.image.startsWith('/uploads/specimen_images/')) {
+              try {
+                await fetch(`${API}/api/specimen/delete`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ imageUrl: spec.image }),
+                });
+              } catch (e) {
+                console.error('[DELETE SPECIMEN] Ошибка:', e);
+              }
+            }
+            setSpecimens(prev => prev.filter(s => s.id !== id));
+          }}
           onNavigate={(newScreen) => navigateTo(newScreen as Screen)}
           openSettings={openSettings}
           onAvatarClick={() => setIsAvatarModalOpen(true)}

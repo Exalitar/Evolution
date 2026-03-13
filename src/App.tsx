@@ -675,6 +675,11 @@ function App() {
       }
     }
 
+    // Преобразуем в полный URL с Railway префиксом чтобы Museum мог отображать
+    if (protectedImageUrl && protectedImageUrl.startsWith('/uploads')) {
+      protectedImageUrl = `${API}${protectedImageUrl}`;
+    }
+
     // 2. Сохраняем экспонат с защищённым URL
     const newSpecimen: Specimen = {
       id: `specimen_${Date.now()}_${Math.random().toString(36).slice(2)}`,
@@ -1683,12 +1688,15 @@ function App() {
           onDelete={async (id) => {
             const spec = specimens.find(s => s.id === id);
             // Удаляем файл с Railway если он в specimen_images
-            if (spec?.image && spec.image.startsWith('/uploads/specimen_images/')) {
+            const imageUrl = spec?.image;
+            if (imageUrl && (imageUrl.includes('/uploads/specimen_images/') || imageUrl.includes('/specimen_images/'))) {
               try {
+                // Извлекаем относительный путь если URL абсолютный
+                const relPath = imageUrl.replace(/^https?:\/\/[^\/]+/, '');
                 await fetch(`${API}/api/specimen/delete`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ imageUrl: spec.image }),
+                  body: JSON.stringify({ imageUrl: relPath }),
                 });
               } catch (e) {
                 console.error('[DELETE SPECIMEN] Ошибка:', e);

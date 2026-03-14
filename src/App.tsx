@@ -34,6 +34,9 @@ const API = import.meta.env.VITE_API_URL || "";
 // NFT Marketplace backend (для привязки кошелька и минта NFT)
 const NFT_BACKEND_API = "https://nft-market-backend-production.up.railway.app";
 
+// URL сайта маркетплейса (замени на свой домен когда задеплоишь)
+const NFT_MARKETPLACE_URL = "http://localhost:3000";
+
 type CharacterId =
   | "species_1"
   | "species_2"
@@ -269,6 +272,7 @@ function App() {
   };
 
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
 
   // Получаем реальный Telegram ID
   const telegramId = WebApp.initDataUnsafe?.user?.id?.toString() || "dev_user_123";
@@ -1645,21 +1649,50 @@ function App() {
             }}>
               <button
                 style={{
-                  background: "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)",
+                  background: authLoading
+                    ? "linear-gradient(135deg, #005599 0%, #003377 100%)"
+                    : "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)",
                   border: "none",
                   borderRadius: "14px",
                   color: "#fff",
                   fontSize: "16px",
                   fontWeight: 700,
                   padding: "14px 48px",
-                  cursor: "pointer",
+                  cursor: authLoading ? "not-allowed" : "pointer",
                   boxShadow: "0 0 18px rgba(0, 114, 255, 0.5)",
                   letterSpacing: "0.5px",
                   transition: "opacity 0.2s",
+                  opacity: authLoading ? 0.7 : 1,
                 }}
-                onClick={() => {/* TODO: авторизация */ }}
+                disabled={authLoading}
+                onClick={async () => {
+                  const initData = WebApp.initData;
+                  if (!initData) {
+                    WebApp.showAlert("Не удалось получить данные Telegram. Попробуйте перезапустить приложение.");
+                    return;
+                  }
+                  setAuthLoading(true);
+                  try {
+                    const res = await fetch(`${NFT_BACKEND_API}/api/auth/telegram`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ initData }),
+                    });
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({}));
+                      throw new Error(err.message || `Ошибка сервера: ${res.status}`);
+                    }
+                    const { token } = await res.json();
+                    const url = `${NFT_MARKETPLACE_URL}/auth/callback?token=${encodeURIComponent(token)}`;
+                    WebApp.openLink(url);
+                  } catch (e: any) {
+                    WebApp.showAlert("Ошибка авторизации: " + e.message);
+                  } finally {
+                    setAuthLoading(false);
+                  }
+                }}
               >
-                Авторизация
+                {authLoading ? "Подключение..." : "Авторизация"}
               </button>
               <span style={{
                 color: "#00e5ff",

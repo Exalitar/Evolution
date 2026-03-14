@@ -111,9 +111,9 @@ h1, h2, h3, h4,
   max-width: 768px;
   margin: 0 auto;
   background-image: url("/assets/Background_main_window.png");
-  background-repeat: repeat;
-  background-size: auto 100vh;
-  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  background-position: 0% center;
   animation: move-bg-loop 40s ease-in-out infinite;
   position: relative;
   overflow: hidden;
@@ -124,6 +124,9 @@ h1, h2, h3, h4,
 body {
   background-color: #000;
   margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
   display: flex;
   justify-content: center;
 }

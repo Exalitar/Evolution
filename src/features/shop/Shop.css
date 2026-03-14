@@ -3,6 +3,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ===== ШРИФТЫ ===== */
+.shop-screen,
+.shop-screen * {
+  font-family: 'Nunito', sans-serif;
+}
+
+.shop-header h2,
+.shop-section-title,
+.shop-modal-title,
+.shop-modal-buy-button,
+.shop-close-button {
+  font-family: 'Tektur', sans-serif;
+  font-weight: 600;
+}
+
 /* Общий экран магазина */
 .shop-screen {
   position: fixed;
@@ -38,7 +53,7 @@
 .shop-header h2 {
   color: #00ffff;
   font-size: 22px;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 6px rgba(0, 220, 220, 0.3);
   margin: 0;
 }
 
@@ -62,7 +77,7 @@
   color: #00ffff;
   font-size: 18px;
   font-weight: 600;
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 220, 220, 0.25);
 }
 
 
@@ -73,7 +88,7 @@
   color: white;
   width: 42px;
   height: 42px;
-  border-radius: 50%;
+  border-radius: 8px;
   font-size: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -119,9 +134,8 @@
   margin: 0;
   font-size: 16px;
   color: #00ffff;
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 220, 220, 0.25);
   text-align: center;
-  /* центрируем текст */
 }
 
 .shop-section-divider {
@@ -175,7 +189,8 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 6px;
   box-sizing: border-box;
 }
 
@@ -228,7 +243,6 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  overflow: hidden;
 }
 
 .shop-item-name {
@@ -249,7 +263,7 @@
   color: #00ff88;
   font-size: 12px;
   font-weight: 600;
-  text-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
+  text-shadow: 0 0 4px rgba(0, 220, 120, 0.3);
 }
 
 
@@ -314,7 +328,7 @@
   right: 15px;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 8px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
   color: white;
@@ -330,7 +344,7 @@
 .shop-modal-close:hover {
   background: rgba(255, 0, 0, 0.3);
   border-color: rgba(255, 0, 0, 0.6);
-  transform: rotate(90deg);
+  background: rgba(180, 20, 20, 0.5);
 }
 
 
@@ -368,7 +382,7 @@
   font-size: 18px;
   /* было 22px */
   font-weight: 600;
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 220, 220, 0.25);
   margin: 0;
   text-align: center;
 }
@@ -397,7 +411,7 @@
   font-size: 22px;
   /* было 26px */
   font-weight: 700;
-  text-shadow: 0 0 12px rgba(0, 255, 136, 0.6);
+  text-shadow: 0 0 6px rgba(0, 210, 110, 0.3);
 }
 
 

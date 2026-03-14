@@ -1616,20 +1616,62 @@ function App() {
       )}
 
       {screen === "id_person" && (
-        <div className="secondary-screen">
-          <div className="secondary-header">
-            <h2>ID Telegram</h2>
-            <button className="close-button" onClick={() => setScreen("main")}>✕</button>
-          </div>
-          <div className="secondary-content" style={{ overflowY: "auto", paddingBottom: "100px" }}>
-            <p>Ваш ID: {telegramId}</p>
-            <hr style={{ margin: "20px 0", borderColor: "#333" }} />
-            <h4 style={{ color: "#ffd700" }}>Debug Info (Send Screenshot):</h4>
-            <p style={{ wordBreak: "break-all", fontSize: "10px", lineHeight: "1.2", color: "#aaa" }}>
-              WebApp Ready: {typeof WebApp !== 'undefined' ? "Yes" : "No"} <br />
-              initData: {WebApp?.initData} <br />
-              initDataUnsafe: {JSON.stringify(WebApp?.initDataUnsafe || {})}
-            </p>
+        <div className="secondary-screen" style={{ background: "#000" }}>
+          <div style={{ maxWidth: "768px", margin: "0 auto", minHeight: "100vh", position: "relative", background: "linear-gradient(180deg, #0a0f1e 0%, #1a1f3e 100%)" }}>
+            <div className="secondary-header">
+              <h2>ID Telegram</h2>
+              <button className="close-button" onClick={() => setScreen("main")}>✕</button>
+            </div>
+            <div className="secondary-content" style={{ overflowY: "auto", paddingBottom: "100px" }}>
+              <p>Ваш ID: {telegramId}</p>
+              <hr style={{ margin: "20px 0", borderColor: "#333" }} />
+              <h4 style={{ color: "#ffd700" }}>Debug Info (Send Screenshot):</h4>
+              <p style={{ wordBreak: "break-all", fontSize: "10px", lineHeight: "1.2", color: "#aaa" }}>
+                WebApp Ready: {typeof WebApp !== 'undefined' ? "Yes" : "No"} <br />
+                initData: {WebApp?.initData} <br />
+                initDataUnsafe: {JSON.stringify(WebApp?.initDataUnsafe || {})}
+              </p>
+            </div>
+            {/* Кнопка авторизации внизу */}
+            <div style={{
+              position: "absolute",
+              bottom: "32px",
+              left: 0,
+              right: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <button
+                style={{
+                  background: "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)",
+                  border: "none",
+                  borderRadius: "14px",
+                  color: "#fff",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  padding: "14px 48px",
+                  cursor: "pointer",
+                  boxShadow: "0 0 18px rgba(0, 114, 255, 0.5)",
+                  letterSpacing: "0.5px",
+                  transition: "opacity 0.2s",
+                }}
+                onClick={() => {/* TODO: авторизация */ }}
+              >
+                Авторизация
+              </button>
+              <span style={{
+                color: "#00e5ff",
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                opacity: 0.75,
+              }}>
+                NFT Genesys
+              </span>
+            </div>
           </div>
         </div>
       )}

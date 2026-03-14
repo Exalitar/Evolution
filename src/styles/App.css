@@ -1,4 +1,36 @@
+/* ===== ШРИФТЫ: Tektur (заголовки) + Nunito (текст) ===== */
+
+*,
+body {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4,
+.player-name,
+.stage-number,
+.stage-label,
+.nav-button-label,
+.start-button,
+.breed-modal-title,
+.bonus-title,
+.settings-btn,
+.close-button,
+.breed-modal-button,
+.reroll-circle-button,
+.secondary-header h2,
+.info-header h2,
+.info-character-name,
+.stat-name,
+.requirements-title,
+.requirements-title-success,
+.tooltip-title {
+  font-family: 'Tektur', sans-serif;
+  font-weight: 600;
+}
+
 /* ===== анимация фона стартового экрана ===== */
+
 
 @keyframes move-bg {
   from {
@@ -145,7 +177,7 @@ body {
   text-align: center;
   padding: 20px;
   font-weight: 500;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 6px rgba(0, 200, 220, 0.25);
 }
 
 .central-character-image {
@@ -219,7 +251,7 @@ body {
 .small-circle-image {
   width: 45px;
   height: 45px;
-  border-radius: 50%;
+  border-radius: 10px;
   background: linear-gradient(135deg, rgba(20, 30, 60, 0.8), rgba(40, 50, 80, 0.8));
   border: 2px solid rgba(0, 200, 255, 0.5);
   object-fit: cover;
@@ -236,7 +268,7 @@ body {
   color: rgba(59, 14, 14, 0.9);
   text-align: center;
   font-weight: 500;
-  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+  text-shadow: none;
   margin-top: 1px;
 }
 
@@ -356,11 +388,10 @@ img {
 
 .player-name {
   font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: none;
   white-space: nowrap;
-  /* Не дает длинным именам переноситься на новую строку */
 }
 
 .player-level {
@@ -457,14 +488,15 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
+  background: rgba(10, 20, 50, 0.5);
+  border: 1px solid rgba(0, 180, 220, 0.25);
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 0;
+  padding: 5px;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 /* При наведении прыгает только сама кнопка (иконка), а не весь блок с текстом */
@@ -481,7 +513,7 @@ img {
 .nav-button-icon {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 10px;
   background: transparent;
   border: none;
   display: flex;
@@ -513,9 +545,10 @@ img {
 
 /* Активная кнопка */
 .nav-item.active .nav-button {
-  background: linear-gradient(135deg, rgba(0, 200, 255, 0.3), rgba(0, 100, 200, 0.3));
-  border: 2px solid rgba(0, 255, 255, 0.7);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.2), rgba(0, 100, 200, 0.2));
+  border: 2px solid rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.25);
+  border-radius: 10px;
 }
 
 .nav-item.active .nav-button-icon img {
@@ -524,7 +557,7 @@ img {
 
 .nav-item.active .nav-button-label {
   color: #00ffff;
-  text-shadow: 0 0 15px rgba(0, 255, 255, 1);
+  text-shadow: 0 0 8px rgba(0, 200, 220, 0.5);
   font-weight: 700;
 }
 
@@ -534,7 +567,7 @@ img {
   font-weight: 500;
   text-align: center;
   transition: color 0.3s ease;
-  text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  text-shadow: none;
   pointer-events: none;
   /* Чтобы нельзя было кликнуть по тексту, только по кнопке */
 }
@@ -544,7 +577,7 @@ img {
 .nav-button-label:hover {
   /* На случай если вдруг hover попадет на текст */
   color: rgba(0, 255, 255, 1);
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+  text-shadow: 0 0 6px rgba(0, 200, 220, 0.3);
 }
 
 /* ===== вторичные экраны (Лаборатория, Премиум, Магазин) ===== */
@@ -573,7 +606,7 @@ img {
 .secondary-header h2 {
   color: #00ffff;
   font-size: 22px;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 6px rgba(0, 200, 220, 0.25);
   margin: 0;
 }
 
@@ -622,24 +655,25 @@ img {
 /* ===== общая кнопка закрытия ===== */
 
 .close-button {
-  background: rgba(255, 0, 0, 0.2);
-  border: 2px solid rgba(255, 0, 0, 0.5);
-  color: white;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  font-size: 20px;
+  background: rgba(60, 10, 10, 0.6);
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  color: rgba(255, 180, 180, 0.9);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 18px;
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .close-button:hover {
-  background: rgba(255, 0, 0, 0.4);
-  border-color: rgba(255, 0, 0, 0.8);
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+  background: rgba(180, 20, 20, 0.5);
+  border-color: rgba(255, 100, 100, 0.7);
 }
 
 /* ===== экран информации ===== */
@@ -684,7 +718,7 @@ img {
 .info-header h2 {
   color: #00ffff;
   font-size: 22px;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 200, 220, 0.25);
   margin: 0;
 }
 
@@ -714,7 +748,7 @@ img {
   font-size: 22px;
   font-weight: 600;
   color: #00ffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 200, 220, 0.25);
 }
 
 .info-stats-list {
@@ -833,7 +867,7 @@ img {
   font-size: 32px;
   font-weight: 700;
   color: #00ffff;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+  text-shadow: 0 0 8px rgba(0, 200, 220, 0.4);
 }
 
 .info-no-character {
@@ -872,7 +906,7 @@ img {
   font-weight: 600;
   margin-bottom: 10px;
   color: #00ffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 200, 220, 0.25);
 }
 
 .breed-modal-text {
@@ -1001,28 +1035,29 @@ img {
   font-size: 24px;
   font-weight: 600;
   color: #00ffff;
-  text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+  text-shadow: 0 0 6px rgba(0, 200, 220, 0.3);
 }
 
 .close-button {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  background: rgba(60, 10, 10, 0.6);
+  color: rgba(255, 180, 180, 0.9);
+  font-size: 18px;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
 }
 
 .close-button:hover {
-  background: rgba(255, 0, 0, 0.3);
-  border-color: rgba(255, 0, 0, 0.6);
-  transform: rotate(90deg);
+  background: rgba(180, 20, 20, 0.5);
+  border-color: rgba(255, 100, 100, 0.7);
 }
 
 /* ===== Сетка кнопок лаборатории ===== */
@@ -1090,13 +1125,13 @@ img {
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+  text-shadow: 0 0 4px rgba(0, 200, 220, 0.2);
   transition: all 0.3s ease;
 }
 
 .lab-room-button:hover .lab-room-name {
   color: #00ffff;
-  text-shadow: 0 0 12px rgba(0, 255, 255, 0.7);
+  text-shadow: 0 0 6px rgba(0, 200, 220, 0.3);
 }
 
 /* ===== Адаптивность ===== */
@@ -1219,7 +1254,7 @@ img {
   text-align: center;
   font-size: 22px;
   color: #00ffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  text-shadow: 0 0 5px rgba(0, 200, 220, 0.25);
 }
 
 .settings-btn {
@@ -1439,7 +1474,7 @@ img {
   font-size: 18px;
   font-weight: 700;
   color: #00e5ff;
-  text-shadow: 0 0 12px rgba(0, 229, 255, 0.7);
+  text-shadow: 0 0 6px rgba(0, 200, 220, 0.3);
   letter-spacing: 1px;
   display: flex;
   align-items: center;
@@ -1547,7 +1582,7 @@ img {
   font-size: 14px;
   font-weight: 700;
   color: #cceeff;
-  text-shadow: 0 0 8px rgba(0, 200, 255, 0.6);
+  text-shadow: 0 0 4px rgba(0, 180, 210, 0.25);
   letter-spacing: 0.3px;
   text-align: center;
   line-height: 1.3;
@@ -1665,7 +1700,7 @@ img {
   font-weight: 700;
   color: #00e5ff;
   text-align: center;
-  text-shadow: 0 0 6px rgba(0, 220, 255, 0.6);
+  text-shadow: 0 0 4px rgba(0, 180, 210, 0.25);
   word-break: break-word;
   line-height: 1.2;
 }
@@ -1896,7 +1931,7 @@ img {
   font-size: 20px;
   font-weight: 700;
   color: #00e5ff;
-  text-shadow: 0 0 10px rgba(0, 220, 255, 0.6);
+  text-shadow: 0 0 5px rgba(0, 180, 210, 0.25);
   margin: 0;
   text-align: center;
   margin-top: 4px;
